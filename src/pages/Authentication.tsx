@@ -1,5 +1,6 @@
-import { Form, Input, Button, Checkbox, Flex } from 'antd';
+import { Form, Input, Button, Checkbox, Flex, message } from 'antd';
 import { GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 import AuthImage from '../assets/images/authimage.jpg';
 import Patch1 from '../assets/images/patch_1.png'
@@ -7,9 +8,12 @@ import Patch2 from '../assets/images/patch_2.png'
 import Patch3 from '../assets/images/patch_3.png'
 import Patch4 from '../assets/images/patch_4.png'
 import { useState } from 'react';
-
+import { Context } from '../context/context.provider';
+import { saveCredentialsToStorage } from '../utils/storage';
 
 export const Authentication = () => {
+
+  const { setUserAuthenticated, setAuthenticatedVerified } = Context();
 
   const [isLogin, setIsLogin] = useState(true);
 
@@ -19,8 +23,28 @@ export const Authentication = () => {
 
   const Login = () => {
 
-    const onFinish = () => {
-      // Handle form submission here
+    const onFinish = async (values: { username: string, password: string, remember: boolean }) => {
+      try {
+        // Send login request to Django API
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/`, {
+          username: values.username,
+          password: values.password,
+        });
+        
+        console.log(response.data.user.verified)
+        saveCredentialsToStorage(response.data, values.remember);
+        setAuthenticatedVerified(response.data.user.verified)
+        setUserAuthenticated(!!response.data.user)
+
+        // Optionally, show a success message
+        message.success('Login successful!');
+      } catch (error) {
+        // Handle login errors
+        console.error('Error logging in:', error);
+
+        // Optionally, show an error message
+        message.error('Failed to login. Please check your credentials.');
+      }
     };
 
     return (
@@ -35,10 +59,10 @@ export const Authentication = () => {
               onFinish={onFinish}
             >
               <Form.Item
-                name="email"
-                rules={[{ required: true, message: 'Please enter your email!' }]}
+                name="username"
+                rules={[{ required: true, message: 'Please enter your username!' }]}
               >
-                <Input placeholder="Email" className='h-10' />
+                <Input placeholder="Username" className='h-10' />
               </Form.Item>
 
               <Form.Item
@@ -73,7 +97,7 @@ export const Authentication = () => {
               </Button>
             </div>
           </div>
-          <div className='my-6 text-center font-medium'>
+          <div className='my-6 text-center'>
             Don't have an account?
             <button className='mx-1 text-primary underline hover:text-green-500' onClick={switchForm}>
               Register Now
@@ -86,9 +110,40 @@ export const Authentication = () => {
 
   const Signup = () => {
 
-    const onFinish = () => {
-      // Handle form submission here
+    const onFinish = async (values: { first_name: string, last_name: string, username: string, email: string, password: string, confirmpassword: string }) => {
+      // Check if password and confirmPassword match
+      if (values.password !== values.confirmpassword) {
+        // Show an error message if passwords do not match
+        message.error('Password and Confirm Password do not match. Please check your information.');
+        return;
+      }
+
+      try {
+        // Send signup request to Django API
+        await axios.post(`${import.meta.env.VITE_BASE_URL}/user/`, {
+          first_name: values.first_name,
+          last_name: values.last_name,
+          username: values.username,
+          email: values.email,
+          password: values.password
+        });
+
+        // Optionally, show a success message
+        message.success('Signup successful! Please login.');
+        setIsLogin(true)
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.response && error.response.status === 400 && error.response.data.username) {
+          // If the error is due to the username already existing, set the state
+          message.error('A User with that username already exists, please try with a different username');
+        } else {
+          console.error('Error logging in:', error);
+          message.error('Failed to login. Please check your credentials.');
+        }
+      }
     };
+
 
     return (
       <>
@@ -103,14 +158,14 @@ export const Authentication = () => {
             >
               <Flex className='space-x-4'>
                 <Form.Item
-                  name="firstname"
+                  name="first_name"
                   rules={[{ required: true, message: 'Please enter your email!' }]}
                 >
                   <Input placeholder="Firstname" className='h-10' />
                 </Form.Item>
 
                 <Form.Item
-                  name="lastname"
+                  name="last_name"
                   rules={[{ required: true, message: 'Please enter your email!' }]}
                 >
                   <Input placeholder="Lastname" className='h-10' />
@@ -122,6 +177,13 @@ export const Authentication = () => {
                 rules={[{ required: true, message: 'Please enter your email!' }]}
               >
                 <Input placeholder="Email" className='h-10' />
+              </Form.Item>
+
+              <Form.Item
+                name="username"
+                rules={[{ required: true, message: 'Please enter your username!' }]}
+              >
+                <Input placeholder="Username" className='h-10' />
               </Form.Item>
 
               <Form.Item
@@ -159,7 +221,7 @@ export const Authentication = () => {
               </Button>
             </div>
           </div>
-          <div className='my-6 text-center font-medium'>
+          <div className='my-6 text-center'>
             Already have an account?
             <button className='mx-1 text-primary underline hover:text-green-500' onClick={switchForm}>
               Login Now
