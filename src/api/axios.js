@@ -38,7 +38,7 @@ instance.interceptors.response.use(
     (error) => {
         // Handle response errors
         if (error.response.status === 401) {
-            // Logout
+            window.location.href = '/'
         }
 
         return Promise.reject(error);

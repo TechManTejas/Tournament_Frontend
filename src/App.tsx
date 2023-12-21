@@ -6,45 +6,26 @@ import { Lobby } from "./pages/Lobby"
 
 function App() {
 
-  const { userAuthenticated , authenticatedVerified} = Context();
+  const { userAuthenticated , authenticatedVerified } = Context();
 
   return (
     <Router>
       <Routes>
         <Route
           path="/"
-          element={<Navigate to="/dashboard" replace={true} />}
+          element={<Navigate to="/auth" replace={true} />}
         />
         <Route
           path="/auth"
-          element={
-            authenticatedVerified ? (
-              <Navigate to="/dashboard" replace={true} />
-            ) : userAuthenticated ? (
-              <Navigate to="/lobby" replace={true} />
-            ) : (
-              <Authentication />
-            )
-          }
+          element={<Authentication />}
         />
         <Route
           path="/lobby"
-          element={
-            authenticatedVerified ? (
-              <Navigate to="/dashboard" replace={true} />
-            ) : userAuthenticated ? (
-              <Lobby />
-            ) : (
-              <Navigate to="/auth" replace={true} />
-            )
-          }
+          element={<Lobby />}
         />
         <Route
           path="/dashboard/*"
-          element={(
-              <Dashboard />
-            ) 
-          }
+          element={<Dashboard />}
         />
       </Routes>
     </Router>

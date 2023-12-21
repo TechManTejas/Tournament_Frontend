@@ -101,7 +101,7 @@ const Users: React.FC = () => {
 
   const handleDeleteUser = async (userId: number) => {
     try {
-      await axios.delete(`/users/${userId}/`);
+      await axios.delete(`/user-lobby/${userId}/`);
       setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
       message.success('User deleted successfully!');
     } catch (error) {
