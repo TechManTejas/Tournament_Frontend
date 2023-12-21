@@ -35,6 +35,7 @@ export const Authentication = () => {
         saveCredentialsToStorage(response.data, values.remember);
         setAuthenticatedVerified(response.data.user.verified)
         setUserAuthenticated(!!response.data.user)
+        window.location.href = '/lobby'
 
         // Optionally, show a success message
         message.success('Login successful!');

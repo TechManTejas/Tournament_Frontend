@@ -26,7 +26,7 @@ export const Lobby = () => {
                 message.success("Your account has been verified");
                 setAuthenticatedVerified(true)
                 setUserAuthenticated(true)
-                window.location.href = '/'
+                window.location.href = '/dashboard'
             }
 
         } catch (error) {
