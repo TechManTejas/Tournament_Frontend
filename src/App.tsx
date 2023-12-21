@@ -40,13 +40,10 @@ function App() {
           }
         />
         <Route
-          path="/dashboard"
-          element={
-            authenticatedVerified ? (
+          path="/dashboard/*"
+          element={(
               <Dashboard />
-            ) : (
-              <Navigate to="/auth" replace={true} />
-            )
+            ) 
           }
         />
       </Routes>

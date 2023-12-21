@@ -9,9 +9,11 @@ import Patch4 from '../assets/images/patch_4.png'
 import axios from "../api/axios"
 import { getCredentialsFromStorage } from '../utils/storage';
 import { useEffect, useState } from 'react';
+import { Context } from '../context/context.provider';
 
 export const Lobby = () => {
 
+    const { setUserAuthenticated, setAuthenticatedVerified } = Context();
     const user = getCredentialsFromStorage()?.user
 
     const [initialMessage, setInitialMessage] = useState('');
@@ -22,6 +24,9 @@ export const Lobby = () => {
             // Assuming your API response structure has a 'message' field
             if (response.data.verified) {
                 message.success("Your account has been verified");
+                setAuthenticatedVerified(true)
+                setUserAuthenticated(true)
+                window.location.href = '/'
             }
 
         } catch (error) {
