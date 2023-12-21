@@ -1,9 +1,9 @@
-import { User } from "../types/user.types";
+import { IUser } from "../types/user.types";
 
 export const storageKey = 'user_data';
 
 export interface UserData {
-    user: User;
+    user: IUser;
     token: string;
 }
 

@@ -5,11 +5,12 @@ import axios from '../api/axios';
 import { useLocation } from 'react-router-dom';
 import { IStadium } from '../types/stadium.types';
 import { IMedia } from '../types/media.types';
+import { getCredentialsFromStorage } from '../utils/storage';
 
 const { Option } = Select;
 
 const StadiumAddEdit: React.FC = () => {
-    
+
     const { state } = useLocation();
 
     console.log(state)
@@ -59,6 +60,7 @@ const StadiumAddEdit: React.FC = () => {
     const onFinish = async (values: any) => {
 
         values.image = selectedImage?.id
+        values.club = getCredentialsFromStorage()?.user?.club?.id
 
         try {
             if (id) {

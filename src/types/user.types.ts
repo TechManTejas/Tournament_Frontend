@@ -1,3 +1,5 @@
+import { IClub } from "./club.types";
+
 export interface IUser {
     id: number;
     username: string;
@@ -7,4 +9,5 @@ export interface IUser {
     role: string | null;
     verified: boolean;
     message: string | null;
+    club: IClub
 }
