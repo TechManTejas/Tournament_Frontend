@@ -7,14 +7,17 @@ import Patch3 from '../assets/images/patch_3.png'
 import Patch4 from '../assets/images/patch_4.png'
 
 import axios from "../api/axios"
-import { getCredentialsFromStorage } from '../utils/storage';
+import { getCredentialsFromStorage, saveCredentialsToStorage } from '../utils/storage';
 import { useEffect, useState } from 'react';
 import { Context } from '../context/context.provider';
 
 export const Lobby = () => {
 
-    const { setUserAuthenticated, setAuthenticatedVerified } = Context();
-    const user = getCredentialsFromStorage()?.user
+    const { setUserVerified } = Context();
+
+    const user_data = getCredentialsFromStorage()
+    const user = user_data?.user
+    const token = user_data?.token
 
     const [initialMessage, setInitialMessage] = useState('');
 
@@ -22,11 +25,15 @@ export const Lobby = () => {
         try {
             const response = await axios.get(`/user-lobby/${user?.id}/`);
             // Assuming your API response structure has a 'message' field
+            console.log(response.data)
+
             if (response.data.verified) {
                 message.success("Your account has been verified");
-                setAuthenticatedVerified(true)
-                setUserAuthenticated(true)
-                window.location.href = '/dashboard'
+                setUserVerified(response.data.verified)
+                if(token){
+                    saveCredentialsToStorage({ token: user_data?.token, user: { ...response.data } })
+                }
+                window.location.href = '/'
             }
 
         } catch (error) {

@@ -7,13 +7,13 @@ export interface UserData {
     token: string;
 }
 
-export const saveCredentialsToStorage = (user_data: UserData, rememberMe: boolean) => {
-    const storage = rememberMe ? localStorage : sessionStorage;
+export const saveCredentialsToStorage = (user_data: UserData) => {
+    const storage = localStorage
     storage.setItem(storageKey, JSON.stringify(user_data));
 };
 
 export const getCredentialsFromStorage = (): UserData | null => {
-    const storage_data = localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
+    const storage_data = localStorage.getItem(storageKey);
 
     if (storage_data) {
         try {

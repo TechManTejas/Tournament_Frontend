@@ -11,16 +11,17 @@ const MyContext = createContext<any | undefined>(undefined);
 export const MyContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const storage_data = getCredentialsFromStorage();
+    const token = storage_data?.token
     const user = storage_data?.user
     
-    const [userAuthenticated, setUserAuthenticated] = useState<boolean>(!!user)
-    const [userAuthenticatedVerified, setAuthenticatedVerified] = useState<boolean>(user?.verified ?? false)
+    const [userAuthenticated, setUserAuthenticated] = useState<boolean>(!!token ?? false)
+    const [userVerified, setUserVerified] = useState<boolean>(user?.verified ?? false)
 
     const contextValue: any = {
         userAuthenticated,
         setUserAuthenticated,
-        userAuthenticatedVerified,
-        setAuthenticatedVerified
+        userVerified,
+        setUserVerified
     };
 
     return (

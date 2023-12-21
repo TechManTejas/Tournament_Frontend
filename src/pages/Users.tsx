@@ -22,6 +22,8 @@ const Users: React.FC = () => {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
+  console.log(currentPage)
+
   const columns: ColumnsType<IUser> = [
     {
       title: 'USERNAME',
@@ -76,7 +78,7 @@ const Users: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get('/user-lobby/');
+      const response = await axios.get('/user/');
 
       console.log(response.data);
 

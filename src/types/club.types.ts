@@ -1,8 +1,6 @@
-import { IMedia } from "./media.types";
-
 export interface IClub {
     id: number;
     name: string;
-    logo: IMedia | null;
+    logo: string;
     address: string;
 }

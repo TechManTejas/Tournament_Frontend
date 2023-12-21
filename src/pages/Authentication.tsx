@@ -1,5 +1,4 @@
-import { Form, Input, Button, Checkbox, Flex, message } from 'antd';
-import { GoogleOutlined, FacebookOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Flex, message } from 'antd';
 import axios from 'axios';
 
 import AuthImage from '../assets/images/authimage.jpg';
@@ -13,7 +12,7 @@ import { saveCredentialsToStorage } from '../utils/storage';
 
 export const Authentication = () => {
 
-  const { setUserAuthenticated, setAuthenticatedVerified } = Context();
+  const { setUserAuthenticated, setUserVerified } = Context();
 
   const [isLogin, setIsLogin] = useState(true);
 
@@ -24,18 +23,20 @@ export const Authentication = () => {
   const Login = () => {
 
     const onFinish = async (values: { username: string, password: string, remember: boolean }) => {
+
+      console.log(values.remember)
+
       try {
         // Send login request to Django API
         const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/`, {
           username: values.username,
           password: values.password,
         });
-        
-        console.log(response.data.user.verified)
-        saveCredentialsToStorage(response.data, values.remember);
-        setAuthenticatedVerified(response.data.user.verified)
-        setUserAuthenticated(!!response.data.user)
-        window.location.href = '/lobby'
+
+        saveCredentialsToStorage(response.data);
+        setUserAuthenticated(!!response?.data?.token)
+        setUserVerified(response?.data?.user?.verified)
+        window.location.href = '/'
 
         // Optionally, show a success message
         message.success('Login successful!');
@@ -44,7 +45,7 @@ export const Authentication = () => {
         console.error('Error logging in:', error);
 
         // Optionally, show an error message
-        message.error('Failed to login. Please check your credentials.');
+        message.error('Failed to si. Please check your credentials.');
       }
     };
 
@@ -73,9 +74,9 @@ export const Authentication = () => {
                 <Input.Password placeholder="Password" className='h-10' />
               </Form.Item>
 
-              <Form.Item name="remember" valuePropName="checked">
+              {/* <Form.Item name="remember" valuePropName="checked">
                 <Checkbox className='text-zinc-500'>Remember me</Checkbox>
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item>
                 <Button type="primary" htmlType="submit" className='h-10 w-full font-semibold shadow-xl'>
@@ -83,7 +84,7 @@ export const Authentication = () => {
                 </Button>
               </Form.Item>
             </Form>
-            <div className='text-xs flex justify-center items-center text-zinc-500'>
+            {/* <div className='text-xs flex justify-center items-center text-zinc-500'>
               <hr className='flex-grow border-t' />
               <div className='mx-2'>or login with</div>
               <hr className='flex-grow border-t' />
@@ -96,7 +97,7 @@ export const Authentication = () => {
               <Button className='w-1/2 h-10 rounded-lg border-blue-500 text-blue-500' icon={<FacebookOutlined />} onClick={() => { }}>
                 Facebook
               </Button>
-            </div>
+            </div> */}
           </div>
           <div className='my-6 text-center'>
             Don't have an account?
@@ -121,7 +122,7 @@ export const Authentication = () => {
 
       try {
         // Send signup request to Django API
-        await axios.post(`${import.meta.env.VITE_BASE_URL}/user/`, {
+        await axios.post(`${import.meta.env.VITE_BASE_URL}/user-register/`, {
           first_name: values.first_name,
           last_name: values.last_name,
           username: values.username,
@@ -140,7 +141,7 @@ export const Authentication = () => {
           message.error('A User with that username already exists, please try with a different username');
         } else {
           console.error('Error logging in:', error);
-          message.error('Failed to login. Please check your credentials.');
+          message.error('Failed to signup. Please check your credentials.');
         }
       }
     };
@@ -207,7 +208,7 @@ export const Authentication = () => {
                 </Button>
               </Form.Item>
             </Form>
-            <div className='text-xs flex justify-center items-center text-zinc-500'>
+            {/* <div className='text-xs flex justify-center items-center text-zinc-500'>
               <hr className='flex-grow border-t' />
               <div className='mx-2'>or signup with</div>
               <hr className='flex-grow border-t' />
@@ -220,7 +221,7 @@ export const Authentication = () => {
               <Button className='w-1/2 h-10 rounded-lg border-blue-500 text-blue-500' icon={<FacebookOutlined />} onClick={() => { }}>
                 Facebook
               </Button>
-            </div>
+            </div> */}
           </div>
           <div className='my-6 text-center'>
             Already have an account?

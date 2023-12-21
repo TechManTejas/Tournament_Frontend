@@ -1,12 +1,10 @@
 import { IClub } from "./club.types";
-import { IMedia } from "./media.types";
-
 export interface ITournament {
     id: number;
     club: IClub;
     name: string;
     alias: string;
-    logo: IMedia;
+    logo: string;
     points_draw: number;
     start_time: string; 
     start_date: string;
