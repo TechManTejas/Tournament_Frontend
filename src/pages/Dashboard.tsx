@@ -6,7 +6,7 @@ import { Tournaments } from './Tournaments';
 import { Matches } from './Matches';
 import { Players } from './Players';
 import { Teams } from './Teams';
-import { Referees } from './Referees';
+import Referees from './Referees';
 import Stadiums from './Stadiums';
 import StadiumAddEdit from './StadiumAddEdit';
 import Users from './Users';
@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import './chatscrollbar.css'
 import { Profile } from './Profile';
+import RefereeAddEdit from './RefereeAddEdit';
 
 const { Content } = Layout;
 
@@ -181,6 +182,7 @@ export const Dashboard = () => {
                         <Route path="/players" element={<Players />} />
                         <Route path="/teams" element={<Teams />} />
                         <Route path="/referees" element={<Referees />} />
+                        <Route path="/referees/add-edit" element={<RefereeAddEdit />} />
                         <Route path="/stadiums" element={<Stadiums />} />
                         <Route path="/stadiums/add-edit" element={<StadiumAddEdit />} />
                         <Route path="/users" element={<Users />} />
