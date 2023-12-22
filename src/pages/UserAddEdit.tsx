@@ -9,24 +9,9 @@ const { Option } = Select;
 
 const UserAddEdit: React.FC = () => {
   const { state } = useLocation();
-
-  console.log(state);
-
-  const goBack = () => {
-    window.history.back();
-  };
-
   const [form] = Form.useForm();
-  const [userToEdit, setUserToEdit] = useState<IUser | undefined>(state?.user);
-
+  const [userToEdit] = useState<IUser | undefined>(state?.user);
   const id = userToEdit?.id || undefined;
-
-  const initialValues = {
-    username: '',
-    role: '',
-    verified: false,
-    message: '',
-  };
 
   useEffect(() => {
     form.setFieldsValue({
@@ -34,13 +19,20 @@ const UserAddEdit: React.FC = () => {
     });
   }, [userToEdit, form]);
 
+  const goBack = () => {
+    window.history.back();
+  };
+
   const onFinish = async (values: any) => {
+
+    values.verified = true
+
     try {
       if (id) {
-        await axios.put(`/users/${id}/`, values);
+        await axios.put(`/user/${id}/`, values);
         message.success('User Updated successfully!');
       } else {
-        await axios.post('/users/', values);
+        await axios.post('/user/', values);
         message.success('User Added successfully!');
         form.resetFields();
       }
@@ -56,11 +48,28 @@ const UserAddEdit: React.FC = () => {
     <div className="px-10 py-6">
       <div className="text-2xl font-light">{id ? 'EDIT USER' : 'ADD NEW USER'}</div>
       <Form form={form} onFinish={onFinish} layout="vertical" className="max-w-md mt-8">
+
         <Form.Item name="username" label="Username" rules={[{ required: true, message: 'Please enter the username' }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Please enter the role' }]}>
+        <Form.Item name="first_name" label="First Name" rules={[{ required: true, message: 'Please enter the first name' }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="last_name" label="Last Name" rules={[{ required: true, message: 'Please enter the last name' }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}>
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="password" label="Password" rules={[{ required: !id, message: 'Please enter the password' }]}>
+          <Input.Password />
+        </Form.Item>
+
+        <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Please select the role' }]}>
           <Select placeholder="Select a role">
             <Option value="club_admin">Club Admin</Option>
             <Option value="club_user">Club User</Option>

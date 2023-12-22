@@ -8,7 +8,7 @@ import Patch3 from '../assets/images/patch_3.png'
 import Patch4 from '../assets/images/patch_4.png'
 import { useState } from 'react';
 import { Context } from '../context/context.provider';
-import { saveCredentialsToStorage } from '../utils/storage';
+import { saveUserDataToStorage } from '../utils/storage';
 
 export const Authentication = () => {
 
@@ -33,7 +33,7 @@ export const Authentication = () => {
           password: values.password,
         });
 
-        saveCredentialsToStorage(response.data);
+        saveUserDataToStorage(response.data);
         setUserAuthenticated(!!response?.data?.token)
         setUserVerified(response?.data?.user?.verified)
         window.location.href = '/'

@@ -1,4 +1,4 @@
-import { FloatButton, Layout } from 'antd';
+import { Button, FloatButton, Layout } from 'antd';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Club } from './Club';
@@ -12,26 +12,144 @@ import StadiumAddEdit from './StadiumAddEdit';
 import Users from './Users';
 import UserAddEdit from './UserAddEdit';
 import { Sidebar } from '../components/Sidebar';
-import { MessageOutlined } from '@ant-design/icons';
+import { CloseOutlined, CrownOutlined, MessageOutlined } from '@ant-design/icons';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import './chatscrollbar.css'
+import { Profile } from './Profile';
 
 const { Content } = Layout;
 
+interface ChatBoxProps {
+    closeChat: () => void; // Corrected type for closeChat prop
+}
 
-const ChatBox: React.FC = () => {
-    const [position, setPosition] = useState({ x: window.innerWidth/2, y: -window.innerHeight/1.25 });
+const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
 
     const handleDrag = (e: DraggableEvent, ui: DraggableData) => {
         const { x, y } = ui;
         setPosition({ x, y });
     };
 
+    useEffect(() => {
+        // Scroll to the bottom when the component mounts or whenever the content changes
+        if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+    }, [/* dependencies that trigger a scroll, e.g., content changes */]);
+
     return (
-        <Draggable position={position} onDrag={handleDrag}>
-            <div className='bg-red-300 w-[400px] h-[600px] rounded'>
-                <div>Drag here to move</div>
-                <input/>
+        <Draggable
+            axis="x"
+            position={position}
+            onDrag={handleDrag}
+        >
+            <div className='bg-zinc-500 w-[350px] h-[500px] rounded shadow-2xl'>
+                <div className='relative p-1'>
+                    <div className='absolute right-1'>
+                        <Button size='small' type='primary' onClick={closeChat} icon={<CloseOutlined />} />
+                    </div>
+                    <div className='flex justify-center w-full text-white'>
+                        CHAT BOX
+                    </div>
+                </div>
+                <div className='bg-green-100'>
+                    <div className='flex'>
+                        <Button type='primary' className='w-full font-semibold text-xs'>CHATS</Button>
+                        <Button className='w-full font-semibold text-xs text-zinc-500'>MEMBERS</Button>
+                    </div>
+                </div>
+                <div ref={containerRef} className='bg-[#F5F5F5] p-2 w-full h-full overflow-auto scrollbar-custom-style'>
+                    <div className='flex'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='text-xs font-bold text-zinc-500'>
+                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
+                            </div>
+                            <div className='max-w-[225px]'>
+                                Hi my name is Tejas Vaij I am a developer of this website
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='max-w-[225px]'>
+                                Hi wassup
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='text-xs font-bold text-zinc-500'>
+                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
+                            </div>
+                            <div className='max-w-[225px]'>
+                                Hi my name is Tejas Vaij I am a developer of this website
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='max-w-[225px]'>
+                                Hi wassup
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='text-xs font-bold text-zinc-500'>
+                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
+                            </div>
+                            <div className='max-w-[225px]'>
+                                Hi my name is Tejas Vaij I am a developer of this website
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='max-w-[225px]'>
+                                Hi wassup
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='text-xs font-bold text-zinc-500'>
+                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
+                            </div>
+                            <div className='max-w-[225px]'>
+                                Hi my name is Tejas Vaij I am a developer of this website
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='max-w-[225px]'>
+                                Hi wassup
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='text-xs font-bold text-zinc-500'>
+                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
+                            </div>
+                            <div className='max-w-[225px]'>
+                                Hi my name is Tejas Vaij I am a developer of this website
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='m-1 p-2 bg-white rounded '>
+                            <div className='max-w-[225px]'>
+                                Hi wassup
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </Draggable>
     );
@@ -42,8 +160,12 @@ export const Dashboard = () => {
 
     console.log(isChatVisible)
 
-    const handleChat = () => {
+    const openChat = () => {
         setChatVisible(true);
+    };
+
+    const closeChat = () => {
+        setChatVisible(false);
     };
 
     return (
@@ -63,17 +185,21 @@ export const Dashboard = () => {
                         <Route path="/stadiums/add-edit" element={<StadiumAddEdit />} />
                         <Route path="/users" element={<Users />} />
                         <Route path="/users/add-edit" element={<UserAddEdit />} />
+                        <Route path="/profile" element={<Profile />} />
                     </Routes>
-                    <>
-                        <FloatButton.Group shape="circle">
-                            <FloatButton type='primary' badge={{ count: 123, overflowCount: 99 }} onClick={handleChat} icon={<MessageOutlined />} />
-                            {/* <FloatButton onClick={handleLogout} icon={<PoweroffOutlined/>}/> */}
-                        </FloatButton.Group>
-                        {/* Render the ChatBox component based on the state */}
-                        <ChatBox/>
-                    </>
                 </Content>
+                <>
+                </>
             </Layout>
+            {isChatVisible &&
+                <div className='absolute bottom-32 right-10'>
+                    <ChatBox closeChat={closeChat} />
+                </div>
+            }
+            <FloatButton.Group shape="circle">
+                <FloatButton type='primary' badge={{ count: 123, overflowCount: 99 }} onClick={openChat} icon={<MessageOutlined />} />
+                {/* <FloatButton onClick={handleLogout} icon={<PoweroffOutlined/>}/> */}
+            </FloatButton.Group>
         </Layout>
     );
 };

@@ -1,9 +1,9 @@
 // Import Axios library
 import axios from "axios";
-import { getCredentialsFromStorage } from "../utils/storage";
+import { getUserDataFromStorage } from "../utils/storage";
 import.meta.env
 
-const storage_data = getCredentialsFromStorage();
+const storage_data = getUserDataFromStorage();
 
 // Create a new instance of Axios
 const instance = axios.create({

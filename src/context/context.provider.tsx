@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useState, ReactNode, useContext } from 'react';
-import { getCredentialsFromStorage } from '../utils/storage';
+import { getUserDataFromStorage } from '../utils/storage';
 
 
 // Create the context
@@ -10,7 +10,7 @@ const MyContext = createContext<any | undefined>(undefined);
 // Create a provider component
 export const MyContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
-    const storage_data = getCredentialsFromStorage();
+    const storage_data = getUserDataFromStorage();
     const token = storage_data?.token
     const user = storage_data?.user
     

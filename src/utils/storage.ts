@@ -1,18 +1,18 @@
 import { IUser } from "../types/user.types";
 
-export const storageKey = 'user_data';
+export const storageKey = 'tournament-user-data';
 
 export interface UserData {
     user: IUser;
     token: string;
 }
 
-export const saveCredentialsToStorage = (user_data: UserData) => {
+export const saveUserDataToStorage = (user_data: UserData) => {
     const storage = localStorage
     storage.setItem(storageKey, JSON.stringify(user_data));
 };
 
-export const getCredentialsFromStorage = (): UserData | null => {
+export const getUserDataFromStorage = (): UserData | null => {
     const storage_data = localStorage.getItem(storageKey);
 
     if (storage_data) {
@@ -26,7 +26,6 @@ export const getCredentialsFromStorage = (): UserData | null => {
     return null;
 };
 
-export const clearCredentialsFromStorage = () => {
+export const clearUserDataFromStorage = () => {
     localStorage.removeItem(storageKey);
-    sessionStorage.removeItem(storageKey);
 };

@@ -8,6 +8,6 @@ export interface IUser {
     email: string;
     role: string | null;
     verified: boolean;
-    message: string | null;
-    club: IClub
+    message?: string | null;
+    club?: IClub
 }

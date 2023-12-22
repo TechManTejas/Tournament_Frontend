@@ -4,7 +4,7 @@ import { Button, Input, Form, Space, message } from 'antd';
 import axios from '../api/axios';
 import { useLocation } from 'react-router-dom';
 import { IStadium } from '../types/stadium.types';
-import { getCredentialsFromStorage } from '../utils/storage';
+import { getUserDataFromStorage } from '../utils/storage';
 
 
 const StadiumAddEdit: React.FC = () => {
@@ -31,7 +31,7 @@ const StadiumAddEdit: React.FC = () => {
 
     const onFinish = async (values: any) => {
 
-        values.club = getCredentialsFromStorage()?.user?.club?.id
+        values.club = getUserDataFromStorage()?.user?.club?.id
 
         try {
             if (id) {

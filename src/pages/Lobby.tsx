@@ -7,7 +7,7 @@ import Patch3 from '../assets/images/patch_3.png'
 import Patch4 from '../assets/images/patch_4.png'
 
 import axios from "../api/axios"
-import { getCredentialsFromStorage, saveCredentialsToStorage } from '../utils/storage';
+import { getUserDataFromStorage, saveUserDataToStorage } from '../utils/storage';
 import { useEffect, useState } from 'react';
 import { Context } from '../context/context.provider';
 
@@ -15,7 +15,7 @@ export const Lobby = () => {
 
     const { setUserVerified } = Context();
 
-    const user_data = getCredentialsFromStorage()
+    const user_data = getUserDataFromStorage()
     const user = user_data?.user
     const token = user_data?.token
 
@@ -31,7 +31,7 @@ export const Lobby = () => {
                 message.success("Your account has been verified");
                 setUserVerified(response.data.verified)
                 if(token){
-                    saveCredentialsToStorage({ token: user_data?.token, user: { ...response.data } })
+                    saveUserDataToStorage({ token: user_data?.token, user: { ...response.data } })
                 }
                 window.location.href = '/'
             }
