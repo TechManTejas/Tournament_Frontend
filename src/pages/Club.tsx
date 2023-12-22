@@ -10,7 +10,7 @@ export const Club = () => {
     <div className='p-6 flex flex-col gap-12 h-screen overflow-auto'>
       <div className='flex gap-4'>
         <div>
-          <img src={import.meta.env.VITE_BASE_URL+club?.logo} alt="Club Logo" className='bg-white rounded w-44 h-44 shadow p-4 object-cover' />
+          <img src={club?.logo} alt="Club Logo" className='bg-white rounded w-44 h-44 shadow p-4 object-cover' />
         </div>
         <div className='text-2xl p-2'>{club?.name}</div>
       </div>

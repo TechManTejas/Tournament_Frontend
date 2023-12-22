@@ -39,11 +39,11 @@ export const Sidebar = () => {
                         <Menu.Item key="matches" icon={<CalendarOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Matches
                         </Menu.Item>
-                        <Menu.Item key="players" icon={<UserOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Players
-                        </Menu.Item>
                         <Menu.Item key="teams" icon={<TeamOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Teams
+                        </Menu.Item>
+                        <Menu.Item key="players" icon={<UserOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
+                            Players
                         </Menu.Item>
                         <Menu.Item key="referees" icon={<UserSwitchOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Referees
