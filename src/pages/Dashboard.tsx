@@ -20,6 +20,8 @@ import './chatscrollbar.css'
 import { Profile } from './Profile';
 import RefereeAddEdit from './RefereeAddEdit';
 import PlayerAddEdit from './PlayerAddEdit';
+import TournamentAddEdit from './TournamentAddEdit';
+import TournamentManage from './TournamentManage';
 
 const { Content } = Layout;
 
@@ -179,6 +181,8 @@ export const Dashboard = () => {
                         <Route path="/" element={<Navigate to="/dashboard/club" />} />
                         <Route path="/club" element={<Club />} />
                         <Route path="/tournaments" element={<Tournaments />} />
+                        <Route path="/tournaments/add-edit" element={<TournamentAddEdit />} />
+                        <Route path="/tournaments/manage" element={<TournamentManage />} />
                         <Route path="/matches" element={<Matches />} />
                         <Route path="/players" element={<Players />} />
                         <Route path="/players/add-edit" element={<PlayerAddEdit />} />
