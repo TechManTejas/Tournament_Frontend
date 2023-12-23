@@ -59,7 +59,7 @@ const Users: React.FC = () => {
 
         return isClubAdmin ?
           (
-            <div className='text-primary font-bold flex flex-wrap space-x-1'>
+            <div className='text-primary font-bold flex flex-wrap gap-1'>
               <Button
                 type='primary'
                 className='rounded w-10 h-10 flex justify-center items-center'

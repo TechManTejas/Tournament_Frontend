@@ -1,5 +1,5 @@
 import { Layout, Menu } from 'antd';
-import { BankOutlined, CalendarOutlined, DashboardOutlined, TeamOutlined, TrophyOutlined, UserOutlined, UserSwitchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import { BankOutlined, DashboardOutlined, TrophyOutlined, UserOutlined, UserSwitchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import Logo from "../assets/images/logo.png"
 import { useNavigate } from 'react-router-dom';
 import SidebarBg from "../assets/images/sidebar.jpg"
@@ -36,12 +36,12 @@ export const Sidebar = () => {
                         <Menu.Item key="tournaments" icon={<TrophyOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Tournaments
                         </Menu.Item>
-                        <Menu.Item key="matches" icon={<CalendarOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
+                        {/* <Menu.Item key="matches" icon={<CalendarOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Matches
                         </Menu.Item>
                         <Menu.Item key="teams" icon={<TeamOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Teams
-                        </Menu.Item>
+                        </Menu.Item> */}
                         <Menu.Item key="players" icon={<UserOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Players
                         </Menu.Item>
