@@ -1,66 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SearchOutlined } from '@ant-design/icons';
-import { Card, Col, Input, Row, Tabs } from 'antd';
-import Meta from 'antd/es/card/Meta';
+import { Tabs } from 'antd';
 import TabPane from 'antd/es/tabs/TabPane';
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Teams } from './Teams';
+import { TeamAddEdit } from './TeamAddEdit';
+import { ITeamRecord } from '../types/team.types';
 
 const ManageTournament: React.FC = () => {
+
     const { state } = useLocation();
-    const tabPaneRef = useRef<HTMLDivElement | null>(null);
-
-    console.log(state)
-
     const tournament = state?.tournament;
+
+    const [teamAddEdit, setTeamAddEdit] = useState(false)
+    const [selectedTeam, setSelectedTeam] = useState<ITeamRecord | undefined>(undefined)
+
+    const [groupAddEdit, setGroupAddEdit] = useState(false)
+    const [roundedAddEdit, setRoundedAddEdit] = useState(false)
+
+    const toggleAddEdit = () =>{
+        setTeamAddEdit(!teamAddEdit)
+    }
+
+    const handleSelectTeam = (team: ITeamRecord | undefined) => {
+        setSelectedTeam(team)
+        toggleAddEdit()
+    }
 
     if (!tournament) {
         // Handle the case where no tournament is passed in state
         return <div>No tournament data available</div>;
     }
-    const data = [
-        { id: 1, logo: 'logo1.png', text: 'Card 1' },
-        { id: 2, logo: 'logo2.png', text: 'Card 2' },
-        // Add more data as needed
-    ];
 
-    const handleDragStart = (e: React.DragEvent, item: any) => {
-        const target = e.currentTarget as HTMLDivElement;
-        // Set opacity to 0 to make the card not visible during drag
-        target.style.opacity = '0.5';
-
-        console.log(item)
-    };
-
-    const handleDragEnterTabPane = (e: React.DragEvent) => {
-        console.log(e)
-        // Add styles or perform actions when the drag enters the TabPane
-        if (tabPaneRef.current) {
-            tabPaneRef.current.style.border = '2px solid green';
-        }
-    };
-
-    const handleDragLeaveTabPane = () => {
-        // Remove styles or perform actions when the drag leaves the TabPane
-        if (tabPaneRef.current) {
-            tabPaneRef.current.style.border = 'none';
-        }
-    };
-
-    const handleDragEnd = (e: React.DragEvent) => {
-        const target = e.currentTarget as HTMLDivElement;
-        // Reset opacity to 1 when drag ends
-        target.style.opacity = '1';
-
-        // Reset styles or perform additional actions when the drag ends
-        if (tabPaneRef.current) {
-            tabPaneRef.current.style.border = 'none';
-        }
-
-        // Get the id from the data transfer object
-        const id = e.dataTransfer.getData('text/plain');
-        console.log("Dragged Card ID:", id);
-    };
     return (
         <div className='flex flex-col gap-4 h-full'>
             <div className='border border-green-500 rounded-lg flex gap-2 bg-white'>
@@ -88,53 +59,49 @@ const ManageTournament: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <div className='flex gap-4  h-full'>
+            <div className='flex gap-4 h-full'>
                 <div className='bg-white rounded-lg flex-grow p-2'>
                     <Tabs defaultActiveKey="overview" type="card">
                         <TabPane
                             tab="Teams"
                             key="teams"
                         >
+                            {
+                                teamAddEdit ?
+                                    <TeamAddEdit 
+                                        toggleAddEdit={toggleAddEdit}
+                                        selectedTeam={selectedTeam}
+                                    />
+                                    :
+                                    <Teams 
+                                        toggleAddEdit={toggleAddEdit}
+                                        handleSelectTeam={handleSelectTeam}
+                                    />
+                            }
+                        </TabPane>
+                        <TabPane
+                            tab="Groups"
+                            key="groups"
+                        >
                             <div
-                                ref={tabPaneRef}
                                 className='w-full h-full bg-red-100'
-                                onDragEnter={handleDragEnterTabPane}
-                                onDragLeave={handleDragLeaveTabPane}
+                            >
+                                Matches content goes here.
+                            </div>
+                        </TabPane>
+                        <TabPane
+                            tab="Rounds"
+                            key="rounds"
+                        >
+                            <div
+                                className='w-full h-full bg-red-100'
                             >
                                 Matches content goes here.
                             </div>
                         </TabPane>
                     </Tabs>
                 </div>
-                <div className='bg-white border border-green-500 rounded-lg p-2'>
-                    {/* Search Component */}
-                    <Input
-                        prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                        placeholder='Search...'
-                        className='mb-2'
-                    />
 
-                    {/* Card Grid */}
-                    <Row gutter={[16, 16]}>
-                        {data.map((item) => (
-                            <Col key={item.id} span={8}>
-                                <Card
-                                    hoverable
-                                    draggable
-                                    onDragStart={(e) => {
-                                        handleDragStart(e, item)
-                                    }}
-                                    onDragEnd={(e) => {
-                                        handleDragEnd(e)
-                                    }}
-                                    cover={<img alt={item.text} src={item.logo} />}
-                                >
-                                    <Meta title={item.text} />
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </div>
             </div>
         </div>
     );

@@ -77,26 +77,22 @@ const Players: React.FC = () => {
             <Card
                 key={player.id}
                 hoverable
-                style={{ width: 250, marginBottom: 16 }}
-                cover={<Image style={{ height: 350, objectFit:"cover" }}  src={player.image} alt='Player'/>}
+                style={{ width: 150, marginBottom: 16 }}
+                cover={<Image style={{ height: 200, objectFit:"cover" }}  src={player.image} alt='Player'/>}
                 actions={[
                     <Button
                         key='edit'
                         type='primary'
                         icon={<EditOutlined />}
                         onClick={() => handleEdit(player)}
-                    >
-                        Edit
-                    </Button>,
+                    />,
                     <Button
                         key='delete'
                         type='primary'
                         danger
                         icon={<DeleteOutlined />}
                         onClick={() => handleDeleteConfirmation(player.id)}
-                    >
-                        Delete
-                    </Button>,
+                    />
                 ]}
             >
                 <Card.Meta title={player.name} description={`Squad Number: ${player.squad_number}`} />

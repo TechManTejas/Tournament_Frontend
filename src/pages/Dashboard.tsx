@@ -146,7 +146,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
                             </div>
                         </div>
                     </div>
-                    <div className='flex justify-end'>
+                    <div className='flex justify-end'>Teams
                         <div className='m-1 p-2 bg-white rounded '>
                             <div className='max-w-[225px]'>
                                 Hi wassup
@@ -182,7 +182,7 @@ export const Dashboard = () => {
                         <Route path="/club" element={<Club />} />
                         <Route path="/tournaments" element={<Tournaments />} />
                         <Route path="/tournaments/add-edit" element={<TournamentAddEdit />} />
-                        <Route path="/tournaments/manage" element={<TournamentManage />} />
+                        <Route path="/tournaments/manage/*" element={<TournamentManage />} />
                         <Route path="/matches" element={<Matches />} />
                         <Route path="/players" element={<Players />} />
                         <Route path="/players/add-edit" element={<PlayerAddEdit />} />
