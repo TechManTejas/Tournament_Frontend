@@ -6,14 +6,16 @@ import { ITeamRecord } from '../types/team.types';
 import { getUserDataFromStorage } from '../utils/storage';
 import axios from "../api/axios"
 import { confirmation } from '../components/Confirmation';
+import { ITournament } from '../types/tournament.types';
 
 interface TeamsProps {
   toggleAddEdit: () => void;
   handleSelectTeam: (team: ITeamRecord | undefined) => void;
+  tournament: ITournament | undefined;
 }
 
 
-export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam }) => {
+export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam, tournament }) => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [teamRecords, setTeamRecords] = useState<ITeamRecord[]>([]);
@@ -82,7 +84,7 @@ export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam }
       },
     ];
 
-  const fetchData = async (page: number = 1, search: string = '') => {
+  const fetchData = async (page: number = 1, search: string = '', tournament_id?: number) => {
     try {
       setLoading(true);
 
@@ -90,6 +92,7 @@ export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam }
         params: {
           page,
           search,
+          tournament_id,
         },
       });
 
@@ -106,8 +109,9 @@ export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Fetch data for the initial page, search, and specify the tournamentId if needed
+    fetchData(1, '', tournament?.id);
+  }, [tournament]); 
 
   const handlePageChange = (page: number) => {
     fetchData(page);

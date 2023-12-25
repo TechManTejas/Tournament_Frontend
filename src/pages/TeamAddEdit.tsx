@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseOutlined, LeftOutlined, SearchOutlined, UploadOutlined } from '@ant-design/icons'
-import { Button, Flex, Form, Input, Upload, message } from 'antd'
+import { Button, Checkbox, Flex, Form, Input, Upload, message } from 'antd'
 import { useEffect, useRef, useState } from 'react';
 import { IPlayer } from '../types/player.types';
 import axios from "../api/axios"
 import { ITeamRecord } from '../types/team.types';
+import { ITournament } from '../types/tournament.types';
 
 interface TeamAddEditProps {
     toggleAddEdit: () => void;
-    selectedTeam: ITeamRecord | undefined
+    selectedTeam: ITeamRecord | undefined;
+    tournament: ITournament | undefined;
 }
 
 
-export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selectedTeam }) => {
+export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selectedTeam, tournament }) => {
 
     const team = selectedTeam ?? null
     const id = team?.id
@@ -40,29 +42,46 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
 
         console.log(values)
 
-        // try {
-        //     const formData = new FormData();
-        //     if (values?.logo?.file?.originFileObj) {
-        //         formData.append('logo', values?.logo?.file?.originFileObj);
-        //     }
-        //     formData.append('name', values.name);
-        //     formData.append('name', values.name);
-        //     formData.append('short_name', values.short_name);
+        try {
+            const formData = new FormData();
+            if (values?.logo?.file?.originFileObj) {
+                formData.append('logo', values?.logo?.file?.originFileObj);
+            }
+            if(tournament?.id){
+                formData.append('tournament', tournament?.id.toString())
+            }
+            formData.append('name', values.name);
+            formData.append('short_name', values.short_name);
 
-        //     if (id) {
-        //         await axios.patch(`/teamrecord/${id}/`, formData);
-        //         message.success('Team Updated successfully!');
-        //     } else {
-        //         await axios.post('/teamrecord/', formData);
-        //         message.success('Team Added successfully!');
-        //         form.resetFields();
-        //     }
+            // Add playing and substitute players to formData
+            for (let i = 1; i <= 11; i++) {
+                const playingPlayerKey = `playing_player_${i}`;
+                formData.append(playingPlayerKey, values[playingPlayerKey]?.id);
+            }
 
-        //     toggleAddEdit();
-        // } catch (error) {
-        //     console.error('Error:', error);
-        //     message.error('Error adding/updating team');
-        // }
+            for (let i = 1; i <= 5; i++) {
+                const substitutePlayerKey = `substitute_player_${i}`;
+                formData.append(substitutePlayerKey, values[substitutePlayerKey]?.id);
+            }
+
+            formData.append('save_team', values.save_team === undefined ? false : values.save_team);
+
+            console.log(formData);
+
+            if (id) {
+                await axios.patch(`/teamrecord/${id}/`, formData);
+                message.success('Team Updated successfully!');
+            } else {
+                await axios.post('/teamrecord/', formData);
+                message.success('Team Added successfully!');
+                form.resetFields();
+            }
+
+            toggleAddEdit();
+        } catch (error) {
+            console.error('Error:', error);
+            message.error('Error adding/updating team');
+        }
     };
 
     const handleDragStart = (e: React.DragEvent) => {
@@ -112,7 +131,7 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                     </div>
                 </div>
                 <div className='flex'>
-                    <div className='flex-grow p-4' style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0)), url(${uploadedImage})`, backgroundSize: 'cover' }}>
+                    <div className='flex-grow p-4' style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0)), url(${uploadedImage})`, backgroundSize: '' }}>
                         <Form
                             form={form}
                             onFinish={onFinish}
@@ -121,12 +140,10 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                             className="mt-8 backdrop-blur-sm p-4 rounded-xl"
                         >
 
-                            <Flex gap={20}>
+                            <Flex gap={20} className='items-end'>
                                 <Form.Item
                                     name="logo"
                                     label="Team Logo"
-                                    valuePropName="fileList"
-                                    getValueFromEvent={(e) => e.fileList}
                                     rules={[{ required: true, message: 'Please upload the team logo!' }]}
                                 >
                                     <Upload {...uploadProps} listType="picture">
@@ -149,6 +166,16 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                                     rules={[{ required: true, message: 'Please enter the short name!' }]}
                                 >
                                     <Input />
+                                </Form.Item>
+
+                                <Form.Item
+                                    name="save_team"
+                                    valuePropName="checked"
+                                    initialValue={selectedTeam?.save_team}
+                                     getValueFromEvent={(e) => e.target.checked} 
+                                    className="mt-4"
+                                >
+                                    <Checkbox>Save Team</Checkbox>
                                 </Form.Item>
                             </Flex>
 

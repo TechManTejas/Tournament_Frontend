@@ -71,11 +71,13 @@ const ManageTournament: React.FC = () => {
                                     <TeamAddEdit 
                                         toggleAddEdit={toggleAddEdit}
                                         selectedTeam={selectedTeam}
+                                        tournament={tournament}
                                     />
                                     :
                                     <Teams 
                                         toggleAddEdit={toggleAddEdit}
                                         handleSelectTeam={handleSelectTeam}
+                                        tournament={tournament}
                                     />
                             }
                         </TabPane>
