@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CloseOutlined, LeftOutlined, SearchOutlined, UploadOutlined } from '@ant-design/icons'
-import { Button, Checkbox, Flex, Form, Input, Upload, message } from 'antd'
+import { Button, Checkbox, Flex, Form, Input, Pagination, Spin, Upload, message } from 'antd'
 import { useEffect, useRef, useState } from 'react';
 import { IPlayer } from '../types/player.types';
 import axios from "../api/axios"
@@ -18,25 +18,52 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
 
     const team = selectedTeam ?? null
     const id = team?.id
-    console.log(team)
 
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState<boolean>(false);
     const [uploadedImage, setUploadedImage] = useState<string | null>(selectedTeam?.logo || null);
     const [playerData, setPlayerData] = useState<IPlayer[]>([]);
+    const [selectedPlayers, setSelectedPlayers] = useState<IPlayer[]>([]);
 
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [totalPlayers, setTotalPlayers] = useState<number>(0);
+    const [searchText, setSearchText] = useState<string>('');
+    const pageSize: number = 10
+
+    const fetchData = async (page: number = 1, search: string = '') => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/player/', {
+                params: {
+                    page,
+                    search,
+                    assigned:true,
+                    tournament_id: tournament?.id
+                },
+            });
+            console.log(response);
+            setPlayerData(response.data.results);
+            setTotalPlayers(response.data.count);
+            setCurrentPage(page);
+        } catch (error) {
+            console.error('Error fetching player data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        // Fetch player data from the /player endpoint
-        axios.get('/player/')
-            .then(response => {
+        fetchData();
+    }, [searchText]);
 
-                console.log(response.data)
-                setPlayerData(response.data.results);
-            })
-            .catch(error => {
-                console.error('Error fetching player data:', error);
-            });
-    }, []);
+    const handlePageChange = (page: number) => {
+        fetchData(page, searchText);
+    };
+
+    const handleSearch = (value: string) => {
+        setSearchText(value);
+        fetchData(1, value);
+    };
 
     const onFinish = async (values: any) => {
 
@@ -47,7 +74,7 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
             if (values?.logo?.file?.originFileObj) {
                 formData.append('logo', values?.logo?.file?.originFileObj);
             }
-            if(tournament?.id){
+            if (tournament?.id) {
                 formData.append('tournament', tournament?.id.toString())
             }
             formData.append('name', values.name);
@@ -94,7 +121,6 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
         target.style.opacity = '1';
     };
 
-
     const beforeUpload = (file: File) => {
         // Allow only one file to be uploaded
         const isLt10M = file.size / 1024 / 1024 < 10;
@@ -119,7 +145,7 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
     return (
         <>
             <div className='flex flex-col gap-4'>
-                <div className='flex justify-end'>
+                <div className='flex'>
                     <div className='flex gap-4'>
                         <Button
                             icon={<LeftOutlined />}
@@ -130,14 +156,14 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                         </Button>
                     </div>
                 </div>
-                <div className='flex'>
+                <div className='flex gap-2'>
                     <div className='flex-grow p-4' style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0)), url(${uploadedImage})`, backgroundSize: '' }}>
                         <Form
                             form={form}
                             onFinish={onFinish}
                             initialValues={selectedTeam}
                             layout='vertical'
-                            className="mt-8 backdrop-blur-sm p-4 rounded-xl"
+                            className="mt-8 backdrop-blur-md p-4 rounded-xl"
                         >
 
                             <Flex gap={20} className='items-end'>
@@ -172,7 +198,7 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                                     name="save_team"
                                     valuePropName="checked"
                                     initialValue={selectedTeam?.save_team}
-                                     getValueFromEvent={(e) => e.target.checked} 
+                                    getValueFromEvent={(e) => e.target.checked}
                                     className="mt-4"
                                 >
                                     <Checkbox>Save Team</Checkbox>
@@ -180,23 +206,23 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                             </Flex>
 
                             <Flex className='flex-wrap'>
-                                <PlayerSelection label="Playing Player 1" name="playing_player_1" form={form} />
-                                <PlayerSelection label="Playing Player 2" name="playing_player_2" form={form} />
-                                <PlayerSelection label="Playing Player 3" name="playing_player_3" form={form} />
-                                <PlayerSelection label="Playing Player 4" name="playing_player_4" form={form} />
-                                <PlayerSelection label="Playing Player 5" name="playing_player_5" form={form} />
-                                <PlayerSelection label="Playing Player 6" name="playing_player_6" form={form} />
-                                <PlayerSelection label="Playing Player 7" name="playing_player_7" form={form} />
-                                <PlayerSelection label="Playing Player 8" name="playing_player_8" form={form} />
-                                <PlayerSelection label="Playing Player 9" name="playing_player_9" form={form} />
-                                <PlayerSelection label="Playing Player 10" name="playing_player_10" form={form} />
-                                <PlayerSelection label="Playing Player 11" name="playing_player_11" form={form} />
+                                <PlayerSelection label="Playing Player 1" name="playing_player_1" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 2" name="playing_player_2" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 3" name="playing_player_3" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 4" name="playing_player_4" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 5" name="playing_player_5" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 6" name="playing_player_6" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 7" name="playing_player_7" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 8" name="playing_player_8" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 9" name="playing_player_9" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 10" name="playing_player_10" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 11" name="playing_player_11" form={form} setSelectedPlayers={setSelectedPlayers} />
 
-                                <PlayerSelection label="Substitute Player 1" name="substitute_player_1" form={form} />
-                                <PlayerSelection label="Substitute Player 2" name="substitute_player_2" form={form} />
-                                <PlayerSelection label="Substitute Player 3" name="substitute_player_3" form={form} />
-                                <PlayerSelection label="Substitute Player 4" name="substitute_player_4" form={form} />
-                                <PlayerSelection label="Substitute Player 5" name="substitute_player_5" form={form} />
+                                <PlayerSelection label="Substitute Player 1" name="substitute_player_1" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Substitute Player 2" name="substitute_player_2" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Substitute Player 3" name="substitute_player_3" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Substitute Player 4" name="substitute_player_4" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Substitute Player 5" name="substitute_player_5" form={form} setSelectedPlayers={setSelectedPlayers} />
                             </Flex>
 
                             <Form.Item>
@@ -213,33 +239,48 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                                 prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                                 placeholder='Search...'
                                 className='mb-2'
+                                onChange={(e) => handleSearch(e.target.value)}
                             />
                         </div>
-                        <div className='overflow-y-auto overflow-x-hidden grid grid-cols-3'>
+                        <div className='overflow-y-auto overflow-x-hidden grid grid-cols-3 transition-all'>
                             <>
-                                {playerData.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className='text-xs hover:shadow-2xl hover:shadow-green-500 w-20 m-1 transition-all rounded'
-                                        draggable
-                                        onDragStart={(e) => {
-                                            e.dataTransfer.setData('application/json', JSON.stringify(item));
-                                            handleDragStart(e)
-                                        }}
-                                        onDragEnd={(e) => {
-                                            handleDragEnd(e)
-                                        }}
-                                    >
-                                        <div className='w-full'>
-                                            <img className='w-full h-24 object-cover rounded-t' alt={item.name} src={item.image} />
-                                            <div className='text-center'>
-                                                {item.name}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                {loading ? (
+                                    <Spin size="large" />
+                                ) : (
+                                    playerData
+                                        .filter(item => !selectedPlayers.some(selected => selected.id === item.id))
+                                        .map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className='text-xs hover:shadow-2xl hover:shadow-green-500 w-20 m-1 transition-all rounded'
+                                                draggable
+                                                onDragStart={(e) => {
+                                                    e.dataTransfer.setData('application/json', JSON.stringify(item));
+                                                    handleDragStart(e)
+                                                }}
+                                                onDragEnd={(e) => {
+                                                    handleDragEnd(e)
+                                                }}
+                                            >
+                                                <div className='w-full'>
+                                                    <img className='w-full h-24 object-cover rounded-t' alt={item.name} src={item.image} />
+                                                    <div className='text-center'>
+                                                        {item.name}
+                                                    </div>
+                                                </div>
+                                            </div>)
+                                        )
+                                )
+                                }
                             </>
                         </div>
+                        <Pagination
+                            current={currentPage}
+                            pageSize={pageSize}
+                            total={totalPlayers}
+                            onChange={handlePageChange}
+                            className='mt-4'
+                        />
                     </div>
                 </div>
             </div>
@@ -250,10 +291,11 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
 interface PlayerSelectionProps {
     label: string;
     name: string;
-    form: any; // Replace with the actual type of your form instance
+    form: any;
+    setSelectedPlayers: React.Dispatch<React.SetStateAction<IPlayer[]>>; // Add this prop
 }
 
-const PlayerSelection: React.FC<PlayerSelectionProps> = ({ label, name, form }) => {
+const PlayerSelection: React.FC<PlayerSelectionProps> = ({ label, name, form, setSelectedPlayers }) => {
     const playerRef = useRef<HTMLDivElement | null>(null);
 
     const [, forceUpdate] = useState(0);
@@ -292,6 +334,9 @@ const PlayerSelection: React.FC<PlayerSelectionProps> = ({ label, name, form }) 
                     // Handle the dropped data as needed
                     console.log(`Dropped data for ${label}:`, playerData);
 
+                    // Add the dropped player to the selectedPlayers array
+                    setSelectedPlayers((prevSelectedPlayers) => [...prevSelectedPlayers, playerData]);
+
                     // You can now use `playerData` as needed, for example, set it in the form
                     form.setFieldsValue({ [name]: playerData });
 
@@ -319,6 +364,11 @@ const PlayerSelection: React.FC<PlayerSelectionProps> = ({ label, name, form }) 
                             icon={<CloseOutlined />}
                             className="absolute top-0 right-0"
                             onClick={() => {
+                                // Remove the dropped player from the selectedPlayers array
+                                const player = form.getFieldValue(name)
+                                console.log(player.id)
+                                setSelectedPlayers((prevSelectedPlayers) => prevSelectedPlayers.filter(item => item.id !== player.id));
+
                                 form.setFieldsValue({ [name]: null });
                                 forceUpdate((prev) => prev + 1);
                             }}

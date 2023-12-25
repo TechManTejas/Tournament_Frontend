@@ -15,7 +15,7 @@ interface TeamsProps {
 }
 
 
-export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam, tournament }) => {
+export const Teams: React.FC<TeamsProps> = ({ toggleAddEdit, handleSelectTeam, tournament }) => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [teamRecords, setTeamRecords] = useState<ITeamRecord[]>([]);
@@ -111,7 +111,7 @@ export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam, 
   useEffect(() => {
     // Fetch data for the initial page, search, and specify the tournamentId if needed
     fetchData(1, '', tournament?.id);
-  }, [tournament]); 
+  }, [tournament]);
 
   const handlePageChange = (page: number) => {
     fetchData(page);
@@ -154,9 +154,12 @@ export const Teams: React.FC<TeamsProps>  = ({ toggleAddEdit, handleSelectTeam, 
               type='primary'
               icon={<PlusOutlined />}
               className='font-bold text-md'
-              onClick={toggleAddEdit}
+              onClick={() => {
+                handleSelectTeam(undefined)
+                toggleAddEdit()
+              }}
             >
-              ADD NEW
+              ADD TEAM
             </Button>
           </div>
         </div>

@@ -6,6 +6,8 @@ import { useLocation } from 'react-router-dom';
 import { Teams } from './Teams';
 import { TeamAddEdit } from './TeamAddEdit';
 import { ITeamRecord } from '../types/team.types';
+import { RoundsAddEdit } from './RoundsAddEdit';
+import { Rounds } from './Rounds';
 
 const ManageTournament: React.FC = () => {
 
@@ -14,17 +16,21 @@ const ManageTournament: React.FC = () => {
 
     const [teamAddEdit, setTeamAddEdit] = useState(false)
     const [selectedTeam, setSelectedTeam] = useState<ITeamRecord | undefined>(undefined)
-
-    const [groupAddEdit, setGroupAddEdit] = useState(false)
     const [roundedAddEdit, setRoundedAddEdit] = useState(false)
+    const [selectedRound, setSelectedRound] = useState<string | null>(null);
 
-    const toggleAddEdit = () =>{
+    const toggleAddEditTeam = () => {
         setTeamAddEdit(!teamAddEdit)
+    }
+
+    const toggleAddEditRound = (selectedRound: string) => {
+        setSelectedRound(selectedRound)
+        setRoundedAddEdit(!roundedAddEdit)
     }
 
     const handleSelectTeam = (team: ITeamRecord | undefined) => {
         setSelectedTeam(team)
-        toggleAddEdit()
+        toggleAddEditTeam()
     }
 
     if (!tournament) {
@@ -66,34 +72,46 @@ const ManageTournament: React.FC = () => {
                             tab="Teams"
                             key="teams"
                         >
-                            {
-                                teamAddEdit ?
-                                    <TeamAddEdit 
-                                        toggleAddEdit={toggleAddEdit}
-                                        selectedTeam={selectedTeam}
-                                        tournament={tournament}
-                                    />
-                                    :
-                                    <Teams 
-                                        toggleAddEdit={toggleAddEdit}
-                                        handleSelectTeam={handleSelectTeam}
-                                        tournament={tournament}
-                                    />
-                            }
-                        </TabPane>
-                        <TabPane
-                            tab="Groups"
-                            key="groups"
-                        >
-                            <div
-                                className='w-full h-full bg-red-100'
-                            >
-                                Matches content goes here.
-                            </div>
+                            <>
+                                {
+                                    teamAddEdit ?
+                                        <TeamAddEdit
+                                            toggleAddEdit={toggleAddEditTeam}
+                                            selectedTeam={selectedTeam}
+                                            tournament={tournament}
+                                        />
+                                        :
+                                        <Teams
+                                            toggleAddEdit={toggleAddEditTeam}
+                                            handleSelectTeam={handleSelectTeam}
+                                            tournament={tournament}
+                                        />
+                                }
+                            </>
                         </TabPane>
                         <TabPane
                             tab="Rounds"
                             key="rounds"
+                        >
+                            <>
+                                {
+                                    roundedAddEdit ?
+                                        <RoundsAddEdit
+                                            toggleAddEdit={toggleAddEditRound}
+                                            tournament={tournament}
+                                            selectedRound={selectedRound}
+                                        />
+                                        :
+                                        <Rounds
+                                            toggleAddEdit={toggleAddEditRound}
+                                            tournament={tournament}
+                                        />
+                                }
+                            </>
+                        </TabPane>
+                        <TabPane
+                            tab="Invite Clubs"
+                            key="groups"
                         >
                             <div
                                 className='w-full h-full bg-red-100'
