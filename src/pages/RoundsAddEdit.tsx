@@ -6,14 +6,20 @@ import { ITournament } from '../types/tournament.types';
 import axios from '../api/axios';
 import { CloseOutlined, LeftOutlined, SearchOutlined } from '@ant-design/icons';
 import { IRound } from '../types/round.types';
+import { IGroup } from '../types/group.types';
 
 interface RoundAddEditProps {
-    toggleAddEdit: (selectedRound: IRound) => void;
+    toggleAddEdit: (selectedRound: IRound | null) => void;
     tournament: ITournament;
-    selectedRound: IRound
+    selectedRound: IRound | null
+    selectedGroup: IGroup | null
 }
 
-export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tournament, selectedRound }) => {
+export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tournament, selectedRound, selectedGroup }) => {
+
+    const group = selectedGroup
+    console.log(group)
+
     const [form] = Form.useForm();
     const [selectedTeams, setSelectedTeams] = useState<ITeamRecord[]>([]);
     const [allTeams, setAllTeams] = useState<ITeamRecord[]>([]);
@@ -31,6 +37,14 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
     // useEffect to fetch teams when the component mounts
     useEffect(() => {
         fetchAllTeams();
+
+        // Set initial form values if group is not null
+        if (group) {
+            form.setFieldsValue({
+                name: group.name,
+            });
+            setSelectedTeams(group.team_records);
+        }
     }, []);
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -61,30 +75,37 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
 
         try {
             // Create formData
-            const formData = new FormData();
-            formData.append('name', values.name);
-            formData.append('tournament_id', tournament.id.toString());
-            formData.append('round_id', selectedRound.id.toString());
+            if (selectedRound) {
 
-            const team_records = []
-            for (let i = 1; i <= 5; i++) {
-                const teamKey = `team_${i}`;
-                team_records.push(values[teamKey].id)
+                const formData = new FormData();
+                formData.append('name', values.name);
+                formData.append('tournament_id', tournament.id.toString());
+                formData.append('round_id', selectedRound.id.toString());
+
+                const team_records = []
+                for (let i = 1; i <= 5; i++) {
+                    const teamKey = `team_${i}`;
+                    const orderKey = `team_${i}_order`;
+                    team_records.push({ id: values[teamKey].id, order: values[orderKey] });
+                }
+                formData.append('team_records', JSON.stringify(team_records));
+
+                if (group) {
+                    // If selectedGroup is available, update the group
+                    const response = await axios.patch(`/group/${group.id}/`, formData);
+                    console.log(response.data);
+                    message.success('Group updated successfully!');
+                } else {
+                    // If selectedGroup is not available, create a new group
+                    const response = await axios.post('/group/', formData);
+                    console.log(response.data);
+                    message.success('Group added successfully!');
+                }
+
+                // Reset the form and close the modal
+                form.resetFields();
+                toggleAddEdit(selectedRound);
             }
-
-            console.log(team_records)
-
-            formData.append('team_records', JSON.stringify(team_records));
-
-            const response = await axios.post('/group/', formData);
-            console.log(response.data)
-
-            // Display success message
-            message.success('Group added/updated successfully!');
-
-            // Reset the form and close the modal
-            // form.resetFields();
-            // toggleAddEdit(selectedRound);
         } catch (error) {
             console.error('Error:', error);
             message.error('Error adding/updating group');
@@ -103,6 +124,18 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                     form={form}
                     name={`team_${i}`}
                 />
+            );
+
+            // Add a hidden input for each team to store its order
+            teamSelections.push(
+                <Form.Item
+                    key={`team_${i}_order`}
+                    name={`team_${i}_order`}
+                    hidden
+                    initialValue={i}
+                >
+                    <Input />
+                </Form.Item>
             );
         }
 
@@ -125,11 +158,11 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                         </Button>
                     </div>
                     <div className='font-bold text-2xl text-green-500'>
-                        {selectedRound.name}
+                        {selectedRound?.name}
                     </div>
                 </div>
                 <div className='flex gap-2'>
-                    <div className='flex-grow p-4 bg-red-50'>
+                    <div className='flex-grow p-4'>
                         <Form
                             form={form}
                             onFinish={onFinish}

@@ -8,6 +8,8 @@ import { TeamAddEdit } from './TeamAddEdit';
 import { ITeamRecord } from '../types/team.types';
 import { RoundsAddEdit } from './RoundsAddEdit';
 import { Rounds } from './Rounds';
+import { IRound } from '../types/round.types';
+import { IGroup } from '../types/group.types';
 
 const ManageTournament: React.FC = () => {
 
@@ -17,15 +19,20 @@ const ManageTournament: React.FC = () => {
     const [teamAddEdit, setTeamAddEdit] = useState(false)
     const [selectedTeam, setSelectedTeam] = useState<ITeamRecord | undefined>(undefined)
     const [roundedAddEdit, setRoundedAddEdit] = useState(false)
-    const [selectedRound, setSelectedRound] = useState<string | null>(null);
+    const [selectedRound, setSelectedRound] = useState<IRound | null>(null);
+    const [selectedGroup, setSelectedGroup] = useState<IGroup | null>(null);
 
     const toggleAddEditTeam = () => {
         setTeamAddEdit(!teamAddEdit)
     }
 
-    const toggleAddEditRound = (selectedRound: string) => {
+    const toggleAddEditRound = (selectedRound: IRound | null) => {
         setSelectedRound(selectedRound)
         setRoundedAddEdit(!roundedAddEdit)
+    }
+
+    const handleSelectGroup = (group: IGroup | null) => {
+        setSelectedGroup(group)
     }
 
     const handleSelectTeam = (team: ITeamRecord | undefined) => {
@@ -100,11 +107,13 @@ const ManageTournament: React.FC = () => {
                                             toggleAddEdit={toggleAddEditRound}
                                             tournament={tournament}
                                             selectedRound={selectedRound}
+                                            selectedGroup={selectedGroup}
                                         />
                                         :
                                         <Rounds
                                             toggleAddEdit={toggleAddEditRound}
                                             tournament={tournament}
+                                            handleSelectGroup={handleSelectGroup}
                                         />
                                 }
                             </>

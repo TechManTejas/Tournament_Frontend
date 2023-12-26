@@ -12,10 +12,11 @@ import { getUserDataFromStorage } from "../utils/storage";
 
 interface RoundsProps {
     toggleAddEdit: (selectedRound: IRound) => void;
+    handleSelectGroup: (group: IGroup | null) => void;
     tournament: ITournament;
 }
 
-export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, tournament }) => {
+export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup, tournament }) => {
 
     const isClubAdmin = getUserDataFromStorage()?.user?.role === 'club_admin'
 
@@ -263,6 +264,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, tournament }) => 
                                 icon={<PlusOutlined />}
                                 className='font-bold text-md'
                                 onClick={() => {
+                                    handleSelectGroup(null)
                                     toggleAddEdit(selectedRound)
                                 }}
                             >
@@ -298,9 +300,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, tournament }) => 
                                             type="primary"
                                             className="rounded w-10 h-10 flex justify-center items-center"
                                             onClick={() => {
-                                                // const groupToEdit = groups.find((g) => g.id === group.id);
-                                                // Adjust the route and state based on your requirements
-                                                // navigate('/dashboard/groups/add-edit', { state: { group: groupToEdit } });
+                                                handleSelectGroup(group)
+                                                toggleAddEdit(selectedRound)
                                             }}
                                         >
                                             <EditOutlined />
