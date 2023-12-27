@@ -5,7 +5,7 @@ import { Club } from './Club';
 import { Tournaments } from './Tournaments';
 import { Matches } from './Matches';
 import Players from './Players';
-import { Teams } from './Teams';
+// import { Teams } from './Teams';
 import Referees from './Referees';
 import Stadiums from './Stadiums';
 import StadiumAddEdit from './StadiumAddEdit';
@@ -186,7 +186,7 @@ export const Dashboard = () => {
                         <Route path="/matches" element={<Matches />} />
                         <Route path="/players" element={<Players />} />
                         <Route path="/players/add-edit" element={<PlayerAddEdit />} />
-                        <Route path="/teams" element={<Teams />} />
+                        {/* <Route path="/teams" element={<Teams />} /> */}
                         <Route path="/referees" element={<Referees />} />
                         <Route path="/referees/add-edit" element={<RefereeAddEdit />} />
                         <Route path="/stadiums" element={<Stadiums />} />

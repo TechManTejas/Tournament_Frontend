@@ -1,26 +1,26 @@
 import { IPlayer } from "./player.types";
-import { IReferee } from "./referee.types";
-import { IStadium } from "./stadium.types";
-import { ITeam } from "./team.types";
-import { ITournament } from "./tournament.types";
+// import { IReferee } from "./referee.types";
+// import { IStadium } from "./stadium.types";
+import { ITeamRecord } from "./team.types";
+// import { ITournament } from "./tournament.types";
 
 export interface IMatch {
-    id: number;
-    teamA: ITeam;
-    teamB: ITeam;
-    jersey_color_A: string;
-    jersey_color_B: string;
-    tournament: ITournament;
-    datetime: string;
-    referee_head: IReferee;
-    referee_assistant: IReferee | null;
-    referee_assistant_2: IReferee | null;
-    referee_assistant_3: IReferee | null;
-    stadium: IStadium;
-    status: 'scheduled' | 'in_progress' | 'completed';
-    start_time: string;
-    timer: string;
-    end_time: string;
+    // id: number;
+    teamA: ITeamRecord;
+    teamB: ITeamRecord;
+    // jersey_color_A: string;
+    // jersey_color_B: string;
+    // tournament: ITournament;
+    // datetime: string;
+    // referee_head: IReferee;
+    // referee_assistant: IReferee | null;
+    // referee_assistant_2: IReferee | null;
+    // referee_assistant_3: IReferee | null;
+    // stadium: IStadium;
+    // status: 'scheduled' | 'in_progress' | 'completed';
+    // start_time: string;
+    // timer: string;
+    // end_time: string;
 }
 
 export interface IMatchSubstituteRecord {

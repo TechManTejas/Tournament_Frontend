@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined, ScheduleOutlined, SearchOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Input, Menu, Modal, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import { ITournament } from "../types/tournament.types";
@@ -7,8 +7,9 @@ import axios from "../api/axios"
 import { IRound } from "../types/round.types";
 import { IGroup } from "../types/group.types";
 import { ColumnsType } from "antd/es/table";
-import { confirmation } from "../components/Confirmation";
-import { getUserDataFromStorage } from "../utils/storage";
+import { confirmation } from "../components/Confirmation"
+import { Match, generateMatchSchedule } from "../utils/round_robin_schedule";
+import { usePDF } from 'react-to-pdf';
 
 interface RoundsProps {
     toggleAddEdit: (selectedRound: IRound) => void;
@@ -18,14 +19,20 @@ interface RoundsProps {
 
 export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup, tournament }) => {
 
-    const isClubAdmin = getUserDataFromStorage()?.user?.role === 'club_admin'
+    const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' });
 
     const [selectedRound, setSelectedRound] = useState<IRound | null>(null);
     const [rounds, setRounds] = useState<IRound[]>([])
     const [groups, setGroups] = useState<IGroup[]>([]);
     const [isAddRoundModalVisible, setAddRoundModalVisible] = useState(false);
     const [newRoundName, setNewRoundName] = useState("");
-    const [numberOfTeamsInGroup, setNumberOfTeamsInGroup] = useState<number>(0);
+    const [numberOfTeamsInGroup, setNumberOfTeamsInGroup] = useState<number>(2);
+    const [selectedSubMenu, setSelectedSubMenu] = useState('groups');
+    const [scheduleData, setScheduleData] = useState<Match[]>([]);
+
+    const handleSelectSubMenu = (value: string) => {
+        setSelectedSubMenu(value);
+    };
 
     const columns: ColumnsType<any> = [
         {
@@ -91,9 +98,9 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
     };
 
     const handleAddRoundOk = async () => {
-        if (!newRoundName) {
+        if (!newRoundName || numberOfTeamsInGroup <= 1) {
             // Handle the case where the round name is empty
-            message.error('Please enter a round name');
+            message.error('Please enter a round name and a valid number of teams in a group');
             return;
         }
 
@@ -102,6 +109,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
             const response = await axios.post("/round/", {
                 tournament_id: tournament.id,
                 name: newRoundName,
+                no_of_groups: numberOfTeamsInGroup,
             });
             const newRound = response.data
 
@@ -111,6 +119,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
             // Update state with the new round name
             setSelectedRound(newRound);
             setNewRoundName("");
+            setNumberOfTeamsInGroup(0);
             setAddRoundModalVisible(false);
 
             // Display a success message or handle any additional actions
@@ -182,8 +191,6 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                 const response = await axios.get(`/group/?tournament_id=${tournament.id}&round_id=${selectedRound.id}`);
                 const fetchedGroups = response.data;
 
-                console.log(fetchedGroups)
-
                 // Set the groups state
                 setGroups(fetchedGroups);
             }
@@ -201,8 +208,58 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
         fetchGroups();
     }, [selectedRound]);
 
+    useEffect(() => {
+        schedule();
+    }, [selectedSubMenu, selectedRound]);
+
+
+    const schedule = () => {
+        console.log(groups);
+
+        const matchSchedule: Match[] = generateMatchSchedule(groups, tournament);
+
+        // Display the generated match schedule
+        console.log("Match Schedule:");
+        matchSchedule.forEach((match) => {
+            console.log(`${match.time} - ${match.teamA} vs ${match.teamB} in ${match.group}`);
+        });
+
+        setScheduleData(matchSchedule);
+    };
+
+    const handleRowClick = (record: Match) => {
+        // Add your logic here to handle the row click
+        console.log("Row clicked:", record);
+        // You can access the information about teams, timings, etc., from the 'record' object
+        // Perform any actions or call any functions based on the clicked row data
+    };
+
+    const handleStartTournament = async () => {
+        try {
+            // Send a PATCH request to start the tournament
+            await axios.patch(`/tournament/${tournament.id}/`, {
+                // Add any additional data you want to send in the request body
+                // For example, you might want to set a 'status' to 'active' or something similar
+                status: 'Started',
+            });
+
+            // Optionally, you can fetch the updated tournament data after starting the tournament
+            // and update the 'tournament' state or perform any additional actions
+            // const updatedTournament = await axios.get(`/tournament/${tournament.id}`);
+            // setTournament(updatedTournament.data);
+            window.location.href = '/dashboard/tournament'
+
+            // Display a success message or handle any additional actions
+            message.success('Tournament started successfully!');
+        } catch (error) {
+            // Handle error responses from the server
+            console.error('Error starting tournament:', error);
+            message.error('An error occurred while starting the tournament. Please try again.');
+        }
+    };
+
     return (
-        <>
+        <div className="flex flex-col gap-4">
             <div className='flex gap-4'>
                 <div className="flex gap-1 ">
                     {rounds.map((round: IRound) => (
@@ -240,63 +297,106 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                         onOk={handleAddRoundOk}
                         onCancel={handleAddRoundCancel}
                     >
-                        <Input
-                            placeholder="Enter the name of the round"
-                            value={newRoundName}
-                            onChange={(e) => setNewRoundName(e.target.value)}
-                        />
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-zinc-500">Round Name:</label>
+                            <Input
+                                placeholder="Enter the name of the round"
+                                value={newRoundName}
+                                onChange={(e) => setNewRoundName(e.target.value)}
+                            />
+                        </div>
+                        <div className="m-4" />
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-zinc-500">Number of Teams in a Group:</label>
+                            <Input
+                                type="number"
+                                placeholder="Enter the number of teams in a group"
+                                value={numberOfTeamsInGroup}
+                                onChange={(e) => setNumberOfTeamsInGroup(parseInt(e.target.value, 10))}
+                            />
+                        </div>
                     </Modal>
                 </div>
             </div>
             {selectedRound &&
                 <div className="h-full">
 
-                    <div className='flex justify-end'>
-                        <div className='flex gap-4'>
-                            <Input
-                                prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                placeholder='Search...'
-                                className='mb-2'
-                                onChange={(e) => (e.target.value)}
-                            />
-                            <Button
-                                type='primary'
-                                icon={<PlusOutlined />}
-                                className='font-bold text-md'
-                                onClick={() => {
-                                    handleSelectGroup(null)
-                                    toggleAddEdit(selectedRound)
-                                }}
-                            >
-                                ADD GROUP
-                            </Button>
+                    <div className="flex justify-between">
+                        <div className="flex gap-4">
+                            <Button.Group>
+                                <Button
+                                    type={selectedSubMenu === 'groups' ? 'primary' : 'default'}
+                                    icon={<TeamOutlined />}
+                                    onClick={() => handleSelectSubMenu('groups')}
+                                >
+                                    GROUPS
+                                </Button>
+                                <Button
+                                    type={selectedSubMenu === 'schedule' ? 'primary' : 'default'}
+                                    icon={<ScheduleOutlined />}
+                                    onClick={() => handleSelectSubMenu('schedule')}
+                                >
+                                    SCHEDULE
+                                </Button>
+                                {/* <Button
+                                    type={selectedSubMenu === 'results' ? 'primary' : 'default'}
+                                    icon={<BarChartOutlined />}
+                                    onClick={() => handleSelectSubMenu('results')}
+                                >
+                                    RESULTS
+                                </Button> */}
+                            </Button.Group>
+                        </div>
+                        <div className='flex justify-end'>
+                            <div className='flex gap-4'>
+                                <Input
+                                    prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                    placeholder='Search...'
+                                    className='mb-2'
+                                    onChange={(e) => (e.target.value)}
+                                />
+                                <Button
+                                    type='primary'
+                                    icon={<PlusOutlined />}
+                                    className='font-bold text-md'
+                                    onClick={() => {
+                                        handleSelectGroup(null)
+                                        toggleAddEdit(selectedRound)
+                                    }}
+                                >
+                                    ADD GROUP
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="bg-[#F5F5F5] h-screen rounded p-2 flex flex-col gap-10">
-                        {groups.map((group) => (
-                            <div key={group.id} className="flex flex-col gap-4">
-                                <div className="flex gap-1 items-center">
-                                    <div className='text-2xl'>{group.name}</div>
-                                    {/* Add more details or information about the group as needed */}
-                                </div>
+                    {
+                        selectedSubMenu === "groups" &&
+                        <>
+                            <div className=" h-screen rounded p-2 flex flex-col gap-10">
+                                {groups.map((group) => (
+                                    <div key={group.id} className="flex flex-col gap-4">
+                                        <div className="flex gap-1 items-center">
+                                            <div className='text-2xl'>{group.name}</div>
+                                            {/* Add more details or information about the group as needed */}
+                                        </div>
 
-                                <div className="bg-[#F5F5F5] rounded p-2 flex gap-10">
-                                    <Table
-                                        className="w-full"
-                                        columns={columns}
-                                        dataSource={group.team_records.map((teamRecord) => ({
-                                            key: teamRecord.id,
-                                            name: teamRecord.name,
-                                            logo: teamRecord.logo,
-                                            points: 0,
-                                            goalsPlus: 0,
-                                            goalsMinus: 0,
-                                        }))}
-                                        pagination={false}
-                                    />
-                                    <div className="flex flex-col gap-1 justify-center items-center">
-                                        <Button
+                                        <div className=" rounded p-2 flex gap-10">
+                                            <Table
+                                                className="w-full"
+                                                columns={columns}
+                                                dataSource={group.group_team_records.map((groupTeamRecord) => ({
+                                                    key: groupTeamRecord.id,
+                                                    name: groupTeamRecord.team_record.name,
+                                                    logo: groupTeamRecord.team_record.logo,
+                                                    points: groupTeamRecord.points,
+                                                    goalsPlus: groupTeamRecord.goals_pos,
+                                                    goalsMinus: groupTeamRecord.goals_neg,
+                                                }))}
+                                                pagination={false}
+                                            />
+                                            <div className="flex flex-col gap-1 justify-center items-center">
+                                                {/* <Button
                                             type="primary"
                                             className="rounded w-10 h-10 flex justify-center items-center"
                                             onClick={() => {
@@ -305,21 +405,87 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                             }}
                                         >
                                             <EditOutlined />
-                                        </Button>
-                                        <Button
-                                            type="primary"
-                                            className="rounded w-10 h-10 flex justify-center items-center"
-                                            onClick={() => handleDeleteConfirmation(group.id)}
-                                        >
-                                            <DeleteOutlined />
-                                        </Button>
+                                        </Button> */}
+                                                <Button
+                                                    type="primary"
+                                                    className="rounded w-10 h-10 flex justify-center items-center"
+                                                    onClick={() => handleDeleteConfirmation(group.id)}
+                                                >
+                                                    <DeleteOutlined />
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        </>
+                    }
+                    {
+                        selectedSubMenu === "schedule" &&
+                        <>
+                            {tournament.status === "Not Started" &&
+                                <div className="py-2 flex justify-between gap-4">
+                                    <Button className="bg-red-500 text-white" onClick={handleStartTournament}>START TOURNAMENT</Button>
+                                    <Button onClick={() => toPDF()}>Download PDF</Button>
+                                </div>
+                            }
+                            <div ref={targetRef} className=" h-screen rounded p-2 flex flex-col gap-10">
+                                {scheduleData.length > 0 && (
+                                    <Table
+                                        className="w-full"
+                                        columns={
+                                            [
+                                                {
+                                                    title: 'No.',
+                                                    dataIndex: 'no',
+                                                    key: 'no',
+                                                    align: 'center',
+                                                },
+                                                {
+                                                    title: 'Time',
+                                                    dataIndex: 'time',
+                                                    key: 'time',
+                                                    align: 'center',
+                                                },
+                                                {
+                                                    title: 'Group',
+                                                    dataIndex: 'group',
+                                                    key: 'group',
+                                                    align: 'center',
+                                                },
+                                                {
+                                                    title: 'Team A',
+                                                    dataIndex: 'teamA',
+                                                    key: 'teamA',
+                                                    align: 'center',
+                                                },
+                                                {
+                                                    title: 'Team B',
+                                                    dataIndex: 'teamB',
+                                                    key: 'teamB',
+                                                    align: 'center',
+                                                },
+                                            ]}
+                                        dataSource={scheduleData}
+                                        pagination={false}
+                                        onRow={(record: Match) => ({
+                                            onClick: () => handleRowClick(record),
+                                        })}
+                                    />
+                                )}
+                            </div>
+                        </>
+                    }
+                    {/* {
+                        selectedSubMenu === "results" &&
+                        <>
+                            <div className="bg-[#F5F5F5] h-screen rounded p-2 flex flex-col gap-10">
+                                results
+                            </div>
+                        </>
+                    } */}
                 </div>
             }
-        </>
+        </div>
     )
 }

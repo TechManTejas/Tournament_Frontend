@@ -77,14 +77,19 @@ export const Tournaments = () => {
         style={{ width: 300, marginBottom: 16 }}
         cover={<Image src={tournament.logo} alt='Tournament' preview={false} />}
         actions={[
-          <Button
-            key='edit'
-            type='primary'
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(tournament)}
-          >
-            Edit
-          </Button>,
+          <>
+            {
+              tournament.status !== "Started" &&
+              <Button
+                key='edit'
+                type='primary'
+                icon={<EditOutlined />}
+                onClick={() => handleEdit(tournament)}
+              >
+                Edit
+              </Button>
+            }
+          </>,
           <Button
             key='delete'
             type='primary'

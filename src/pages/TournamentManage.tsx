@@ -118,7 +118,7 @@ const ManageTournament: React.FC = () => {
                                 }
                             </>
                         </TabPane>
-                        <TabPane
+                        {/* <TabPane
                             tab="Invite Clubs"
                             key="groups"
                         >
@@ -127,7 +127,7 @@ const ManageTournament: React.FC = () => {
                             >
                                 Matches content goes here.
                             </div>
-                        </TabPane>
+                        </TabPane> */}
                     </Tabs>
                 </div>
 

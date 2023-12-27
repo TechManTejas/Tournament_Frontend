@@ -7,6 +7,7 @@ export interface IRound {
     club: IClub;
     tournament: ITournament;
     name: string;
+    no_of_groups: number;
     schedule: any[]; 
     result: any[];   
 }

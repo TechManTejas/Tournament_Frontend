@@ -37,7 +37,7 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                 params: {
                     page,
                     search,
-                    assigned:true,
+                    assigned: true,
                     tournament_id: tournament?.id
                 },
             });

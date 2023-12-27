@@ -15,6 +15,7 @@ export interface ITournament {
   points_winner: number;
   points_defeat: number;
   timer: string;
+  status: string;
 }
 
 export interface GameMode {

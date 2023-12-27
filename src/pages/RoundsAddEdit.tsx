@@ -17,8 +17,8 @@ interface RoundAddEditProps {
 
 export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tournament, selectedRound, selectedGroup }) => {
 
+    const round = selectedRound
     const group = selectedGroup
-    console.log(group)
 
     const [form] = Form.useForm();
     const [selectedTeams, setSelectedTeams] = useState<ITeamRecord[]>([]);
@@ -38,12 +38,20 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
     useEffect(() => {
         fetchAllTeams();
 
-        // Set initial form values if group is not null
+        // Set initial form values if selectedGroup is not null
         if (group) {
+            console.log(group)
             form.setFieldsValue({
                 name: group.name,
             });
-            setSelectedTeams(group.team_records);
+
+            // Map the group's team records to set values for team_1, team_2, team_3, etc.
+            group.group_team_records.forEach((record, index) => {
+                const teamKey = `team_${index + 1}`;
+                form.setFieldsValue({ [teamKey]: record.team_record });
+            });
+
+            setSelectedTeams(group.group_team_records.map((record) => record.team_record));
         }
     }, []);
 
@@ -64,11 +72,6 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
         form.setFieldsValue({ team: teamData });
     };
 
-    const handleRemoveTeam = (teamId: number) => {
-        // Remove the dropped team from the selectedTeams array
-        setSelectedTeams((prevSelectedTeams) => prevSelectedTeams.filter((team) => team.id !== teamId));
-    };
-
     const onFinish = async (values: any) => {
 
         console.log(values)
@@ -83,12 +86,15 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                 formData.append('round_id', selectedRound.id.toString());
 
                 const team_records = []
-                for (let i = 1; i <= 5; i++) {
+                for (let i = 1; i <= selectedRound.no_of_groups; i++) {
                     const teamKey = `team_${i}`;
-                    const orderKey = `team_${i}_order`;
-                    team_records.push({ id: values[teamKey].id, order: values[orderKey] });
+                    team_records.push({ id: values[teamKey].id, order: i })
                 }
-                formData.append('team_records', JSON.stringify(team_records));
+                formData.append('group_team_records', JSON.stringify(team_records));
+
+                formData.forEach((value, key) => {
+                    console.log(key, value);
+                });
 
                 if (group) {
                     // If selectedGroup is available, update the group
@@ -112,30 +118,29 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
         }
     };
 
+    const handleDragStart = (e: React.DragEvent) => {
+        const target = e.currentTarget as HTMLDivElement;
+        target.style.opacity = '0.5';
+    };
+
+    const handleDragEnd = (e: React.DragEvent) => {
+        const target = e.currentTarget as HTMLDivElement;
+        target.style.opacity = '1';
+    };
+
     // Function to render TeamSelection components in a loop
-    const renderTeamSelections = (count: number) => {
+    const renderTeamSelections = (count: number | undefined) => {
         const teamSelections = [];
 
-        for (let i = 1; i <= count; i++) {
+        for (let i = 1; i <= count!; i++) {
             teamSelections.push(
                 <TeamSelection
                     key={`team_${i}`}
                     label={`Selected Teams ${i}`}
                     form={form}
                     name={`team_${i}`}
+                    setSelectedTeams={setSelectedTeams}
                 />
-            );
-
-            // Add a hidden input for each team to store its order
-            teamSelections.push(
-                <Form.Item
-                    key={`team_${i}_order`}
-                    name={`team_${i}_order`}
-                    hidden
-                    initialValue={i}
-                >
-                    <Input />
-                </Form.Item>
             );
         }
 
@@ -179,7 +184,7 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                             </Form.Item>
 
                             <Flex>
-                                {renderTeamSelections(5)}
+                                {renderTeamSelections(round?.no_of_groups)}
                             </Flex>
 
                             <Form.Item>
@@ -202,21 +207,27 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                             />
                         </div>
                         <div className="overflow-y-auto overflow-x-hidden grid grid-cols-3 transition-all">
-                            {allTeams.map((team) => (
-                                <div
-                                    key={team.id}
-                                    className="text-xs hover:shadow-2xl hover:shadow-green-500 w-20 m-1 transition-all rounded"
-                                    draggable
-                                    onDragStart={(e) => {
-                                        e.dataTransfer.setData('application/json', JSON.stringify(team));
-                                    }}
-                                >
-                                    <div className="w-full">
-                                        <img className="w-full h-24 object-cover rounded-t" alt={team.name} src={team.logo} />
-                                        <div className="text-center">{team.name}</div>
+                            {allTeams
+                                .filter(item => !selectedTeams.some(selected => selected.id === item.id))
+                                .map((team) => (
+                                    <div
+                                        key={team.id}
+                                        className="text-xs hover:shadow-2xl hover:shadow-green-500 w-20 m-1 transition-all rounded"
+                                        draggable
+                                        onDragStart={(e) => {
+                                            e.dataTransfer.setData('application/json', JSON.stringify(team));
+                                            handleDragStart(e)
+                                        }}
+                                        onDragEnd={(e) => {
+                                            handleDragEnd(e)
+                                        }}
+                                    >
+                                        <div className="w-full">
+                                            <img className="w-full h-24 object-cover rounded-t" alt={team.name} src={team.logo} />
+                                            <div className="text-center">{team.name}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>
@@ -228,10 +239,11 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
 interface TeamSelectionProps {
     label: string;
     form: any;
-    name: string; // Add the name prop
+    name: string;
+    setSelectedTeams: React.Dispatch<React.SetStateAction<ITeamRecord[]>>; // Add this prop
 }
 
-const TeamSelection: React.FC<TeamSelectionProps> = ({ label, form, name }) => {
+const TeamSelection: React.FC<TeamSelectionProps> = ({ label, form, name, setSelectedTeams }) => {
     const teamRef = useRef<HTMLDivElement | null>(null);
 
     const [, forceUpdate] = useState(0);
@@ -250,12 +262,19 @@ const TeamSelection: React.FC<TeamSelectionProps> = ({ label, form, name }) => {
         // You can use the teamData as needed, for example, set it in the form
         form.setFieldsValue({ [name]: teamData }); // Use the name prop here
 
+        // Add the dropped player to the selectedTeams array
+        setSelectedTeams((prevSelectedTeams) => [...prevSelectedTeams, teamData]);
+
         handleDragExitTabPane();
         forceUpdate((prev) => prev + 1);
     };
 
     const handleRemoveTeam = () => {
         handleDragExitTabPane();
+
+        const team = form.getFieldValue(name)
+        setSelectedTeams((prevSelectedTeams) => prevSelectedTeams.filter(item => item.id !== team.id));
+
         // You can remove the teamData from the form or perform other actions
         form.setFieldsValue({ [name]: null }); // Use the name prop here
         forceUpdate((prev) => prev + 1);
