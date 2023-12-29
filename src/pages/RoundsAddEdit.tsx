@@ -7,6 +7,8 @@ import axios from '../api/axios';
 import { CloseOutlined, LeftOutlined, SearchOutlined } from '@ant-design/icons';
 import { IRound } from '../types/round.types';
 import { IGroup } from '../types/group.types';
+import { Pagination } from 'antd';
+
 
 interface RoundAddEditProps {
     toggleAddEdit: (selectedRound: IRound | null) => void;
@@ -23,12 +25,20 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
     const [form] = Form.useForm();
     const [selectedTeams, setSelectedTeams] = useState<ITeamRecord[]>([]);
     const [allTeams, setAllTeams] = useState<ITeamRecord[]>([]);
+    const [totalTeams, setTotalTeams] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const pageSize = 10; // Adjust as needed
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     // Fetch all teams for the tournament
     const fetchAllTeams = async () => {
         try {
-            const response = await axios.get(`/teamrecord/?tournament_id=${tournament?.id}`);
+            const response = await axios.get(`/teamrecord/?tournament_id=${tournament?.id}&page=${currentPage}&pageSize=${pageSize}`);
             setAllTeams(response.data.results);
+            setTotalTeams(response.data.count)
         } catch (error) {
             console.error('Error fetching teams:', error);
         }
@@ -53,7 +63,7 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
 
             setSelectedTeams(group.group_team_records.map((record) => record.team_record));
         }
-    }, []);
+    }, [currentPage]);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -206,28 +216,37 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                                 className='mb-2'
                             />
                         </div>
-                        <div className="overflow-y-auto overflow-x-hidden grid grid-cols-3 transition-all">
-                            {allTeams
-                                .filter(item => !selectedTeams.some(selected => selected.id === item.id))
-                                .map((team) => (
-                                    <div
-                                        key={team.id}
-                                        className="text-xs hover:shadow-2xl hover:shadow-green-500 w-20 m-1 transition-all rounded"
-                                        draggable
-                                        onDragStart={(e) => {
-                                            e.dataTransfer.setData('application/json', JSON.stringify(team));
-                                            handleDragStart(e)
-                                        }}
-                                        onDragEnd={(e) => {
-                                            handleDragEnd(e)
-                                        }}
-                                    >
-                                        <div className="w-full">
-                                            <img className="w-full h-24 object-cover rounded-t" alt={team.name} src={team.logo} />
-                                            <div className="text-center">{team.name}</div>
+                        <div>
+
+                            <div className="overflow-y-auto overflow-x-hidden grid grid-cols-3 transition-all">
+                                {allTeams
+                                    .filter(item => !selectedTeams.some(selected => selected.id === item.id))
+                                    .map((team) => (
+                                        <div
+                                            key={team.id}
+                                            className="text-xs hover:shadow-2xl hover:shadow-green-500 w-20 m-1 transition-all rounded"
+                                            draggable
+                                            onDragStart={(e) => {
+                                                e.dataTransfer.setData('application/json', JSON.stringify(team));
+                                                handleDragStart(e)
+                                            }}
+                                            onDragEnd={(e) => {
+                                                handleDragEnd(e)
+                                            }}
+                                        >
+                                            <div className="w-full">
+                                                <img className="w-full h-24 object-cover rounded-t" alt={team.name} src={team.logo} />
+                                                <div className="text-center">{team.name}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                            </div>
+                            <Pagination
+                                current={currentPage}
+                                total={totalTeams}
+                                pageSize={pageSize}
+                                onChange={handlePageChange}
+                            />
                         </div>
                     </div>
                 </div>
