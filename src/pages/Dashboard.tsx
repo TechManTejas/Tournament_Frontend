@@ -3,7 +3,6 @@ import { Button, FloatButton, Layout } from 'antd';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Club } from './Club';
 import { Tournaments } from './Tournaments';
-import { Matches } from './Matches';
 import Players from './Players';
 // import { Teams } from './Teams';
 import Referees from './Referees';
@@ -22,6 +21,7 @@ import RefereeAddEdit from './RefereeAddEdit';
 import PlayerAddEdit from './PlayerAddEdit';
 import TournamentAddEdit from './TournamentAddEdit';
 import TournamentManage from './TournamentManage';
+import { MatchDashboard } from './MatchDashboard';
 
 const { Content } = Layout;
 
@@ -183,10 +183,9 @@ export const Dashboard = () => {
                         <Route path="/tournaments" element={<Tournaments />} />
                         <Route path="/tournaments/add-edit" element={<TournamentAddEdit />} />
                         <Route path="/tournaments/manage/*" element={<TournamentManage />} />
-                        <Route path="/matches" element={<Matches />} />
+                        <Route path="/match" element={<MatchDashboard />} />
                         <Route path="/players" element={<Players />} />
                         <Route path="/players/add-edit" element={<PlayerAddEdit />} />
-                        {/* <Route path="/teams" element={<Teams />} /> */}
                         <Route path="/referees" element={<Referees />} />
                         <Route path="/referees/add-edit" element={<RefereeAddEdit />} />
                         <Route path="/stadiums" element={<Stadiums />} />

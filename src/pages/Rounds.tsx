@@ -227,13 +227,6 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
         setScheduleData(matchSchedule);
     };
 
-    const handleRowClick = (record: Match) => {
-        // Add your logic here to handle the row click
-        console.log("Row clicked:", record);
-        // You can access the information about teams, timings, etc., from the 'record' object
-        // Perform any actions or call any functions based on the clicked row data
-    };
-
     const handleStartTournament = async () => {
         try {
             // Send a PATCH request to start the tournament
@@ -465,12 +458,41 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                     key: 'teamB',
                                                     align: 'center',
                                                 },
-                                            ]}
+                                                {
+                                                    title: 'Actions',
+                                                    key: 'actions',
+                                                    align: 'center',
+                                                    render: (_: any, record: Match) => (
+                                                        <div>
+                                                            <Button type="primary" onClick={() => {
+
+                                                                const { group, teamA, teamB } = record;
+
+                                                                // Extracting the team IDs from teamA and teamB
+                                                                const teamAId = groups.find(g => g.name === group)?.group_team_records.find(t => t.team_record.name === teamA)?.id;
+                                                                const teamBId = groups.find(g => g.name === group)?.group_team_records.find(t => t.team_record.name === teamB)?.id;
+
+                                                                console.log("Match Dashboard Clicked:");
+                                                                console.log("Tournament:", tournament);
+                                                                console.log("Group:", group);
+                                                                console.log("Teams:", teamA, "vs", teamB);
+                                                                console.log("Team A ID:", teamAId);
+                                                                console.log("Team B ID:", teamBId);
+
+                                                            }}>
+                                                                Match Dashboard
+                                                            </Button>
+                                                            <Button onClick={() => { }}>
+                                                                Stream Operator
+                                                            </Button>
+                                                        </div>
+                                                    ),
+                                                },
+                                            ]
+
+                                        }
                                         dataSource={scheduleData}
                                         pagination={false}
-                                        onRow={(record: Match) => ({
-                                            onClick: () => handleRowClick(record),
-                                        })}
                                     />
                                 )}
                             </div>
