@@ -3,6 +3,7 @@ import { Context } from "./context/context.provider";
 import { Authentication } from "./pages/Authentication"
 import { Dashboard } from "./pages/Dashboard"
 import { Lobby } from "./pages/Lobby"
+import PUBLICMATCHVIEWS from './pages/_PUBLICMATCHVIEWS_';
 
 function App() {
 
@@ -11,6 +12,10 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route
+          path="/live"
+          element={<PUBLICMATCHVIEWS/>}
+        />
         <Route
           path="/"
           element={
@@ -24,7 +29,7 @@ function App() {
                 <Navigate to="/lobby" replace={true} />
               }
               {
-                 userVerified &&
+                userVerified &&
                 <Navigate to="/dashboard" replace={true} />
               }
             </>
