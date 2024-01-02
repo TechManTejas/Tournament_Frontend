@@ -206,7 +206,7 @@ export const TeamAddEdit: React.FC<TeamAddEditProps> = ({ toggleAddEdit, selecte
                             </Flex>
 
                             <Flex className='flex-wrap'>
-                                <PlayerSelection label="Playing Player 1" name="playing_player_1" form={form} setSelectedPlayers={setSelectedPlayers} />
+                                <PlayerSelection label="Playing Player 1" name="playing_player_1" form={form} setSelectedPlayers={setSelectedPlayers} compulsory/>
                                 <PlayerSelection label="Playing Player 2" name="playing_player_2" form={form} setSelectedPlayers={setSelectedPlayers} />
                                 <PlayerSelection label="Playing Player 3" name="playing_player_3" form={form} setSelectedPlayers={setSelectedPlayers} />
                                 <PlayerSelection label="Playing Player 4" name="playing_player_4" form={form} setSelectedPlayers={setSelectedPlayers} />
@@ -292,23 +292,28 @@ interface PlayerSelectionProps {
     label: string;
     name: string;
     form: any;
-    setSelectedPlayers: React.Dispatch<React.SetStateAction<IPlayer[]>>; // Add this prop
+    setSelectedPlayers: React.Dispatch<React.SetStateAction<IPlayer[]>>;
+    compulsory?: boolean;
 }
 
-const PlayerSelection: React.FC<PlayerSelectionProps> = ({ label, name, form, setSelectedPlayers }) => {
-    const playerRef = useRef<HTMLDivElement | null>(null);
+const PlayerSelection: React.FC<PlayerSelectionProps> = ({ 
+    label, 
+    name, 
+    form, 
+    setSelectedPlayers,
+    compulsory = false
+}) => {
 
+    const playerRef = useRef<HTMLDivElement | null>(null);
     const [, forceUpdate] = useState(0);
 
     const handleDragOverTabPane = () => {
-        // Add styles or perform actions when the drag enters the component
         if (playerRef.current) {
             playerRef.current.style.border = '2px solid green';
         }
     };
 
     const handleDragExitTabPane = () => {
-        // Remove styles or perform actions when the drag leaves the component
         if (playerRef.current) {
             playerRef.current.style.border = 'none';
         }
@@ -318,7 +323,7 @@ const PlayerSelection: React.FC<PlayerSelectionProps> = ({ label, name, form, se
         <Form.Item
             label={label}
             name={name}
-            rules={[{ required: true, message: `Select a player!` }]}
+            rules={[{ required: compulsory, message: 'Select a player!' }]}
         >
             <div
                 ref={playerRef}

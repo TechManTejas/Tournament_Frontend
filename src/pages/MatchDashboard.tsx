@@ -290,6 +290,63 @@ export const MatchDashboard: React.FC = () => {
                                 </Select>
                             </Form.Item>
 
+                            <Form.Item
+                                name="stadium"
+                                label="Stadium"
+                                className='p-0 m-2'
+                                rules={[{ required: true, message: 'Please select the stadium' }]}
+                            >
+                                <Select placeholder="Select the stadium">
+                                    <Option value="notStarted">Not Started</Option>
+                                    <Option value="started">Started</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="refereeHead"
+                                label="Referee Head"
+                                className='p-0 m-2'
+                                rules={[{ required: true, message: 'Please select a referee head' }]}
+                            >
+                                <Select placeholder="Select a referee head">
+                                    <Option value="notStarted">Not Started</Option>
+                                    <Option value="started">Started</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="refereeAssistant1"
+                                label="Referee Assistant 1"
+                                className='p-0 m-2'
+                            >
+                                <Select placeholder="Select a referee assistant 1">
+                                    <Option value="notStarted">Not Started</Option>
+                                    <Option value="started">Started</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="refereeAssistant2"
+                                label="Referee Assistant 2"
+                                className='p-0 m-2'
+                            >
+                                <Select placeholder="Select a referee assistant 2">
+                                    <Option value="notStarted">Not Started</Option>
+                                    <Option value="started">Started</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="refereeAssistant3"
+                                label="Referee Assistant 3"
+                                className='p-0 m-2'
+                            >
+                                <Select placeholder="Select a referee assistant 3">
+                                    <Option value="notStarted">Not Started</Option>
+                                    <Option value="started">Started</Option>
+                                </Select>
+                            </Form.Item>
+
                             <Form.Item className='p-0 m-2'>
                                 <Button type="primary" htmlType="submit" className='w-full'>
                                     Update Status
@@ -299,7 +356,7 @@ export const MatchDashboard: React.FC = () => {
                     </div>
 
                     <div className='flex w-full bg-white rounded shadow border'>
-                        <div className='border-r p-2 w-1/4'>
+                        <div className='border-r p-2 w-2/5'>
                             <Form layout='vertical' form={formComment} onFinish={() => handleButtonClick(formComment)}>
                                 <Form.Item
                                     name="commentTime"
@@ -341,7 +398,7 @@ export const MatchDashboard: React.FC = () => {
                             </Form>
                         </div>
 
-                        <div className='p-2 w-3/4'>
+                        <div className='p-2 w-3/5'>
                             <Table
                                 columns={
                                     [

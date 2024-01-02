@@ -53,7 +53,7 @@ const PUBLICMATCHVIEWS: React.FC = () => {
   ];
 
   return (
-    <div className='bg-black' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <div className='border border-black rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)]'>
       <Table dataSource={dataSource} columns={columns} pagination={false}/>
     </div>
   );

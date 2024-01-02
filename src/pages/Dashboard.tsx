@@ -1,19 +1,17 @@
-import { Button, FloatButton, Layout } from 'antd';
+import { FloatButton, Layout } from 'antd';
 
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Club } from './Club';
 import { Tournaments } from './Tournaments';
 import Players from './Players';
-// import { Teams } from './Teams';
 import Referees from './Referees';
 import Stadiums from './Stadiums';
 import StadiumAddEdit from './StadiumAddEdit';
 import Users from './Users';
 import UserAddEdit from './UserAddEdit';
 import { Sidebar } from '../components/Sidebar';
-import { CloseOutlined, CrownOutlined, MessageOutlined } from '@ant-design/icons';
-import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-import { useEffect, useRef, useState } from 'react';
+import { MessageOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
 
 import './chatscrollbar.css'
 import { Profile } from './Profile';
@@ -22,147 +20,18 @@ import PlayerAddEdit from './PlayerAddEdit';
 import TournamentAddEdit from './TournamentAddEdit';
 import TournamentManage from './TournamentManage';
 import { MatchDashboard } from './MatchDashboard';
+import { StreamOperatorDashboard } from './StreamOperatorDashboard';
+import { ChatBox } from '../components/ChatBox';
 
 const { Content } = Layout;
 
-interface ChatBoxProps {
-    closeChat: () => void; // Corrected type for closeChat prop
-}
 
-const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
-
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-
-    const handleDrag = (e: DraggableEvent, ui: DraggableData) => {
-        const { x, y } = ui;
-        setPosition({ x, y });
-    };
-
-    useEffect(() => {
-        // Scroll to the bottom when the component mounts or whenever the content changes
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-    }, [/* dependencies that trigger a scroll, e.g., content changes */]);
-
-    return (
-        <Draggable
-            axis="x"
-            position={position}
-            onDrag={handleDrag}
-        >
-            <div className='bg-zinc-500 w-[350px] h-[500px] rounded shadow-2xl'>
-                <div className='relative p-1'>
-                    <div className='absolute right-1'>
-                        <Button size='small' type='primary' onClick={closeChat} icon={<CloseOutlined />} />
-                    </div>
-                    <div className='flex justify-center w-full text-white'>
-                        CHAT BOX
-                    </div>
-                </div>
-                <div className='bg-green-100'>
-                    <div className='flex'>
-                        <Button type='primary' className='w-full font-semibold text-xs'>CHATS</Button>
-                        <Button className='w-full font-semibold text-xs text-zinc-500'>MEMBERS</Button>
-                    </div>
-                </div>
-                <div ref={containerRef} className='bg-[#F5F5F5] p-2 w-full h-full overflow-auto scrollbar-custom-style'>
-                    <div className='flex'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='text-xs font-bold text-zinc-500'>
-                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
-                            </div>
-                            <div className='max-w-[225px]'>
-                                Hi my name is Tejas Vaij I am a developer of this website
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex justify-end'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='max-w-[225px]'>
-                                Hi wassup
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='text-xs font-bold text-zinc-500'>
-                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
-                            </div>
-                            <div className='max-w-[225px]'>
-                                Hi my name is Tejas Vaij I am a developer of this website
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex justify-end'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='max-w-[225px]'>
-                                Hi wassup
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='text-xs font-bold text-zinc-500'>
-                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
-                            </div>
-                            <div className='max-w-[225px]'>
-                                Hi my name is Tejas Vaij I am a developer of this website
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex justify-end'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='max-w-[225px]'>
-                                Hi wassup
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='text-xs font-bold text-zinc-500'>
-                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
-                            </div>
-                            <div className='max-w-[225px]'>
-                                Hi my name is Tejas Vaij I am a developer of this website
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex justify-end'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='max-w-[225px]'>
-                                Hi wassup
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex'>
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='text-xs font-bold text-zinc-500'>
-                                TechManTejas <span><CrownOutlined className='text-yellow-500' /></span>
-                            </div>
-                            <div className='max-w-[225px]'>
-                                Hi my name is Tejas Vaij I am a developer of this website
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex justify-end'>Teams
-                        <div className='m-1 p-2 bg-white rounded '>
-                            <div className='max-w-[225px]'>
-                                Hi wassup
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Draggable>
-    );
-};
 
 export const Dashboard = () => {
-    const [isChatVisible, setChatVisible] = useState(false);
 
-    console.log(isChatVisible)
+    const [isChatVisible, setChatVisible] = useState(false);
+    const [shouldHideSidebar, setShouldHideSidebar] = useState(false);
+    const location = useLocation();
 
     const openChat = () => {
         setChatVisible(true);
@@ -172,9 +41,17 @@ export const Dashboard = () => {
         setChatVisible(false);
     };
 
+    useEffect(() => {
+        // Define routes where you want to hide the sidebar
+        const routesWithoutSidebar = ['/dashboard/stream-operator', '/dashboard/match'];
+    
+        // Check if the current route should hide the sidebar
+        setShouldHideSidebar(routesWithoutSidebar.includes(location.pathname));
+      }, [location.pathname]);
+
     return (
         <Layout style={{ height: '100vh' }}>
-            <Sidebar />
+            {!shouldHideSidebar && <Sidebar />}
             <Layout>
                 <Content className='bg-[#F5F5F5] p-6'>
                     <Routes>
@@ -184,6 +61,7 @@ export const Dashboard = () => {
                         <Route path="/tournaments/add-edit" element={<TournamentAddEdit />} />
                         <Route path="/tournaments/manage/*" element={<TournamentManage />} />
                         <Route path="/match" element={<MatchDashboard />} />
+                        <Route path="/stream-operator" element={<StreamOperatorDashboard />} />
                         <Route path="/players" element={<Players />} />
                         <Route path="/players/add-edit" element={<PlayerAddEdit />} />
                         <Route path="/referees" element={<Referees />} />
@@ -205,7 +83,6 @@ export const Dashboard = () => {
             }
             <FloatButton.Group shape="circle">
                 <FloatButton type='primary' badge={{ count: 123, overflowCount: 99 }} onClick={openChat} icon={<MessageOutlined />} />
-                {/* <FloatButton onClick={handleLogout} icon={<PoweroffOutlined/>}/> */}
             </FloatButton.Group>
         </Layout>
     );

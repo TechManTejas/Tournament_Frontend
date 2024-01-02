@@ -10,6 +10,7 @@ import { ColumnsType } from "antd/es/table";
 import { confirmation } from "../components/Confirmation"
 import { Match, generateMatchSchedule } from "../utils/round_robin_schedule";
 import { usePDF } from 'react-to-pdf';
+import { useNavigate } from "react-router-dom";
 
 interface RoundsProps {
     toggleAddEdit: (selectedRound: IRound) => void;
@@ -18,6 +19,8 @@ interface RoundsProps {
 }
 
 export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup, tournament }) => {
+
+    const navigate = useNavigate()
 
     const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' });
 
@@ -479,10 +482,16 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                                 console.log("Team A ID:", teamAId);
                                                                 console.log("Team B ID:", teamBId);
 
+                                                                navigate('/dashboard/match')
+
                                                             }}>
                                                                 Match Dashboard
                                                             </Button>
-                                                            <Button onClick={() => { }}>
+                                                            <Button onClick={() => { 
+
+                                                                navigate('/dashboard/stream-operator')
+                                                            
+                                                            }}>
                                                                 Stream Operator
                                                             </Button>
                                                         </div>
