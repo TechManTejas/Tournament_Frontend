@@ -12,6 +12,7 @@ interface IChat {
     id?: number;
     name: string;
     message: string;
+    timestamp: string;
 }
 
 interface ChatBoxProps {
@@ -52,8 +53,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data as string);
                 console.log(data)
-                setChats((prevChats) => [...prevChats, data]);
-                console.log(chats)
+
+                if (data.type === 'load_chats') {
+                    setChats(data.chats);
+                } else {
+                    setChats((prevChats) => [...prevChats, data]);
+                }
+
+                console.log(chats);
             };
         }
     }, [socket]);
@@ -105,9 +112,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
                     </div>
                 </div> */}
                 <div ref={containerRef} className='bg-[#F5F5F5] p-2 w-full h-full overflow-auto scrollbar-custom-style'>
-                    {chats.map((chat: IChat) => (
+                    {chats.map((chat: IChat, index: number) => (
                         chat.name === user_data?.user.username ?
-                            <div className='flex justify-end'>
+                            <div className='flex justify-end' key={index}>
                                 <div className='m-1 p-2 bg-white rounded '>
                                     <div className='max-w-[225px]'>
                                         {chat.message}
@@ -115,7 +122,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
                                 </div>
                             </div>
                             :
-                            <div className='flex'>
+                            <div className='flex' key={index}>
                                 <div className='m-1 p-2 bg-white rounded '>
                                     <div className='text-xs font-bold text-zinc-500'>
                                         {chat.name}
@@ -123,6 +130,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
                                     <div className='max-w-[225px]'>
                                         {chat.message}
                                     </div>
+                                    {/* <div className='text-xs text-zinc-400'>
+                                        {moment(chat.timestamp).fromNow()}
+                                    </div> */}
                                 </div>
                             </div>
 
