@@ -33,7 +33,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ closeChat }) => {
     formRef.current = form;
 
     useEffect(() => {
-        const ws = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/${user_data?.user.club?.id}/`);
+        const ws = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/chat/${user_data?.user.club?.id}/`);
 
         ws.onopen = () => {
             console.log("WebSocket connected");

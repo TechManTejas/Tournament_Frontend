@@ -34,11 +34,11 @@ export const MatchDashboard: React.FC = () => {
         });
     };
 
-    const tabData = Array.from({ length: 100 }, (_, index) => index + 1);
+    // const tabData = Array.from({ length: 100 }, (_, index) => index + 1);
 
     return (
         <div className='rounded-lg flex flex-col' style={{ background: `linear-gradient(to right, rgba(${parseInt(colorPickerValueTeamA.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamA.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamA.slice(-2), 16)}, 0.5), rgba(${parseInt(colorPickerValueTeamB.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamB.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamB.slice(-2), 16)}, 0.5))` }}>
-            <div className='bg-white rounded p-1 flex gap-1'>
+            {/* <div className='bg-white rounded p-1 flex gap-1'>
                 <Tabs
                     type="card"
                     tabBarGutter={5}
@@ -50,7 +50,7 @@ export const MatchDashboard: React.FC = () => {
                         <TabPane tab={"T v B"} key={tabKey.toString()} />
                     ))}
                 </Tabs>
-            </div>
+            </div> */}
             <div className='flex gap-4 h-full'>
                 {/* Team A */}
                 <div className='w-72 h-full rounded p-2'>

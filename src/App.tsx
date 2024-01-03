@@ -3,7 +3,7 @@ import { Context } from "./context/context.provider";
 import { Authentication } from "./pages/Authentication"
 import { Dashboard } from "./pages/Dashboard"
 import { Lobby } from "./pages/Lobby"
-import PUBLICMATCHVIEWS from './pages/_PUBLICMATCHVIEWS_';
+import Live from './pages/Live';
 
 function App() {
 
@@ -13,8 +13,8 @@ function App() {
     <Router>
       <Routes>
         <Route
-          path="/live"
-          element={<PUBLICMATCHVIEWS/>}
+          path="/live/:id/"
+          element={<Live/>}
         />
         <Route
           path="/"

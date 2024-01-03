@@ -482,7 +482,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                                 console.log("Team A ID:", teamAId);
                                                                 console.log("Team B ID:", teamBId);
 
-                                                                navigate('/dashboard/match')
+                                                                // navigate('/dashboard/match')
 
                                                             }}>
                                                                 Match Dashboard
