@@ -72,7 +72,7 @@ const Live: React.FC = () => {
   const [draggableGoalScorer, setDraggableGoalScorer] = useState<DraggableGoalScorer>({ x: ((parentWidth - 640) / 2) - 32, y: ((parentHeight - 200) / 2) - 30 });
   const [goalScorerCardIsLive, setGoalScorerCardIsLive] = useState(false);
 
-  const [draggableCards, setDraggableCards] = useState<DraggableCards>({ x: ((parentWidth - 560) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
+  const [draggableCards, setDraggableCards] = useState<DraggableCards>({ x: ((parentWidth - 580) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
   const [cardsCardIsLive, setCardsCardIsLive] = useState(false);
 
   const [draggableFreeText, setDraggableFreeText] = useState<DraggableFreeText>({ x: ((parentWidth - 580) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
@@ -181,7 +181,7 @@ const Live: React.FC = () => {
   }, [matchId]);
 
   return (
-    <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)] overflow-hidden'>
+    <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)]'>
       {scoreCardIsLive && (
         <div style={{ position: 'absolute', left: draggableScore.x, top: draggableScore.y }} className='p-6'>
           <ScoreCard x={draggableScore.x} y={draggableScore.y} />

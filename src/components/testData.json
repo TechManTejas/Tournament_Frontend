@@ -1,0 +1,102 @@
+[
+    {
+        "name": "Round 1",
+        "groups": [
+            {
+                "name": "Group A",
+                "teams": [
+                    {
+                        "rule": "team",
+                        "team": 1
+                    },
+                    {
+                        "rule": "team",
+                        "team": 2
+                    },
+                    {
+                        "rule": "team",
+                        "team": 3
+                    },
+                    {
+                        "rule": "team",
+                        "team": 4
+                    }
+                ]
+            },
+            {
+                "name": "Group B",
+                "teams": [
+                    {
+                        "rule": "team",
+                        "team": 5
+                    },
+                    {
+                        "rule": "team",
+                        "team": 6
+                    },
+                    {
+                        "rule": "team",
+                        "team": 7
+                    },
+                    {
+                        "rule": "team",
+                        "team": 8
+                    }
+                ]
+            }
+        ],
+        "schedule": [
+            {
+                "group": "Group A",
+                "teamA": 1,
+                "teamB": 2
+            },
+            {
+                "group": "Group A",
+                "teamA": 3,
+                "teamB": 4
+            }
+        ]
+    },
+    {
+        "name": "Round 2",
+        "groups": [
+            {
+                "name": "Group B",
+                "teams": [
+                    {
+                        "rule": "rank",
+                        "team": {
+                            "round": "Round 1",
+                            "group": "Group A",
+                            "team": 0
+                        }
+                    },
+                    {
+                        "rule": "rank",
+                        "team": {
+                            "round": "Round 1",
+                            "group": "Group A",
+                            "team": 1
+                        }
+                    }
+                ]
+            }
+        ],
+        "schedule": [
+            {
+                "group": "Group B",
+                "teamA": {
+                    "round": "Round 1",
+                    "group": "Group A",
+                    "team": 0
+                },
+                "teamB": {
+                    "round": "Round 1",
+                    "group": "Group A",
+                    "team": 1
+                }
+            }
+        ]
+    }
+]

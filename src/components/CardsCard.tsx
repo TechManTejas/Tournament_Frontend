@@ -21,7 +21,7 @@ const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive }) => {
         const parentWidth = window.innerWidth; // Replace this with the actual width of the parent component
         const parentHeight = window.innerHeight; // Replace this with the actual height of the parent component
 
-        const cardWidth = 560; // Replace this with the width of your ScoreCard component
+        const cardWidth = 580; // Replace this with the width of your ScoreCard component
         const cardHeight = 180; // Replace this with the height of your ScoreCard component
 
         const initialX = (parentWidth - cardWidth) / 2;
@@ -39,7 +39,7 @@ const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive }) => {
         <>
             {isDraggable ? (
                 <Draggable bounds={"parent"} onDrag={onDrag} defaultPosition={initialPosition}>
-                    <div className={`absolute w-[560px] h-[180px] rounded ${isLive ? 'border-green-500 border-4' : 'border-red-500 border-4'}`} style={{ backgroundImage: `url(${PanelSmall})`, backgroundSize: 'cover' }}>
+                    <div className={`absolute w-[580px] h-[180px] rounded ${isLive ? 'border-green-500 border-4' : 'border-red-500 border-4'}`} style={{ backgroundImage: `url(${PanelSmall})`, backgroundSize: 'cover' }}>
                         {/* Your draggable box content goes here */}
                         <div className='relative px-4 flex flex-col justify-center h-full '>
                             <div className='flex justify-between items-center text-white text-xl mx-8'>
@@ -51,7 +51,7 @@ const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive }) => {
                     </div>
                 </Draggable>
             ) : (
-                <div className='w-[560px] h-[180px]' style={{ left: `${x}px`, top: `${y}px`, backgroundImage: `url(${PanelSmall})`, backgroundSize: 'cover' }}>
+                <div className='w-[580px] h-[180px]' style={{ left: `${x}px`, top: `${y}px`, backgroundImage: `url(${PanelSmall})`, backgroundSize: 'cover' }}>
                     {/* Your non-draggable box content goes here */}
                     <div className='relative px-4 flex flex-col justify-center h-full '>
                         <div className='flex justify-between items-center text-white text-xl mx-8'>

@@ -7,14 +7,14 @@ import { GameMode, ITournament } from '../types/tournament.types';
 import { UploadOutlined } from '@ant-design/icons';
 import moment from 'moment'
 import GameModeSelector from '../components/GameModeSelector';
-import { GameModeAdder } from '../components/GameModeAdder';
+import GameModeAdder  from '../components/GameModeAdder';
 
 const { Option } = Select;
 
 const TournamentAddEdit: React.FC = () => {
     const { state } = useLocation();
 
-    const [isGameModeAdderVisible, setGameModeAdderVisible] = useState(false);
+    const [isGameModeAdderVisible, setGameModeAdderVisible] = useState(true);
 
     const handleAddGameMode = () => {
         // Set the visibility of the GameModeAdder modal to true
@@ -118,7 +118,9 @@ const TournamentAddEdit: React.FC = () => {
                 title="Add Game Mode"
                 open={isGameModeAdderVisible}
                 onCancel={handleGameModeAdderCancel}
-                footer={null} // Remove the default OK and Cancel buttons
+                footer={null}
+                width={window.innerWidth * 0.9}
+                
             >
                 <GameModeAdder />
             </Modal>
