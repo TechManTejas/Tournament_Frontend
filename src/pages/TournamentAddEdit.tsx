@@ -1,18 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Form, Space, message, Upload, TimePicker, DatePicker, InputNumber, Select } from 'antd';
+import { Button, Input, Form, Space, message, Upload, TimePicker, DatePicker, InputNumber, Select, Modal } from 'antd';
 import axios from '../api/axios';
 import { useLocation } from 'react-router-dom';
 import { GameMode, ITournament } from '../types/tournament.types';
 import { UploadOutlined } from '@ant-design/icons';
 import moment from 'moment'
 import GameModeSelector from '../components/GameModeSelector';
+import { GameModeAdder } from '../components/GameModeAdder';
 
 const { Option } = Select;
 
 const TournamentAddEdit: React.FC = () => {
     const { state } = useLocation();
-    console.log(state)
+
+    const [isGameModeAdderVisible, setGameModeAdderVisible] = useState(false);
+
+    const handleAddGameMode = () => {
+        // Set the visibility of the GameModeAdder modal to true
+        setGameModeAdderVisible(true);
+    };
+
+    const handleGameModeAdderCancel = () => {
+        // Set the visibility of the GameModeAdder modal to false when canceled
+        setGameModeAdderVisible(false);
+    };
 
     const [form] = Form.useForm();
     const [tournamentToEdit] = useState<ITournament | undefined>(state?.tournament);
@@ -101,90 +113,102 @@ const TournamentAddEdit: React.FC = () => {
     };
 
     return (
-        <div className="px-10 py-6 rounded-3xl h-full w-full" style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0)), url(${uploadedLogo || tournamentToEdit?.logo})`, backgroundSize: 'cover' }}>
-            <div className="text-2xl font-light">{id ? 'EDIT TOURNAMENT' : 'ADD NEW TOURNAMENT'}</div>
-            <Form form={form} onFinish={onFinish} layout="vertical" className="mt-8 backdrop-blur-xl p-4 rounded-xl flex gap-10" encType="multipart/form-data">
-                <div className='w-full'>
-                    <Form.Item name="logo" label="Logo">
-                        <Upload {...uploadProps} listType="picture">
-                            <Button icon={<UploadOutlined />}>Click to upload</Button>
-                        </Upload>
-                    </Form.Item>
-
-                    <div className='flex gap-10'>
-                        <Form.Item className='w-full' name="name" label="Name" rules={[{ required: true, message: 'Please enter the name' }]}>
-                            <Input />
+        <>
+            <Modal
+                title="Add Game Mode"
+                open={isGameModeAdderVisible}
+                onCancel={handleGameModeAdderCancel}
+                footer={null} // Remove the default OK and Cancel buttons
+            >
+                <GameModeAdder />
+            </Modal>
+            <div className="px-10 py-6 rounded-3xl h-full w-full" style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0)), url(${uploadedLogo || tournamentToEdit?.logo})`, backgroundSize: 'cover' }}>
+                <div className="text-2xl font-light">{id ? 'EDIT TOURNAMENT' : 'ADD NEW TOURNAMENT'}</div>
+                <Form form={form} onFinish={onFinish} layout="vertical" className="mt-8 backdrop-blur-xl p-4 rounded-xl flex gap-10" encType="multipart/form-data">
+                    <div className='w-full'>
+                        <Form.Item name="logo" label="Logo">
+                            <Upload {...uploadProps} listType="picture">
+                                <Button icon={<UploadOutlined />}>Click to upload</Button>
+                            </Upload>
                         </Form.Item>
 
-                        <Form.Item className='w-full' name="alias" label="Alias" rules={[{ required: true, message: 'Please enter the alias' }]}>
-                            <Input />
+                        <div className='flex gap-10'>
+                            <Form.Item className='w-full' name="name" label="Name" rules={[{ required: true, message: 'Please enter the name' }]}>
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item className='w-full' name="alias" label="Alias" rules={[{ required: true, message: 'Please enter the alias' }]}>
+                                <Input />
+                            </Form.Item>
+                        </div>
+
+                        <div className='flex gap-10'>
+                            <Form.Item className='w-full' name="start_time" label="Start Time" rules={[{ required: true, message: 'Please select the start time' }]}>
+                                <TimePicker className='w-full' format="HH:mm:ss" />
+                            </Form.Item>
+
+                            <Form.Item className='w-full' name="start_date" label="Start Date" rules={[{ required: true, message: 'Please select the start date' }]}>
+                                <DatePicker className='w-full' format="YYYY-MM-DD" />
+                            </Form.Item>
+                        </div>
+
+                        <div className='flex gap-10'>
+                            <Form.Item className='w-full' name="playing_time" label="Playing Time (minutes)" rules={[{ required: true, message: 'Please enter the playing time' }]}>
+                                <InputNumber className='w-full' />
+                            </Form.Item>
+
+                            <Form.Item className='w-full' name="pause_between_games" label="Pause Between Games (minutes)" rules={[{ required: true, message: 'Please enter the pause between games' }]}>
+                                <InputNumber className='w-full' />
+                            </Form.Item>
+                        </div>
+
+                        <div className='flex gap-10'>
+                            <Form.Item className='w-full' name="points_winner" label="Points for Winner" rules={[{ required: true, message: 'Please enter points for the winner' }]}>
+                                <InputNumber className='w-full' />
+                            </Form.Item>
+
+                            <Form.Item className='w-full' name="points_draw" label="Points for Draw" rules={[{ required: true, message: 'Please enter points for a draw' }]}>
+                                <InputNumber className='w-full' />
+                            </Form.Item>
+
+                            <Form.Item className='w-full' name="points_defeat" label="Points for Defeat" rules={[{ required: true, message: 'Please enter points for defeat' }]}>
+                                <InputNumber className='w-full' />
+                            </Form.Item>
+                        </div>
+
+                        <Form.Item name="timer" label="Timer" rules={[{ required: true, message: 'Please select the timer type' }]}>
+                            <Select>
+                                <Option value="up">Runs Up</Option>
+                                <Option value="down">Runs Down</Option>
+                            </Select>
+                        </Form.Item>
+
+                        <Form.Item>
+                            <Space className="space-x-4">
+                                <Button type="primary" htmlType="submit" className="font-semibold w-28 h-10">
+                                    {id ? 'SAVE' : 'ADD'}
+                                </Button>
+                                <Button className="font-semibold w-28 h-10" onClick={goBack}>
+                                    CANCEL
+                                </Button>
+                            </Space>
                         </Form.Item>
                     </div>
-
-                    <div className='flex gap-10'>
-                        <Form.Item className='w-full' name="start_time" label="Start Time" rules={[{ required: true, message: 'Please select the start time' }]}>
-                            <TimePicker className='w-full' format="HH:mm:ss" />
-                        </Form.Item>
-
-                        <Form.Item className='w-full' name="start_date" label="Start Date" rules={[{ required: true, message: 'Please select the start date' }]}>
-                            <DatePicker className='w-full' format="YYYY-MM-DD" />
-                        </Form.Item>
-                    </div>
-
-                    <div className='flex gap-10'>
-                        <Form.Item className='w-full' name="playing_time" label="Playing Time (minutes)" rules={[{ required: true, message: 'Please enter the playing time' }]}>
-                            <InputNumber className='w-full' />
-                        </Form.Item>
-
-                        <Form.Item className='w-full' name="pause_between_games" label="Pause Between Games (minutes)" rules={[{ required: true, message: 'Please enter the pause between games' }]}>
-                            <InputNumber className='w-full' />
+                    <div className='w-full p-4 rounded-xl'>
+                        <Button type="primary" onClick={handleAddGameMode} className='mb-4'>
+                            Add Game Mode
+                        </Button>
+                        <Form.Item
+                            name="game_mode"
+                            label="Game Mode"
+                            rules={[{ required: true, message: 'Please select a game mode' }]}
+                        >
+                            <GameModeSelector selectedGameMode={selectedGameMode} onSelect={onGameModeSelect} />
                         </Form.Item>
                     </div>
-
-                    <div className='flex gap-10'>
-                        <Form.Item className='w-full' name="points_winner" label="Points for Winner" rules={[{ required: true, message: 'Please enter points for the winner' }]}>
-                            <InputNumber className='w-full' />
-                        </Form.Item>
-
-                        <Form.Item className='w-full' name="points_draw" label="Points for Draw" rules={[{ required: true, message: 'Please enter points for a draw' }]}>
-                            <InputNumber className='w-full' />
-                        </Form.Item>
-
-                        <Form.Item className='w-full' name="points_defeat" label="Points for Defeat" rules={[{ required: true, message: 'Please enter points for defeat' }]}>
-                            <InputNumber className='w-full' />
-                        </Form.Item>
-                    </div>
-
-                    <Form.Item name="timer" label="Timer" rules={[{ required: true, message: 'Please select the timer type' }]}>
-                        <Select>
-                            <Option value="up">Runs Up</Option>
-                            <Option value="down">Runs Down</Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Space className="space-x-4">
-                            <Button type="primary" htmlType="submit" className="font-semibold w-28 h-10">
-                                {id ? 'SAVE' : 'ADD'}
-                            </Button>
-                            <Button className="font-semibold w-28 h-10" onClick={goBack}>
-                                CANCEL
-                            </Button>
-                        </Space>
-                    </Form.Item>
-                </div>
-                <div className='w-full p-4 rounded-xl'>
-                    <Form.Item
-                        name="game_mode"
-                        label="Game Mode"
-                        rules={[{ required: true, message: 'Please select a game mode' }]}
-                    >
-                        <GameModeSelector selectedGameMode={selectedGameMode} onSelect={onGameModeSelect} />
-                    </Form.Item>
-
-                </div>
-            </Form>
-        </div>
+                </Form>
+            </div>
+        </>
     );
 };
 

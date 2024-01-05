@@ -181,7 +181,7 @@ const Live: React.FC = () => {
   }, [matchId]);
 
   return (
-    <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)]'>
+    <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)] overflow-hidden'>
       {scoreCardIsLive && (
         <div style={{ position: 'absolute', left: draggableScore.x, top: draggableScore.y }} className='p-6'>
           <ScoreCard x={draggableScore.x} y={draggableScore.y} />
