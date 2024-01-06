@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { Button, Dropdown, Input, Menu, Modal, Radio, RadioChangeEvent, Select, Table, Tabs } from 'antd';
+import { Button, Dropdown, Form, Input, Menu, Modal, Radio, RadioChangeEvent, Select, Table, Tabs } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
 import testData from "./testData.json"
@@ -89,17 +89,49 @@ const GameModeAdder: React.FC = () => {
     };
 
     const handleAddMatch = () => {
-        if (selectedRoundName && selectedGroupForSchedule !== null && selectedTeamA !== null && selectedTeamB !== null) {
+        if (
+            selectedRoundName &&
+            selectedGroupForSchedule !== null &&
+            selectedTeamA !== null &&
+            selectedTeamB !== null
+        ) {
             const round = data.find((r) => r.name === selectedRoundName);
             const group = round?.groups.find((g) => g.name === selectedGroupForSchedule);
 
             console.log(selectedRoundName, selectedGroupForSchedule, selectedTeamA, selectedTeamB);
 
             if (round && group) {
+                let teamAValue: number | string | { round: string; group: string; team: number } = selectedTeamA;
+                let teamBValue: number | string | { round: string; group: string; team: number } = selectedTeamB;
+
+                // Check if selectedTeamA is a string and can be converted into an object
+                if (typeof selectedTeamA === 'string') {
+                    try {
+                        const parsedTeamA = JSON.parse(selectedTeamA);
+                        if (typeof parsedTeamA === 'object' && parsedTeamA !== null && 'team' in parsedTeamA) {
+                            teamAValue = parsedTeamA;
+                        }
+                    } catch (error) {
+                        // Handle parsing error if necessary
+                    }
+                }
+
+                // Check if selectedTeamB is a string and can be converted into an object
+                if (typeof selectedTeamB === 'string') {
+                    try {
+                        const parsedTeamB = JSON.parse(selectedTeamB);
+                        if (typeof parsedTeamB === 'object' && parsedTeamB !== null && 'team' in parsedTeamB) {
+                            teamBValue = parsedTeamB;
+                        }
+                    } catch (error) {
+                        // Handle parsing error if necessary
+                    }
+                }
+
                 const newMatch: ScheduleMatch = {
                     group: selectedGroupForSchedule,
-                    teamA: selectedTeamA,
-                    teamB: selectedTeamB,
+                    teamA: teamAValue,
+                    teamB: teamBValue,
                 };
 
                 const updatedRound: Round = {
@@ -107,10 +139,12 @@ const GameModeAdder: React.FC = () => {
                     schedule: [...round.schedule, newMatch],
                 };
 
-                setData((prevData) => prevData.map((r) => (r.name === selectedRoundName ? updatedRound : r)));
+                setData((prevData) =>
+                    prevData.map((r) => (r.name === selectedRoundName ? updatedRound : r))
+                );
             }
 
-            console.log(data)
+            console.log(data);
         }
     };
 
@@ -335,9 +369,49 @@ const GameModeAdder: React.FC = () => {
         }
     };
 
+    const onFinish = (values: any) => {
+        console.log(data)
+        console.log(data)
+        console.log(data)
+        console.log(data)
+        // Handle form submission here
+        console.log('Received values:', values);
+    };
+
     return (
         <div className='min-h-[70vh]'>
-            <div className='flex flex-col'>
+            <div className='flex flex-col gap-4'>
+                <div>
+                    <Form
+                        name="yourForm"
+                        onFinish={onFinish}
+                        className='flex gap-4'
+                    // Add other form properties as needed
+                    >
+                        <Form.Item
+                            label="Title"
+                            name="title"
+                            rules={[{ required: true, message: 'Please input the title!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Description"
+                            name="description"
+                            rules={[{ required: true, message: 'Please input the description!' }]}
+                            className='flex-grow'
+                        >
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit">
+                                Create
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </div>
                 <div className='flex gap-1'>
                     {data.map((round: Round, roundIndex: number) => (
                         <Dropdown key={round.name} overlay={menu(roundIndex)} trigger={['contextMenu']}>
