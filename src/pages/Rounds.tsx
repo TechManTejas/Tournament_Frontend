@@ -281,12 +281,12 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                             </div>
                         </div>
                     ))}
-                    <Button
+                    {/* <Button
                         type='primary'
                         icon={<PlusOutlined />}
                         className='font-bold text-md'
                         onClick={showAddRoundModal}
-                    />
+                    /> */}
                     <Modal
                         title="Add Round"
                         open={isAddRoundModalVisible}
@@ -343,7 +343,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                 </Button> */}
                             </Button.Group>
                         </div>
-                        <div className='flex justify-end'>
+                        {/* <div className='flex justify-end'>
                             <div className='flex gap-4'>
                                 <Input
                                     prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -363,7 +363,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                     ADD GROUP
                                 </Button>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
                     {
