@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined, PlusOutlined, ScheduleOutlined, SearchOutlined, TeamOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, ScheduleOutlined, SearchOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Input, Menu, Modal, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import { ITournament } from "../types/tournament.types";
@@ -19,6 +19,8 @@ interface RoundsProps {
 }
 
 export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup, tournament }) => {
+
+    console.log(tournament)
 
     const navigate = useNavigate()
 
@@ -212,7 +214,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
     }, [selectedRound]);
 
     useEffect(() => {
-        schedule();
+        // schedule();
     }, [selectedSubMenu, selectedRound]);
 
 
@@ -383,8 +385,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                 columns={columns}
                                                 dataSource={group.group_team_records.map((groupTeamRecord) => ({
                                                     key: groupTeamRecord.id,
-                                                    name: groupTeamRecord.team_record.name,
-                                                    logo: groupTeamRecord.team_record.logo,
+                                                    name: groupTeamRecord.team_record?.name,
+                                                    logo: groupTeamRecord.team_record?.logo,
                                                     points: groupTeamRecord.points,
                                                     goalsPlus: groupTeamRecord.goals_pos,
                                                     goalsMinus: groupTeamRecord.goals_neg,
@@ -392,23 +394,23 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                 pagination={false}
                                             />
                                             <div className="flex flex-col gap-1 justify-center items-center">
-                                                {/* <Button
-                                            type="primary"
-                                            className="rounded w-10 h-10 flex justify-center items-center"
-                                            onClick={() => {
-                                                handleSelectGroup(group)
-                                                toggleAddEdit(selectedRound)
-                                            }}
-                                        >
-                                            <EditOutlined />
-                                        </Button> */}
                                                 <Button
+                                                    type="primary"
+                                                    className="rounded w-10 h-10 flex justify-center items-center"
+                                                    onClick={() => {
+                                                        handleSelectGroup(group)
+                                                        toggleAddEdit(selectedRound)
+                                                    }}
+                                                >
+                                                    <EditOutlined />
+                                                </Button>
+                                                {/* <Button
                                                     type="primary"
                                                     className="rounded w-10 h-10 flex justify-center items-center"
                                                     onClick={() => handleDeleteConfirmation(group.id)}
                                                 >
                                                     <DeleteOutlined />
-                                                </Button>
+                                                </Button> */}
                                             </div>
                                         </div>
                                     </div>
@@ -487,10 +489,10 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                             }}>
                                                                 Match Dashboard
                                                             </Button>
-                                                            <Button onClick={() => { 
+                                                            <Button onClick={() => {
 
                                                                 navigate('/dashboard/stream-operator')
-                                                            
+
                                                             }}>
                                                                 Stream Operator
                                                             </Button>

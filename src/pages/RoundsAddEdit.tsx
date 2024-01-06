@@ -106,21 +106,21 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                     console.log(key, value);
                 });
 
-                if (group) {
-                    // If selectedGroup is available, update the group
-                    const response = await axios.patch(`/group/${group.id}/`, formData);
-                    console.log(response.data);
-                    message.success('Group updated successfully!');
-                } else {
-                    // If selectedGroup is not available, create a new group
-                    const response = await axios.post('/group/', formData);
-                    console.log(response.data);
-                    message.success('Group added successfully!');
-                }
+                // if (group) {
+                //     // If selectedGroup is available, update the group
+                //     const response = await axios.patch(`/group/${group.id}/`, formData);
+                //     console.log(response.data);
+                //     message.success('Group updated successfully!');
+                // } else {
+                //     // If selectedGroup is not available, create a new group
+                //     const response = await axios.post('/group/', formData);
+                //     console.log(response.data);
+                //     message.success('Group added successfully!');
+                // }
 
-                // Reset the form and close the modal
-                form.resetFields();
-                toggleAddEdit(selectedRound);
+                // // Reset the form and close the modal
+                // form.resetFields();
+                // toggleAddEdit(selectedRound);
             }
         } catch (error) {
             console.error('Error:', error);

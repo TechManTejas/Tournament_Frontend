@@ -144,12 +144,12 @@ export const Teams: React.FC<TeamsProps> = ({ toggleAddEdit, handleSelectTeam, t
       <div>
         <div className='flex justify-end'>
           <div className='flex gap-4'>
-            <Input
+            {/* <Input
               prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder='Search...'
               className='mb-2'
               onChange={(e) => handleSearch(e.target.value)}
-            />
+            /> */}
             <Button
               type='primary'
               icon={<PlusOutlined />}

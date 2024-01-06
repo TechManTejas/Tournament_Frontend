@@ -14,7 +14,7 @@ export const Club = () => {
         </div>
         <div className='text-2xl p-2'>{club?.name}</div>
       </div>
-      <div className='flex flex-col gap-4'>
+      {/* <div className='flex flex-col gap-4'>
         <div className='text-2xl font-medium'>
           News Feed
         </div>
@@ -64,7 +64,7 @@ export const Club = () => {
 
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

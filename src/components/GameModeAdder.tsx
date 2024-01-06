@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Dropdown, Form, Input, Menu, Modal, Radio, RadioChangeEvent, Select, Table, Tabs, message } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
 import axios from "../api/axios"
+import { GameMode } from '../types/tournament.types';
 
 interface Team {
     rule: string;
@@ -28,8 +29,9 @@ interface Round {
     schedule: ScheduleMatch[];
 }
 
-const GameModeAdder: React.FC = () => {
+const GameModeAdder: React.FC<{ editingGameMode: GameMode | null }> = ({ editingGameMode }) => {
 
+    const [form] = Form.useForm();
     const [data, setData] = useState<Round[]>([]);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [newRoundName, setNewRoundName] = useState<string>('');
@@ -44,6 +46,19 @@ const GameModeAdder: React.FC = () => {
     const [selectedGroupForSchedule, setSelectedGroupForSchedule] = useState<string | null>(null);
     const [selectedTeamA, setSelectedTeamA] = useState<number | string | { round: string; group: string; team: number } | null>(null);
     const [selectedTeamB, setSelectedTeamB] = useState<number | string | { round: string; group: string; team: number } | null>(null);
+
+    useEffect(() => {
+        if (editingGameMode) {
+            console.log(editingGameMode);
+            setData([...editingGameMode.data]);
+
+            // Set initial values for title and description using form.setFieldsValue()
+            form.setFieldsValue({
+                title: editingGameMode.name,
+                description: editingGameMode.description,
+            });
+        }
+    }, [editingGameMode, form]);
 
     const columns = [
         {
@@ -372,24 +387,37 @@ const GameModeAdder: React.FC = () => {
 
     const onFinish = async (values: any) => {
         try {
-            await axios.post('/gamemode/', {
-                name: values.title,
-                description: values.description,
-                data: data,  // Assuming 'data' is your JSON data
-            });
-
-            // Display success message
-            message.success('Game mode created successfully!');
-
+            if (editingGameMode && editingGameMode.id) {
+                // Use axios.patch for updating an existing resource
+                await axios.patch(`/gamemode/${editingGameMode.id}/`, {
+                    name: values.title,
+                    description: values.description,
+                    data: data,  // Assuming 'data' is your JSON data
+                });
+    
+                // Display success message
+                message.success('Game mode updated successfully!');
+            } else {
+                // If there is no id, fall back to axios.post for creating a new resource
+                await axios.post('/gamemode/', {
+                    name: values.title,
+                    description: values.description,
+                    data: data,  // Assuming 'data' is your JSON data
+                });
+    
+                // Display success message
+                message.success('Game mode created successfully!');
+            }
+    
             // Reload the current page
             window.location.reload();
-
+    
         } catch (error) {
             // Handle error
-            console.error('Error making POST request:', error);
-
+            console.error('Error making PATCH request:', error);
+    
             // Display error message
-            message.error('Error creating game mode. Please try again.');
+            message.error('Error updating/creating game mode. Please try again.');
         }
     };
 
@@ -398,10 +426,11 @@ const GameModeAdder: React.FC = () => {
             <div className='flex flex-col gap-4'>
                 <div>
                     <Form
+                        form={form}
                         name="yourForm"
                         onFinish={onFinish}
                         className='flex gap-4'
-                    // Add other form properties as needed
+                        // Add other form properties as needed
                     >
                         <Form.Item
                             label="Title"

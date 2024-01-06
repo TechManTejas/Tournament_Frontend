@@ -15,6 +15,7 @@ const TournamentAddEdit: React.FC = () => {
     const { state } = useLocation();
 
     const [isGameModeAdderVisible, setGameModeAdderVisible] = useState(false);
+    const [editingGameMode, setEditingGameMode] = useState<GameMode | null>(null);
 
     const handleAddGameMode = () => {
         // Set the visibility of the GameModeAdder modal to true
@@ -24,6 +25,14 @@ const TournamentAddEdit: React.FC = () => {
     const handleGameModeAdderCancel = () => {
         // Set the visibility of the GameModeAdder modal to false when canceled
         setGameModeAdderVisible(false);
+    };
+
+    const handleEditGameMode = (gameMode: GameMode) => {
+        // Set the editingGameMode state with the selected game mode
+        setEditingGameMode(gameMode);
+        console.log(gameMode)
+        // Open the GameModeAdder modal
+        setGameModeAdderVisible(true);
     };
 
     const [form] = Form.useForm();
@@ -122,7 +131,7 @@ const TournamentAddEdit: React.FC = () => {
                 width={window.innerWidth * 0.9}
                 
             >
-                <GameModeAdder />
+                <GameModeAdder editingGameMode={editingGameMode}/>
             </Modal>
             <div className="px-10 py-6 rounded-3xl h-full w-full" style={{ backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0)), url(${uploadedLogo || tournamentToEdit?.logo})`, backgroundSize: 'cover' }}>
                 <div className="text-2xl font-light">{id ? 'EDIT TOURNAMENT' : 'ADD NEW TOURNAMENT'}</div>
@@ -205,7 +214,11 @@ const TournamentAddEdit: React.FC = () => {
                             label="Game Mode"
                             rules={[{ required: true, message: 'Please select a game mode' }]}
                         >
-                            <GameModeSelector selectedGameMode={selectedGameMode} onSelect={onGameModeSelect} />
+                            <GameModeSelector 
+                                selectedGameMode={selectedGameMode} 
+                                onSelect={onGameModeSelect}
+                                onEdit={handleEditGameMode}
+                            />
                         </Form.Item>
                     </div>
                 </Form>

@@ -1,6 +1,8 @@
 import { IClub } from "./club.types";
+
 export interface ITournament {
   id: number;
+  game_mode: GameMode;
   club: IClub;
   name: string;
   alias: string;
@@ -19,7 +21,7 @@ export interface ITournament {
 }
 
 export interface GameMode {
-  id: string;
+  id: number;
   name: string;
   description: string;
   data: JSON;
