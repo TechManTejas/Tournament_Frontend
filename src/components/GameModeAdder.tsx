@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { Button, Dropdown, Form, Input, Menu, Modal, Radio, RadioChangeEvent, Select, Table, Tabs } from 'antd';
+import { Button, Dropdown, Form, Input, Menu, Modal, Radio, RadioChangeEvent, Select, Table, Tabs, message } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
-import testData from "./testData.json"
+import axios from "../api/axios"
 
 interface Team {
     rule: string;
@@ -30,7 +30,7 @@ interface Round {
 
 const GameModeAdder: React.FC = () => {
 
-    const [data, setData] = useState<Round[]>(testData);
+    const [data, setData] = useState<Round[]>([]);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [newRoundName, setNewRoundName] = useState<string>('');
     const [selectedRoundName, setSelectedRoundName] = useState<string | null>(null); // Change here
@@ -293,7 +293,7 @@ const GameModeAdder: React.FC = () => {
                                         team: {
                                             round: selectedRoundForRank!,
                                             group: selectedGroupForRank!,
-                                            team: rankOptions[groupIndex],
+                                            team: rankOptions[0],
                                         },
                                     },
                                 ],
@@ -305,6 +305,7 @@ const GameModeAdder: React.FC = () => {
                 setData((prevData) =>
                     prevData.map((round) => (round.name === selectedRoundName ? updatedRound : round))
                 );
+                handleGroupForRankChange(selectedGroup.name)
             }
         }
     };
@@ -369,13 +370,27 @@ const GameModeAdder: React.FC = () => {
         }
     };
 
-    const onFinish = (values: any) => {
-        console.log(data)
-        console.log(data)
-        console.log(data)
-        console.log(data)
-        // Handle form submission here
-        console.log('Received values:', values);
+    const onFinish = async (values: any) => {
+        try {
+            await axios.post('/gamemode/', {
+                name: values.title,
+                description: values.description,
+                data: data,  // Assuming 'data' is your JSON data
+            });
+
+            // Display success message
+            message.success('Game mode created successfully!');
+
+            // Reload the current page
+            window.location.reload();
+
+        } catch (error) {
+            // Handle error
+            console.error('Error making POST request:', error);
+
+            // Display error message
+            message.error('Error creating game mode. Please try again.');
+        }
     };
 
     return (

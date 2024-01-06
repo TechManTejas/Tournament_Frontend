@@ -16,7 +16,8 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedGameMode, o
     useEffect(() => {
         const fetchGameModes = async () => {
             try {
-                const response = await axios.get('/gamemode/'); // Adjust the API endpoint
+                const response = await axios.get('/gamemode/');
+                console.log(response.data);
                 setGameModes(response.data);
             } catch (error) {
                 console.error('Error fetching game modes:', error);
@@ -39,7 +40,6 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedGameMode, o
                     key={mode.id}
                     hoverable
                     style={{ width: 200 }}
-                    cover={<img alt={mode.name} src={mode.image} className='w-40 h-48' />}
                     onClick={() => onSelect(mode)}
                     className={`game-mode-card ${selectedGameMode === mode ? 'shadow-xl border-2 border-green-500' : ''}`}
                 >

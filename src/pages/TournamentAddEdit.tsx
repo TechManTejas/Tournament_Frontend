@@ -14,7 +14,7 @@ const { Option } = Select;
 const TournamentAddEdit: React.FC = () => {
     const { state } = useLocation();
 
-    const [isGameModeAdderVisible, setGameModeAdderVisible] = useState(true);
+    const [isGameModeAdderVisible, setGameModeAdderVisible] = useState(false);
 
     const handleAddGameMode = () => {
         // Set the visibility of the GameModeAdder modal to true

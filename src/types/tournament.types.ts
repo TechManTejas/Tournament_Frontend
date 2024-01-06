@@ -21,6 +21,6 @@ export interface ITournament {
 export interface GameMode {
   id: string;
   name: string;
-  image: string;
   description: string;
+  data: JSON;
 }
