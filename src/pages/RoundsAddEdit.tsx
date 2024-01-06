@@ -22,6 +22,8 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
     const round = selectedRound
     const group = selectedGroup
 
+    console.log(selectedGroup)
+
     const [form] = Form.useForm();
     const [selectedTeams, setSelectedTeams] = useState<ITeamRecord[]>([]);
     const [allTeams, setAllTeams] = useState<ITeamRecord[]>([]);
@@ -98,7 +100,7 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                 const team_records = []
                 for (let i = 1; i <= selectedRound.no_of_groups; i++) {
                     const teamKey = `team_${i}`;
-                    team_records.push({ id: values[teamKey].id, order: i })
+                    team_records.push({ id: values[teamKey].id, group_team_id: group?.group_team_records[i-1].id, order: i })
                 }
                 formData.append('group_team_records', JSON.stringify(team_records));
 
@@ -106,21 +108,21 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                     console.log(key, value);
                 });
 
-                // if (group) {
-                //     // If selectedGroup is available, update the group
-                //     const response = await axios.patch(`/group/${group.id}/`, formData);
-                //     console.log(response.data);
-                //     message.success('Group updated successfully!');
-                // } else {
-                //     // If selectedGroup is not available, create a new group
-                //     const response = await axios.post('/group/', formData);
-                //     console.log(response.data);
-                //     message.success('Group added successfully!');
-                // }
+                if (group) {
+                    // If selectedGroup is available, update the group
+                    const response = await axios.patch(`/group/${group.id}/`, formData);
+                    console.log(response.data);
+                    message.success('Group updated successfully!');
+                } else {
+                    // If selectedGroup is not available, create a new group
+                    const response = await axios.post('/group/', formData);
+                    console.log(response.data);
+                    message.success('Group added successfully!');
+                }
 
-                // // Reset the form and close the modal
-                // form.resetFields();
-                // toggleAddEdit(selectedRound);
+                // Reset the form and close the modal
+                form.resetFields();
+                toggleAddEdit(selectedRound);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -220,7 +222,7 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
 
                             <div className="overflow-y-auto overflow-x-hidden grid grid-cols-3 transition-all">
                                 {allTeams
-                                    .filter(item => !selectedTeams.some(selected => selected.id === item.id))
+                                    .filter(item => !selectedTeams.some(selected => selected?.id === item.id))
                                     .map((team) => (
                                         <div
                                             key={team.id}
@@ -292,7 +294,7 @@ const TeamSelection: React.FC<TeamSelectionProps> = ({ label, form, name, setSel
         handleDragExitTabPane();
 
         const team = form.getFieldValue(name)
-        setSelectedTeams((prevSelectedTeams) => prevSelectedTeams.filter(item => item.id !== team.id));
+        setSelectedTeams((prevSelectedTeams) => prevSelectedTeams.filter(item => item?.id !== team.id));
 
         // You can remove the teamData from the form or perform other actions
         form.setFieldsValue({ [name]: null }); // Use the name prop here

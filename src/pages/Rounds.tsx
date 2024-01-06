@@ -214,22 +214,23 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
     }, [selectedRound]);
 
     useEffect(() => {
-        // schedule();
+        schedule();
     }, [selectedSubMenu, selectedRound]);
 
 
     const schedule = () => {
-        console.log(groups);
+        const roundData = tournament.game_mode.data.find((round: IRound) => round.name === selectedRound?.name);
+        console.log(roundData?.schedule)
+        console.log(groups)
 
-        const matchSchedule: Match[] = generateMatchSchedule(groups, tournament);
-
-        // Display the generated match schedule
-        console.log("Match Schedule:");
-        matchSchedule.forEach((match) => {
-            console.log(`${match.time} - ${match.teamA} vs ${match.teamB} in ${match.group}`);
+        roundData?.schedule.forEach((group: any) => {
+            const selected_group = group
+            console.log("GROUP: " + selected_group.group + " teamA: " + parseInt(selected_group.teamA) + " teamB: " + selected_group.teamB)
+            const group_to_schedule = (groups.find((group: any) => group.name === selected_group.group))
+            const groupTeamRecordA = group_to_schedule?.group_team_records[parseInt(selected_group.teamA) - 1]
+            const groupTeamRecordB = group_to_schedule?.group_team_records[parseInt(selected_group.teamB) - 1]
+            console.log(groupTeamRecordA, groupTeamRecordB)
         });
-
-        setScheduleData(matchSchedule);
     };
 
     const handleStartTournament = async () => {
