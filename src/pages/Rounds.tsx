@@ -370,6 +370,55 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
         }
     };
 
+    const finaliseRound = () => {
+        // Ensure that selectedRound is not null
+        if (selectedRound) {
+            // Find the groups for the selected round
+            const currentRoundGroups = groupsAll.filter((group) => group.round.name === selectedRound.name);
+
+            const result = calculateGroupRanks(groups);
+            console.log("results:", result);
+
+            // Print the groups in the console
+            console.log('Groups in the current round:', currentRoundGroups);
+        } else {
+            console.error('No round selected.');
+        }
+    };
+
+    interface GroupRank {
+        name: string;
+        teams: number[];
+    }
+
+    const calculateGroupRanks = (groups: IGroup[]): GroupRank[] => {
+        const groupRanks: GroupRank[] = [];
+
+        groups.forEach((group) => {
+            const sortedTeams = group.group_team_records
+                .slice() // Create a copy to avoid modifying the original array
+                .sort((teamA, teamB) => {
+                    // Compare teams based on points, goals difference, and goals scored
+                    if (teamA.points !== teamB.points) {
+                        return teamB.points - teamA.points; // Higher points come first
+                    }
+                    if (teamA.goals_pos - teamA.goals_neg !== teamB.goals_pos - teamB.goals_neg) {
+                        return (teamB.goals_pos - teamB.goals_neg) - (teamA.goals_pos - teamA.goals_neg);
+                        // Higher goal difference comes first
+                    }
+                    return teamB.goals_pos - teamA.goals_pos; // Higher goals scored come first
+                })
+                .map((team) => team.id);
+
+            groupRanks.push({
+                name: group.name,
+                teams: sortedTeams,
+            });
+        });
+
+        return groupRanks;
+    };
+
     return (
         <div className="flex flex-col gap-4">
             <div className='flex gap-4'>
@@ -486,14 +535,6 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                         selectedSubMenu === "groups" &&
                         <>
                             <div className="flex justify-between my-2">
-                                <Button
-                                    type='primary'
-                                    icon={<ScheduleOutlined />}
-                                    className='font-bold text-md'
-                                    onClick={() => {}}
-                                >
-                                    FINALISE ROUND
-                                </Button>
                                 {rounds.length > 0 && selectedRound !== rounds[0] && (
                                     <Button
                                         type='primary'
@@ -504,6 +545,14 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                         SCHEDULE GROUPS
                                     </Button>
                                 )}
+                                <Button
+                                    type='primary'
+                                    icon={<ScheduleOutlined />}
+                                    className='font-bold text-md'
+                                    onClick={finaliseRound}
+                                >
+                                    FINALISE ROUND
+                                </Button>
                             </div>
                             <div className=" h-screen rounded p-2 flex flex-col gap-10">
                                 {groups.map((group) => (
