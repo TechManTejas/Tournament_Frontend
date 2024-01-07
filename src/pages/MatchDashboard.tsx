@@ -1,13 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Select, TimePicker, Button, RadioChangeEvent, Radio, Form, Tabs, Input, Table, Space, ColorPicker } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import { DeleteOutlined, EditOutlined, MenuFoldOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
+import { useLocation } from 'react-router-dom';
+import axios from "../api/axios"
+import { IReferee } from '../types/referee.types';
+import { IStadium } from '../types/stadium.types';
 
 const { Option } = Select;
 
 export const MatchDashboard: React.FC = () => {
+
+    const location = useLocation();
+    const { matchRecord } = location.state;
+    console.log(matchRecord);
+
+    const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
+    const [matchData, setMatchData] = useState()
+
+    const [stadiums, setStadiums] = useState<IStadium[]>([]);
+    const [referees, setReferees] = useState<IReferee[]>([]);
 
     const [formColorTeamA] = Form.useForm();
     const [formGoalTeamA] = Form.useForm();
@@ -34,6 +48,88 @@ export const MatchDashboard: React.FC = () => {
         });
     };
 
+    // Function to fetch stadiums
+    const fetchStadiums = async () => {
+        try {
+            const response = await axios.get('/stadium-all/');
+            console.log(response.data)
+            setStadiums(response.data);
+        } catch (error) {
+            console.error('Error fetching stadiums:', error);
+        }
+    };
+
+    // Function to fetch referees
+    const fetchReferees = async () => {
+        try {
+            const response = await axios.get('/referee-all/');
+            console.log(response.data)
+            setReferees(response.data);
+        } catch (error) {
+            console.error('Error fetching referees:', error);
+        }
+    };
+
+    const getOrCreateMatchRecord = async (groupAId: number, groupBId: number) => {
+        const matchId = `${groupAId}-${groupBId}`;
+
+        try {
+            // Attempt to fetch the match record
+            const response = await axios.get(`/match/${matchId}/`);
+            console.log(response.data)
+            setMatchData(response.data)
+            // If the match record exists, return it
+            return response.data;
+        } catch (error) {
+            // If the match record doesn't exist, create it
+            const newMatchRecord = {
+                teamA: matchRecord.teamAGroupRecord.id,
+                teamB: matchRecord.teamBGroupRecord.id,
+                id: matchId,
+            };
+
+            // Make a POST request to create the match record
+            await axios.post('/match/', newMatchRecord);
+
+            // Return the newly created match record
+            return newMatchRecord;
+        }
+    };
+
+    const updateStatus = async () => {
+        try {
+            const values = await formComment.validateFields();
+
+            // Assuming you have the matchId available, replace 'YOUR_MATCH_ID' with the actual matchId
+            const matchId = 'YOUR_MATCH_ID';
+
+            const updateData = {
+                gameStatus: values.gameStatus,
+                stadium: values.stadium,
+                refereeHead: values.refereeHead,
+                refereeAssistant1: values.refereeAssistant1,
+                refereeAssistant2: values.refereeAssistant2,
+                refereeAssistant3: values.refereeAssistant3,
+            };
+
+            // Make an axios PUT request to update the status
+            await axios.put(`/match/${matchId}/updateStatus`, updateData);
+
+            // Add any additional logic or UI updates after a successful update
+
+            console.log('Status updated successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error updating status:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchStadiums();
+        fetchReferees();
+        getOrCreateMatchRecord(matchRecord.teamAGroupRecord.id, matchRecord.teamBGroupRecord.id)
+    }, [matchRecord])
+
     // const tabData = Array.from({ length: 100 }, (_, index) => index + 1);
 
     return (
@@ -55,7 +151,7 @@ export const MatchDashboard: React.FC = () => {
                 {/* Team A */}
                 <div className='w-72 h-full rounded p-2'>
                     <div className='text-center text-xl mb-1'>
-                        Team A (3)
+                        {matchRecord.teamA}
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Form form={formColorTeamA} onFinish={() => handleButtonClick(formColorTeamA)}>
@@ -280,7 +376,6 @@ export const MatchDashboard: React.FC = () => {
                                 name="gameStatus"
                                 label="Game Status"
                                 className='p-0 m-2'
-                                rules={[{ required: true, message: 'Please select the game status' }]}
                             >
                                 <Select placeholder="Select the game status">
                                     <Option value="notStarted">Not Started</Option>
@@ -294,11 +389,13 @@ export const MatchDashboard: React.FC = () => {
                                 name="stadium"
                                 label="Stadium"
                                 className='p-0 m-2'
-                                rules={[{ required: true, message: 'Please select the stadium' }]}
                             >
                                 <Select placeholder="Select the stadium">
-                                    <Option value="notStarted">Not Started</Option>
-                                    <Option value="started">Started</Option>
+                                    {stadiums.map((stadium) => (
+                                        <Option key={stadium.id} value={stadium.id}>
+                                            {stadium.name}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
 
@@ -306,11 +403,13 @@ export const MatchDashboard: React.FC = () => {
                                 name="refereeHead"
                                 label="Referee Head"
                                 className='p-0 m-2'
-                                rules={[{ required: true, message: 'Please select a referee head' }]}
                             >
                                 <Select placeholder="Select a referee head">
-                                    <Option value="notStarted">Not Started</Option>
-                                    <Option value="started">Started</Option>
+                                    {referees.map((referee) => (
+                                        <Option key={referee.id} value={referee.id}>
+                                            {referee.name}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
 
@@ -320,8 +419,11 @@ export const MatchDashboard: React.FC = () => {
                                 className='p-0 m-2'
                             >
                                 <Select placeholder="Select a referee assistant 1">
-                                    <Option value="notStarted">Not Started</Option>
-                                    <Option value="started">Started</Option>
+                                    {referees.map((referee) => (
+                                        <Option key={referee.id} value={referee.id}>
+                                            {referee.name}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
 
@@ -331,8 +433,11 @@ export const MatchDashboard: React.FC = () => {
                                 className='p-0 m-2'
                             >
                                 <Select placeholder="Select a referee assistant 2">
-                                    <Option value="notStarted">Not Started</Option>
-                                    <Option value="started">Started</Option>
+                                    {referees.map((referee) => (
+                                        <Option key={referee.id} value={referee.id}>
+                                            {referee.name}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
 
@@ -342,8 +447,11 @@ export const MatchDashboard: React.FC = () => {
                                 className='p-0 m-2'
                             >
                                 <Select placeholder="Select a referee assistant 3">
-                                    <Option value="notStarted">Not Started</Option>
-                                    <Option value="started">Started</Option>
+                                    {referees.map((referee) => (
+                                        <Option key={referee.id} value={referee.id}>
+                                            {referee.name}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
 
@@ -391,8 +499,8 @@ export const MatchDashboard: React.FC = () => {
 
 
                                 <Form.Item className='p-0 m-2'>
-                                    <Button type="primary" htmlType="submit" className='w-full'>
-                                        Submit Comment
+                                    <Button type="primary" htmlType="button" onClick={updateStatus} className='w-full'>
+                                        Update Status
                                     </Button>
                                 </Form.Item>
                             </Form>
@@ -437,13 +545,12 @@ export const MatchDashboard: React.FC = () => {
                             />
                         </div>
                     </div>
-
                 </div>
 
                 {/* Team B */}
                 <div className='w-72 h-full rounded p-2'>
                     <div className='text-center text-xl mb-1'>
-                        Team B (2)
+                        {matchRecord.teamB}
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Form form={formColorTeamB} onFinish={() => handleButtonClick(formColorTeamB)}>

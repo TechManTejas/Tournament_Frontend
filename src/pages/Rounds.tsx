@@ -5,12 +5,21 @@ import { useEffect, useState } from "react";
 import { ITournament } from "../types/tournament.types";
 import axios from "../api/axios"
 import { IRound } from "../types/round.types";
-import { IGroup } from "../types/group.types";
+import { IGroup, IGroupTeam } from "../types/group.types";
 import { ColumnsType } from "antd/es/table";
 import { confirmation } from "../components/Confirmation"
-import { Match, generateMatchSchedule } from "../utils/round_robin_schedule";
 import { usePDF } from 'react-to-pdf';
 import { useNavigate } from "react-router-dom";
+
+export interface Match {
+    no: number;
+    time?: string;
+    group: string;
+    teamA: string;
+    teamB: string;
+    teamAGroupRecord: IGroupTeam | undefined;
+    teamBGroupRecord: IGroupTeam | undefined;
+}
 
 interface RoundsProps {
     toggleAddEdit: (selectedRound: IRound) => void;
@@ -223,14 +232,27 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
         console.log(roundData?.schedule)
         console.log(groups)
 
-        roundData?.schedule.forEach((group: any) => {
-            const selected_group = group
-            console.log("GROUP: " + selected_group.group + " teamA: " + parseInt(selected_group.teamA) + " teamB: " + selected_group.teamB)
-            const group_to_schedule = (groups.find((group: any) => group.name === selected_group.group))
-            const groupTeamRecordA = group_to_schedule?.group_team_records[parseInt(selected_group.teamA) - 1]
-            const groupTeamRecordB = group_to_schedule?.group_team_records[parseInt(selected_group.teamB) - 1]
-            console.log(groupTeamRecordA, groupTeamRecordB)
+        let matches: Match[] = [];
+
+        roundData?.schedule.forEach((group: any, index: number) => {
+            const selected_group = group;
+            const group_to_schedule = groups.find((group: any) => group.name === selected_group.group);
+            const groupTeamRecordA = group_to_schedule?.group_team_records[parseInt(selected_group.teamA) - 1];
+            const groupTeamRecordB = group_to_schedule?.group_team_records[parseInt(selected_group.teamB) - 1];
+        
+            console.log(groupTeamRecordA, groupTeamRecordB);
+        
+            matches.push({
+                no: index + 1,
+                group: selected_group.group,
+                teamA: groupTeamRecordA?.team_record.name ?? 'Unknown',
+                teamB: groupTeamRecordB?.team_record.name ?? 'Unknown',
+                teamAGroupRecord: groupTeamRecordA,
+                teamBGroupRecord: groupTeamRecordB
+            });
         });
+
+        setScheduleData(matches);
     };
 
     const handleStartTournament = async () => {
@@ -472,20 +494,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                         <div>
                                                             <Button type="primary" onClick={() => {
 
-                                                                const { group, teamA, teamB } = record;
-
-                                                                // Extracting the team IDs from teamA and teamB
-                                                                const teamAId = groups.find(g => g.name === group)?.group_team_records.find(t => t.team_record.name === teamA)?.id;
-                                                                const teamBId = groups.find(g => g.name === group)?.group_team_records.find(t => t.team_record.name === teamB)?.id;
-
-                                                                console.log("Match Dashboard Clicked:");
-                                                                console.log("Tournament:", tournament);
-                                                                console.log("Group:", group);
-                                                                console.log("Teams:", teamA, "vs", teamB);
-                                                                console.log("Team A ID:", teamAId);
-                                                                console.log("Team B ID:", teamBId);
-
-                                                                // navigate('/dashboard/match')
+                                                                console.log(record)
+                                                                navigate('/dashboard/match', { state: { matchRecord: record } })
 
                                                             }}>
                                                                 Match Dashboard
