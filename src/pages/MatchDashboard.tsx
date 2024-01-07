@@ -8,17 +8,22 @@ import { useLocation } from 'react-router-dom';
 import axios from "../api/axios"
 import { IReferee } from '../types/referee.types';
 import { IStadium } from '../types/stadium.types';
+import { ITournament } from '../types/tournament.types';
+import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
 const { Option } = Select;
 
 export const MatchDashboard: React.FC = () => {
 
     const location = useLocation();
-    const { matchRecord } = location.state;
+    const { matchRecord, tournament } = location.state;
     console.log(matchRecord);
+    console.log(tournament);
 
     const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
     const [matchData, setMatchData] = useState()
+    const [teamAPlayers, setTeamAPlayers] = useState([])
+    const [teamBPlayers, setTeamBPlayers] = useState([])
 
     const [stadiums, setStadiums] = useState<IStadium[]>([]);
     const [referees, setReferees] = useState<IReferee[]>([]);
@@ -78,6 +83,20 @@ export const MatchDashboard: React.FC = () => {
             const response = await axios.get(`/match/${matchId}/`);
             console.log(response.data)
             setMatchData(response.data)
+
+            // Set initial values for the formComment
+            formComment.setFieldsValue({
+                gameStatus: response.data.status,
+                stadium: response.data.stadium.id,
+                refereeHead: response.data.referee_head.id,
+                refereeAssistant1: response.data.referee_assistant.id,
+                refereeAssistant2: response.data.referee_assistant_2.id,
+                refereeAssistant3: response.data.referee_assistant_3.id,
+            });
+
+            setColorPickerValueTeamA(response.data.jersey_color_A)
+            setColorPickerValueTeamB(response.data.jersey_color_B)
+
             // If the match record exists, return it
             return response.data;
         } catch (error) {
@@ -96,15 +115,13 @@ export const MatchDashboard: React.FC = () => {
         }
     };
 
-    const updateStatus = async () => {
-        try {
-            const values = await formComment.validateFields();
+    const updateStatus = async (values: any) => {
 
-            // Assuming you have the matchId available, replace 'YOUR_MATCH_ID' with the actual matchId
-            const matchId = 'YOUR_MATCH_ID';
+        try {
 
             const updateData = {
-                gameStatus: values.gameStatus,
+                id: match_id,
+                status: values.gameStatus,
                 stadium: values.stadium,
                 refereeHead: values.refereeHead,
                 refereeAssistant1: values.refereeAssistant1,
@@ -112,8 +129,10 @@ export const MatchDashboard: React.FC = () => {
                 refereeAssistant3: values.refereeAssistant3,
             };
 
+            console.log(updateData)
+
             // Make an axios PUT request to update the status
-            await axios.put(`/match/${matchId}/updateStatus`, updateData);
+            await axios.put(`/match/${match_id}/`, updateData);
 
             // Add any additional logic or UI updates after a successful update
 
@@ -123,6 +142,78 @@ export const MatchDashboard: React.FC = () => {
             console.error('Error updating status:', error);
         }
     };
+
+    const updateTeamJerseyColorA = async (values: any) => {
+        try {
+
+            console.log(values);
+
+            // Make an axios PUT request to update the jersey color for Team A
+            const updateData = {
+                id: match_id,
+                jersey_color_A: colorPickerValueTeamA,
+            };
+
+            await axios.put(`/match/${match_id}/`, updateData);
+
+            // Add any additional logic or UI updates after a successful update
+            console.log('Jersey color for Team A updated successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error updating jersey color for Team A:', error);
+        }
+    };
+
+    const updateTeamJerseyColorB = async (values: any) => {
+        try {
+
+            console.log(values);
+
+            // Make an axios PUT request to update the jersey color for Team A
+            const updateData = {
+                id: match_id,
+                jersey_color_B: colorPickerValueTeamB,
+            };
+
+            await axios.put(`/match/${match_id}/`, updateData);
+
+            // Add any additional logic or UI updates after a successful update
+            console.log('Jersey color for Team B updated successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error updating jersey color for Team B:', error);
+        }
+    };
+
+    useEffect(() => {
+        // WebSocket connection for MatchCard
+        const matchSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/matchcard/${tournament.id}/`);
+
+        matchSocket.onopen = () => {
+            console.log('Match WebSocket connected');
+
+            // Send a message to the server after connection
+            const message = {
+                data: {
+                    teamA: {
+                        name: matchRecord.teamAGroupRecord.team_record.name,
+                        logo: matchRecord.teamAGroupRecord.team_record.logo
+                    },
+                    teamB: {
+                        name: matchRecord.teamBGroupRecord.team_record.name,
+                        logo: matchRecord.teamBGroupRecord.team_record.logo
+                    },
+                }
+            };
+
+            matchSocket.send(JSON.stringify(message));
+        };
+
+        return () => {
+            // Clean up the WebSocket connection when the component unmounts
+            matchSocket.close();
+        };
+    }, [tournament.id])
 
     useEffect(() => {
         fetchStadiums();
@@ -154,7 +245,7 @@ export const MatchDashboard: React.FC = () => {
                         {matchRecord.teamA}
                     </div>
                     <div className='flex flex-col gap-2'>
-                        <Form form={formColorTeamA} onFinish={() => handleButtonClick(formColorTeamA)}>
+                        <Form form={formColorTeamA} onFinish={updateTeamJerseyColorA}>
                             <div className='bg-white p-4 rounded shadow flex gap-2'>
                                 <Form.Item
                                     className='p-0 m-0'
@@ -371,7 +462,7 @@ export const MatchDashboard: React.FC = () => {
                     </div>
 
                     <div className='w-full bg-white rounded shadow border p-2'>
-                        <Form form={formComment} onFinish={() => handleButtonClick(formComment)}>
+                        <Form form={formComment} onFinish={updateStatus}>
                             <Form.Item
                                 name="gameStatus"
                                 label="Game Status"
@@ -463,7 +554,7 @@ export const MatchDashboard: React.FC = () => {
                         </Form>
                     </div>
 
-                    <div className='flex w-full bg-white rounded shadow border'>
+                    {/* <div className='flex w-full bg-white rounded shadow border'>
                         <div className='border-r p-2 w-2/5'>
                             <Form layout='vertical' form={formComment} onFinish={() => handleButtonClick(formComment)}>
                                 <Form.Item
@@ -544,7 +635,7 @@ export const MatchDashboard: React.FC = () => {
                                 pagination={false}
                             />
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Team B */}
@@ -553,7 +644,7 @@ export const MatchDashboard: React.FC = () => {
                         {matchRecord.teamB}
                     </div>
                     <div className='flex flex-col gap-2'>
-                        <Form form={formColorTeamB} onFinish={() => handleButtonClick(formColorTeamB)}>
+                        <Form form={formColorTeamB} onFinish={updateTeamJerseyColorB}>
                             <div className='bg-white p-4 rounded shadow flex gap-2'>
                                 <Form.Item
                                     className='p-0 m-0'

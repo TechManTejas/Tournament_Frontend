@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import PanelSmall from "../assets/images/panel_small.png"
@@ -8,6 +9,7 @@ interface FreeTextCardProps {
     x?: number;
     y?: number;
     isLive?: boolean;
+    data?: any;
 }
 
 const FreeTextCard: React.FC<FreeTextCardProps> = ({ onDrag, x, y, isLive }) => {

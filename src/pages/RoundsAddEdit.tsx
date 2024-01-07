@@ -104,10 +104,6 @@ export const RoundsAddEdit: React.FC<RoundAddEditProps> = ({ toggleAddEdit, tour
                 }
                 formData.append('group_team_records', JSON.stringify(team_records));
 
-                formData.forEach((value, key) => {
-                    console.log(key, value);
-                });
-
                 if (group) {
                     // If selectedGroup is available, update the group
                     const response = await axios.patch(`/group/${group.id}/`, formData);

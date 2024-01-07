@@ -14,8 +14,16 @@ import FreeTextCard from '../components/FreeTextCard';
 import SwapsCard from '../components/SwapsCard';
 
 export const StreamOperatorDashboard: React.FC = () => {
-    const { state } = useLocation()
-    const match = state?.match ?? 1
+
+    const location = useLocation();
+    const { matchRecord, tournament } = location.state;
+    console.log(matchRecord);
+    console.log(tournament);
+    const match = tournament.id
+
+    if(!tournament){
+        window.location.href = '/dashboard/tournament'
+    }
 
     const [socketScoreCard, setSocketScoreCard] = useState<w3cwebsocket | null>(null);
     const [scoreCardIsLive, setScoreCardIsLive] = useState(false);

@@ -59,27 +59,35 @@ const Live: React.FC = () => {
 
   const [draggableScore, setDraggableScore] = useState<DraggableScore>({ x: ((parentWidth - 320) / 2) - 32, y: ((parentHeight - 96) / 2) - 30 });
   const [scoreCardIsLive, setScoreCardIsLive] = useState(false);
+  const [scoreCardData, setScoreCardData] = useState<unknown>()
 
   const [draggableMatch, setDraggableMatch] = useState<DraggableMatch>({ x: ((parentWidth - 560) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
   const [matchCardIsLive, setMatchCardIsLive] = useState(false);
+  const [matchCardData, setMatchCardData] = useState<unknown>({})
 
   const [draggableSchedule, setDraggableSchedule] = useState<DraggableSchedule>({ x: ((parentWidth - 720) / 2) - 32, y: ((parentHeight - 450) / 2) - 30 });
   const [scheduleCardIsLive, setScheduleCardIsLive] = useState(false);
+  const [scheduleCardData, setScheduleCardData] = useState<unknown>()
 
   const [draggableReferees, setDraggableReferees] = useState<DraggableReferees>({ x: ((parentWidth - 460) / 2) - 32, y: ((parentHeight - 280) / 2) - 30 });
   const [refereesCardIsLive, setRefereesCardIsLive] = useState(false);
+  const [refereesCardData, setRefereesCardData] = useState<unknown>()
 
   const [draggableGoalScorer, setDraggableGoalScorer] = useState<DraggableGoalScorer>({ x: ((parentWidth - 640) / 2) - 32, y: ((parentHeight - 200) / 2) - 30 });
   const [goalScorerCardIsLive, setGoalScorerCardIsLive] = useState(false);
+  const [goalScorerCardData, setGoalScorerCardData] = useState<unknown>()
 
   const [draggableCards, setDraggableCards] = useState<DraggableCards>({ x: ((parentWidth - 580) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
   const [cardsCardIsLive, setCardsCardIsLive] = useState(false);
+  const [cardsCardData, setCardsCardData] = useState<unknown>()
 
   const [draggableFreeText, setDraggableFreeText] = useState<DraggableFreeText>({ x: ((parentWidth - 580) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
   const [freeTextCardIsLive, setFreeTextCardIsLive] = useState(false);
+  const [freeTextCardData, setFreeTextCardData] = useState<unknown>()
 
   const [draggableSwaps, setDraggableSwaps] = useState<DraggableSwaps>({ x: ((parentWidth - 720) / 2) - 32, y: ((parentHeight - 450) / 2) - 30 });
   const [swapsCardIsLive, setSwapsCardIsLive] = useState(false);
+  const [swapsCardData, setSwapsCardData] = useState<unknown>()
 
   useEffect(() => {
     // WebSocket connection for ScoreCard
@@ -92,6 +100,9 @@ const Live: React.FC = () => {
       } else {
         setDraggableScore({ x: data.x, y: data.y });
       }
+      if(data?.data && data.data?.type === 'send_data'){
+        setScoreCardData(data.data.data);
+      }
     };
 
     // WebSocket connection for MatchCard
@@ -99,10 +110,14 @@ const Live: React.FC = () => {
     matchSocket.onopen = () => console.log('Match WebSocket connected');
     matchSocket.onmessage = (event) => {
       const data = JSON.parse(event.data as string);
+
       if (data.isLive !== undefined) {
         setMatchCardIsLive(data.isLive);
       } else {
         setDraggableMatch({ x: data.x, y: data.y });
+      }
+      if(data?.data && data.data?.type === 'send_data'){
+        setMatchCardData(data.data.data);
       }
     };
 
@@ -116,6 +131,9 @@ const Live: React.FC = () => {
       } else {
         setDraggableSchedule({ x: data.x, y: data.y });
       }
+      if(data?.data && data.data?.type === 'send_data'){
+        setScheduleCardData(data.data.data);
+      }
     };
 
     // WebSocket connection for RefereesCard
@@ -127,6 +145,9 @@ const Live: React.FC = () => {
         setRefereesCardIsLive(data.isLive);
       } else {
         setDraggableReferees({ x: data.x, y: data.y });
+      }
+      if(data?.data && data.data?.type === 'send_data'){
+        setRefereesCardData(data.data.data);
       }
     };
 
@@ -140,6 +161,9 @@ const Live: React.FC = () => {
       } else {
         setDraggableGoalScorer({ x: data.x, y: data.y });
       }
+      if(data?.data && data.data?.type === 'send_data'){
+        setGoalScorerCardData(data.data.data);
+      }
     };
 
     // WebSocket connection for CardsCard
@@ -151,6 +175,9 @@ const Live: React.FC = () => {
         setCardsCardIsLive(data.isLive);
       } else {
         setDraggableCards({ x: data.x, y: data.y });
+      }
+      if(data?.data && data.data?.type === 'send_data'){
+        setCardsCardData(data.data.data);
       }
     };
 
@@ -164,6 +191,9 @@ const Live: React.FC = () => {
       } else {
         setDraggableFreeText({ x: data.x, y: data.y });
       }
+      if(data?.data && data.data?.type === 'send_data'){
+        setFreeTextCardData(data.data.data);
+      }
     };
 
     // WebSocket connection for SwapsCard
@@ -176,6 +206,9 @@ const Live: React.FC = () => {
       } else {
         setDraggableSwaps({ x: data.x, y: data.y });
       }
+      if(data?.data && data.data?.type === 'send_data'){
+        setSwapsCardData(data.data.data);
+      }
     };
 
   }, [matchId]);
@@ -184,49 +217,49 @@ const Live: React.FC = () => {
     <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)]'>
       {scoreCardIsLive && (
         <div style={{ position: 'absolute', left: draggableScore.x, top: draggableScore.y }} className='p-6'>
-          <ScoreCard x={draggableScore.x} y={draggableScore.y} />
+          <ScoreCard x={draggableScore.x} y={draggableScore.y} data={scoreCardData}/>
         </div>
       )}
 
       {matchCardIsLive && (
         <div style={{ position: 'absolute', left: draggableMatch.x, top: draggableMatch.y }} className='p-6'>
-          <MatchCard x={draggableMatch.x} y={draggableMatch.y} />
+          <MatchCard x={draggableMatch.x} y={draggableMatch.y} data={matchCardData}/>
         </div>
       )}
 
       {scheduleCardIsLive && (
         <div style={{ position: 'absolute', left: draggableSchedule.x, top: draggableSchedule.y }} className='p-6'>
-          <ScheduleCard x={draggableSchedule.x} y={draggableSchedule.y} />
+          <ScheduleCard x={draggableSchedule.x} y={draggableSchedule.y} data={scheduleCardData}/>
         </div>
       )}
 
       {refereesCardIsLive && (
         <div style={{ position: 'absolute', left: draggableReferees.x, top: draggableReferees.y }} className='p-6'>
-          <RefereesCard x={draggableReferees.x} y={draggableReferees.y} />
+          <RefereesCard x={draggableReferees.x} y={draggableReferees.y} data={refereesCardData}/>
         </div>
       )}
 
       {goalScorerCardIsLive && (
         <div style={{ position: 'absolute', left: draggableGoalScorer.x, top: draggableGoalScorer.y }} className='p-6'>
-          <GoalScorerCard x={draggableGoalScorer.x} y={draggableGoalScorer.y} />
+          <GoalScorerCard x={draggableGoalScorer.x} y={draggableGoalScorer.y} data={goalScorerCardData}/>
         </div>
       )}
 
       {cardsCardIsLive && (
         <div style={{ position: 'absolute', left: draggableCards.x, top: draggableCards.y }} className='p-6'>
-          <CardsCard x={draggableCards.x} y={draggableCards.y} />
+          <CardsCard x={draggableCards.x} y={draggableCards.y} data={cardsCardData}/>
         </div>
       )}
 
       {freeTextCardIsLive && (
         <div style={{ position: 'absolute', left: draggableFreeText.x, top: draggableFreeText.y }} className='p-6'>
-          <FreeTextCard x={draggableFreeText.x} y={draggableFreeText.y} />
+          <FreeTextCard x={draggableFreeText.x} y={draggableFreeText.y} data={freeTextCardData}/>
         </div>
       )}
 
       {swapsCardIsLive && (
         <div style={{ position: 'absolute', left: draggableSwaps.x, top: draggableSwaps.y }} className='p-6'>
-          <SwapsCard x={draggableSwaps.x} y={draggableSwaps.y} />
+          <SwapsCard x={draggableSwaps.x} y={draggableSwaps.y} data={swapsCardData}/>
         </div>
       )}
     </div>

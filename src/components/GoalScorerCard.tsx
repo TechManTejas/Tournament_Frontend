@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import PanelSmall from "../assets/images/panel_small.png"
@@ -10,6 +11,7 @@ interface GoalScorerCardProps {
     x?: number;
     y?: number;
     isLive?: boolean;
+    data?: any;
 }
 
 const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive }) => {

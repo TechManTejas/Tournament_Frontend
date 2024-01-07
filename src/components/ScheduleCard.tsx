@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import PanelLarge from "../assets/images/panel_large.png"
@@ -17,6 +18,7 @@ interface ScheduleCardProps {
     x?: number;
     y?: number;
     isLive?: boolean;
+    data?: any;
 }
 
 const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => {

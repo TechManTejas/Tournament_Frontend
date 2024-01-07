@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import PanelLarge from "../assets/images/panel_large.png"
@@ -9,6 +10,7 @@ interface SwapsCardProps {
     x?: number;
     y?: number;
     isLive?: boolean;
+    data?: any;
 }
 
 const SwapsCard: React.FC<SwapsCardProps> = ({ onDrag, x, y, isLive }) => {

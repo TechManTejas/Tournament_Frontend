@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import PanelSmall from "../assets/images/panel_small.png"
@@ -10,9 +11,11 @@ interface MatchCardProps {
     x?: number;
     y?: number;
     isLive?: boolean;
+    data?: any;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive }) => {
+const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => {
+
     const isDraggable = typeof x === 'undefined' || typeof y === 'undefined';
 
     const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
@@ -46,8 +49,8 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive }) => {
                         <div className='relative px-4 flex flex-col justify-center h-full '>
                             <div className='flex justify-between items-center text-white text-xl'>
                                 <div className='flex flex-grow justify-around items-center'>
-                                    <img src={Team1} className='w-12 h-full rounded' />
-                                    <div className=''>Everton FC</div>
+                                    <img src={data?.teamA?.logo ?? Team1} className='w-12 h-full rounded' />
+                                    <div className=''>{data?.teamA?.name ?? "Team A Name"}</div>
                                 </div>
                                 <div className='flex flex-col justify-center items-center mt-4'>
                                     <div>
@@ -59,8 +62,8 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive }) => {
                                 </div>
 
                                 <div className='flex flex-grow justify-around items-center'>
-                                    <div className=''>AS Rom</div>
-                                    <img src={Team2} className='w-12 h-full rounded' />
+                                    <div className=''>{data?.teamA?.name ?? "Team B Name"}</div>
+                                    <img src={data?.teamB?.logo ?? Team2} className='w-12 h-full rounded' />
                                 </div>
                             </div>
                             <div className='flex justify-between items-center text-zinc-500'>
@@ -80,10 +83,10 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive }) => {
                     <div className='relative px-4 flex flex-col justify-center h-full '>
                         <div className='flex justify-between items-center text-white text-xl'>
                             <div className='flex flex-grow justify-around items-center'>
-                                <img src={Team1} className='w-12 h-full rounded' />
-                                <div className=''>Everton FC</div>
+                                <img src={data?.teamA?.logo ?? Team1} className='w-12 h-full rounded' />
+                                <div className=''>{data?.teamA?.name ?? "Team A Name"}</div>
                             </div>
-                            <div className='flex flex-col justify-center items-center mt-4'>
+                            <div className='flex flex-col justify-center items-center'>
                                 <div>
                                     /
                                 </div>
@@ -93,8 +96,8 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive }) => {
                             </div>
 
                             <div className='flex flex-grow justify-around items-center'>
-                                <div className=''>AS Rom</div>
-                                <img src={Team2} className='w-12 h-full rounded' />
+                                <div className=''>{data?.teamB?.name ?? "Team B Name"}</div>
+                                <img src={data?.teamB?.logo ?? Team2} className='w-12 h-full rounded' />
                             </div>
                         </div>
                         <div className='flex justify-between items-center text-zinc-500'>

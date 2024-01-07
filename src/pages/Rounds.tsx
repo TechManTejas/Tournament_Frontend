@@ -38,6 +38,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
     const [selectedRound, setSelectedRound] = useState<IRound | null>(null);
     const [rounds, setRounds] = useState<IRound[]>([])
     const [groups, setGroups] = useState<IGroup[]>([]);
+    const [roundsAll, setRoundsAll] = useState<IRound[]>([])
+    const [groupsAll, setGroupsAll] = useState<IGroup[]>([]);
     const [isAddRoundModalVisible, setAddRoundModalVisible] = useState(false);
     const [newRoundName, setNewRoundName] = useState("");
     const [numberOfTeamsInGroup, setNumberOfTeamsInGroup] = useState<number>(2);
@@ -214,6 +216,22 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
         }
     };
 
+    const fetchAllGroups = async () => {
+        try {
+            if (selectedRound) {
+                // Fetch groups for the selected round
+                const response = await axios.get(`/group/?tournament_id=${tournament.id}`);
+                const fetchedGroups = response.data;
+                console.log(fetchedGroups)
+                // Set the groups state
+                setGroupsAll(fetchedGroups);
+            }
+        } catch (error) {
+            console.error("Error fetching groups:", error);
+            message.error("An error occurred while fetching groups. Please try again.");
+        }
+    };
+
     useEffect(() => {
         fetchRounds();
     }, [tournament.id]);
@@ -224,24 +242,35 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
 
     useEffect(() => {
         schedule();
+        fetchAllGroups()
     }, [selectedSubMenu, selectedRound]);
 
 
     const schedule = () => {
         const roundData = tournament.game_mode.data.find((round: IRound) => round.name === selectedRound?.name);
-        console.log(roundData?.schedule)
-        console.log(groups)
+        console.log(roundData?.schedule);
 
         let matches: Match[] = [];
 
-        roundData?.schedule.forEach((group: any, index: number) => {
-            const selected_group = group;
-            const group_to_schedule = groups.find((group: any) => group.name === selected_group.group);
-            const groupTeamRecordA = group_to_schedule?.group_team_records[parseInt(selected_group.teamA) - 1];
-            const groupTeamRecordB = group_to_schedule?.group_team_records[parseInt(selected_group.teamB) - 1];
-        
+        roundData?.schedule.forEach((selected_group: any, index: number) => {
+            const group_to_schedule = groupsAll.find((group: any) => group.name === selected_group.group);
+            console.log(group_to_schedule);
+
+            console.log(selected_group);
+            const groupA = groupsAll.find((group: any) => group.name === selected_group.teamA.group)?.group_team_records
+            console.log(groupA)
+
+
+            const groupTeamRecordA = typeof selected_group.teamA === 'object'
+                ? groupsAll.find((group: any) => group.name === selected_group.teamA.group)?.group_team_records[selected_group.teamA.team - 1]
+                : group_to_schedule?.group_team_records[parseInt(selected_group.teamA) - 1];
+
+            const groupTeamRecordB = typeof selected_group.teamB === 'object'
+                ? groupsAll.find((group: any) => group.name === selected_group.teamB.group)?.group_team_records[selected_group.teamB.team - 1]
+                : group_to_schedule?.group_team_records[parseInt(selected_group.teamB) - 1];
+
             console.log(groupTeamRecordA, groupTeamRecordB);
-        
+
             matches.push({
                 no: index + 1,
                 group: selected_group.group,
@@ -276,6 +305,68 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
             // Handle error responses from the server
             console.error('Error starting tournament:', error);
             message.error('An error occurred while starting the tournament. Please try again.');
+        }
+    };
+
+    const scheduleNextRoundGroups = async (selectedRound: IRound) => {
+        // Find the index of the selected round in the rounds array
+        const selectedIndex = rounds.findIndex((round: IRound) => round.name === selectedRound.name);
+
+        if (selectedIndex !== undefined && selectedIndex !== null && selectedIndex > 0) {
+
+            const current_round_rules = (tournament.game_mode.data.find(r => r.name === selectedRound.name));
+
+            current_round_rules.groups.forEach(async (group) => {
+                const formData = new FormData();
+                formData.append('name', group.name);
+                formData.append('tournament_id', tournament.id.toString());
+                formData.append('round_id', selectedRound.id.toString());
+
+                let team_records = [];
+
+                const group_team_records = groupsAll.find(g => g.name === group.name).group_team_records
+                let v = 0
+
+                group.teams.forEach((team, index: number) => {
+
+                    const groupTeamRecord = groupsAll
+                        .find(g => g.name === team.team.group)
+                        ?.group_team_records[team.team.team - 1];
+
+                    team_records.push({
+                        id: groupTeamRecord?.team_record.id,
+                        group_team_id: group_team_records[v].id,
+                        order: index + 1,
+                    });
+
+                    v += 1
+                });
+
+                formData.append('group_team_records', JSON.stringify(team_records));
+
+                const existingGroup = groupsAll.find((g) => g.round.name === selectedRound.name && g.name === group.name);
+
+                try {
+                    if (existingGroup) {
+                        // If the group already exists, update it
+                        const response = await axios.patch(`/group/${existingGroup.id}/`, formData);
+                        console.log(response.data);
+                        message.success('Group updated successfully!');
+                    } else {
+                        // If the group doesn't exist, create a new one
+                        const response = await axios.post('/group/', formData);
+                        console.log(response.data);
+                        message.success('Group added successfully!');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    message.error('Error adding/updating group');
+                }
+            });
+
+            console.log(groupsAll);
+        } else {
+            console.log("No previous round found or selected round is the first round");
         }
     };
 
@@ -394,6 +485,26 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                     {
                         selectedSubMenu === "groups" &&
                         <>
+                            <div className="flex justify-between my-2">
+                                <Button
+                                    type='primary'
+                                    icon={<ScheduleOutlined />}
+                                    className='font-bold text-md'
+                                    onClick={() => {}}
+                                >
+                                    FINALISE ROUND
+                                </Button>
+                                {rounds.length > 0 && selectedRound !== rounds[0] && (
+                                    <Button
+                                        type='primary'
+                                        icon={<ScheduleOutlined />}
+                                        className='font-bold text-md'
+                                        onClick={() => { scheduleNextRoundGroups(selectedRound) }}
+                                    >
+                                        SCHEDULE GROUPS
+                                    </Button>
+                                )}
+                            </div>
                             <div className=" h-screen rounded p-2 flex flex-col gap-10">
                                 {groups.map((group) => (
                                     <div key={group.id} className="flex flex-col gap-4">
@@ -495,14 +606,14 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                             <Button type="primary" onClick={() => {
 
                                                                 console.log(record)
-                                                                navigate('/dashboard/match', { state: { matchRecord: record } })
+                                                                navigate('/dashboard/match', { state: { matchRecord: record, tournament } })
 
                                                             }}>
                                                                 Match Dashboard
                                                             </Button>
                                                             <Button onClick={() => {
 
-                                                                navigate('/dashboard/stream-operator')
+                                                                navigate('/dashboard/stream-operator', { state: { matchRecord: record, tournament } })
 
                                                             }}>
                                                                 Stream Operator
