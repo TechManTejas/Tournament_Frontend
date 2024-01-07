@@ -245,8 +245,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
             matches.push({
                 no: index + 1,
                 group: selected_group.group,
-                teamA: groupTeamRecordA?.team_record.name ?? 'Unknown',
-                teamB: groupTeamRecordB?.team_record.name ?? 'Unknown',
+                teamA: groupTeamRecordA?.team_record?.name ?? 'Unknown',
+                teamB: groupTeamRecordB?.team_record?.name ?? 'Unknown',
                 teamAGroupRecord: groupTeamRecordA,
                 teamBGroupRecord: groupTeamRecordB
             });

@@ -377,7 +377,7 @@ export const MatchDashboard: React.FC = () => {
                                 label="Game Status"
                                 className='p-0 m-2'
                             >
-                                <Select placeholder="Select the game status">
+                                <Select placeholder="Select the game status" defaultValue={"Not Started"}>
                                     <Option value="notStarted">Not Started</Option>
                                     <Option value="started">Started</Option>
                                     <Option value="halftime">Halftime</Option>
