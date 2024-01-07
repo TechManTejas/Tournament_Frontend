@@ -1,6 +1,7 @@
 import { Form, Input, Button, Flex, message } from 'antd';
 import axios from 'axios';
 
+import Logo from '../assets/images/newlogo.png';
 import AuthImage from '../assets/images/authimage.jpg';
 import Patch1 from '../assets/images/patch_1.png'
 import Patch2 from '../assets/images/patch_2.png'
@@ -50,41 +51,42 @@ export const Authentication = () => {
     };
 
     return (
-      <>
-        <div className='bg-white p-16 rounded-2xl shadow-xl z-50'>
-          <div className='text-3xl my-6 text-center font-medium'>
-            Login
-          </div>
-          <div className='flex flex-col w-80 text-lg space-y-3'>
-            <Form
-              name="loginForm"
-              onFinish={onFinish}
-            >
-              <Form.Item
-                name="username"
-                rules={[{ required: true, message: 'Please enter your username!' }]}
-              >
-                <Input placeholder="Username" className='h-10' />
-              </Form.Item>
+        <>
 
-              <Form.Item
-                name="password"
-                rules={[{ required: true, message: 'Please enter your password!' }]}
+          <div className='bg-white p-16 rounded-2xl shadow-xl z-50'>
+            <div className='text-3xl my-6 text-center font-medium'>
+              Login
+            </div>
+            <div className='flex flex-col w-80 text-lg space-y-3'>
+              <Form
+                  name="loginForm"
+                  onFinish={onFinish}
               >
-                <Input.Password placeholder="Password" className='h-10' />
-              </Form.Item>
+                <Form.Item
+                    name="username"
+                    rules={[{required: true, message: 'Please enter your username!'}]}
+                >
+                  <Input placeholder="Username" className='h-10'/>
+                </Form.Item>
 
-              {/* <Form.Item name="remember" valuePropName="checked">
+                <Form.Item
+                    name="password"
+                    rules={[{required: true, message: 'Please enter your password!'}]}
+                >
+                  <Input.Password placeholder="Password" className='h-10'/>
+                </Form.Item>
+
+                {/* <Form.Item name="remember" valuePropName="checked">
                 <Checkbox className='text-zinc-500'>Remember me</Checkbox>
               </Form.Item> */}
 
-              <Form.Item>
-                <Button type="primary" htmlType="submit" className='h-10 w-full font-semibold shadow-xl'>
-                  LOGIN
-                </Button>
-              </Form.Item>
-            </Form>
-            {/* <div className='text-xs flex justify-center items-center text-zinc-500'>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" className='h-10 w-full font-semibold shadow-xl'>
+                    LOGIN
+                  </Button>
+                </Form.Item>
+              </Form>
+              {/* <div className='text-xs flex justify-center items-center text-zinc-500'>
               <hr className='flex-grow border-t' />
               <div className='mx-2'>or login with</div>
               <hr className='flex-grow border-t' />
@@ -98,15 +100,15 @@ export const Authentication = () => {
                 Facebook
               </Button>
             </div> */}
+            </div>
+            <div className='my-6 text-center'>
+              Don't have an account?
+              <button className='mx-1 text-primary underline hover:text-green-500' onClick={switchForm}>
+                Register Now
+              </button>
+            </div>
           </div>
-          <div className='my-6 text-center'>
-            Don't have an account?
-            <button className='mx-1 text-primary underline hover:text-green-500' onClick={switchForm}>
-              Register Now
-            </button>
-          </div>
-        </div>
-      </>
+        </>
     )
   }
 
@@ -237,7 +239,7 @@ export const Authentication = () => {
   return (
     <>
       <div className="absolute top-4 left-4 text-white font-bold text-4xl shadow-white">
-        TOURNAMENT
+        <img src={Logo} className='h-16 w-full' />
       </div>
       <div className="h-screen flex justify-center 
         flex-col
