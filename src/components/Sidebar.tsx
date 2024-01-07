@@ -1,6 +1,6 @@
 import { Layout, Menu } from 'antd';
 import { BankOutlined, DashboardOutlined, TrophyOutlined, UserOutlined, UserSwitchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
-import Logo from "../assets/images/logo.png"
+import Logo from "../assets/images/newlogo.png"
 import { useNavigate } from 'react-router-dom';
 import SidebarBg from "../assets/images/sidebar.jpg"
 
@@ -22,10 +22,7 @@ export const Sidebar = () => {
                     window.location.href = '/'
                 }}>
                     <div className='m-1'>
-                        <img src={Logo} className='h-10 w-10' />
-                    </div>
-                    <div className='font-bold text-base' >
-                        TOURNAMENT
+                        <img src={Logo} className='h-10 w-44' />
                     </div>
                 </button>
                 <Sider style={{ background: 'transparent' }}>
