@@ -14,7 +14,10 @@ interface GoalScorerCardProps {
     data?: any;
 }
 
-const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive }) => {
+const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, data }) => {
+
+    console.log(data)
+
     const isDraggable = typeof x === 'undefined' || typeof y === 'undefined';
 
     const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
@@ -84,32 +87,33 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive })
                     <div className='relative flex flex-col justify-center h-full '>
                         <div className='flex justify-between items-start text-white text-xl'>
                             <div className='flex flex-grow justify-around items-start'>
-                                <img src={Team1} className='w-12 h-full rounded' />
+                                <img src={data?.teamA.logo} className='w-12 h-full rounded' />
                                 <div>
-                                    <div className=''>Everton FC</div>
+                                    <div className=''>{data?.teamA.name}</div>
                                     <div className='text-sm'>
-                                        <div>
-                                            A. Schulz - 12 , 40
-                                        </div>
-                                        <div>
-                                            P. Wunderlich - 16
-                                        </div>
+                                        {data?.teamA.goals.map((goal: any, index: number) => (
+                                            <div key={index}>
+                                                {`${goal.player} - ${goal.minute}`}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
                             <div className='text-2xl font-semibold'>
-                                3:2
+                                {data?.teamA.score} : {data?.teamB.score}
                             </div>
                             <div className='flex flex-grow justify-around items-start'>
                                 <div>
-                                    <div className=''>VfB Stuttgart</div>
+                                    <div className=''>{data?.teamB.name}</div>
                                     <div className='text-sm'>
-                                        <div>
-                                            S. Winkler - 12 , 40
-                                        </div>
+                                        {data?.teamB.goals.map((goal: any, index: number) => (
+                                            <div key={index}>
+                                                {`${goal.player} - ${goal.minute}`}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                                <img src={Team2} className='w-12 h-full rounded' />
+                                <img src={data?.teamB.logo} className='w-12 h-full rounded' />
                             </div>
                         </div>
                     </div>

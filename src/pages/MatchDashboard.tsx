@@ -16,24 +16,26 @@ import { confirmation } from '../components/Confirmation';
 
 const { Option } = Select;
 
+let colorA = '#ff0000';
+let colorB = '#0000ff';
+
 export const MatchDashboard: React.FC = () => {
 
     const location = useLocation();
-    const { matchRecord, tournament } = location.state;
+    const { matchRecord, tournament, schedule } = location.state;
 
     const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
 
-    console.log(match_id)
 
     const [updater, setUpdater] = useState<number>(0)
 
     const [matchData, setMatchData] = useState()
     const [teamAPlayers, setTeamAPlayers] = useState<IPlayer[]>([])
     const [teamBPlayers, setTeamBPlayers] = useState<IPlayer[]>([])
-    const [groupTeamA, setGroupTeamA] = useState<IGroupTeam>()
-    const [groupTeamB, setGroupTeamB] = useState<IGroupTeam>()
+
     const [teamAGoals, setTeamAGoals] = useState([]);
     const [teamBGoals, setTeamBGoals] = useState([]);
+    const [nextMatches, setNextMatches] = useState([]);
 
     const [stadiums, setStadiums] = useState<IStadium[]>([]);
     const [referees, setReferees] = useState<IReferee[]>([]);
@@ -55,13 +57,261 @@ export const MatchDashboard: React.FC = () => {
 
     const [activeTab, setActiveTab] = useState('1');
 
-    const handleButtonClick = (formInstance: any) => {
-        formInstance.validateFields().then((values: any) => {
-            // Handle form submission
-            console.log('Form values:', values);
-            // Add your logic for form submission
-        });
+    const [matchCardSocket, setMatchCardSocket] = useState<W3CWebSocket | null>(null);
+    const [scoreCardSocket, setScoreCardSocket] = useState<W3CWebSocket | null>(null);
+    const [scheduleCardSocket, setScheduleSocket] = useState<W3CWebSocket | null>(null);
+    const [goalScorerCardSocket, setGoalScorerCardSocket] = useState<W3CWebSocket | null>(null);
+
+    const connectMatchSocket = () => {
+        const newMatchSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/matchcard/${tournament.id}/`);
+
+        newMatchSocket.onopen = () => {
+            console.log('Match WebSocket connected');
+            // Send a message to the server after connection
+            const message = {
+                data: {
+                    teamA: {
+                        name: matchRecord.teamAGroupRecord.team_record.name,
+                        logo: matchRecord.teamAGroupRecord.team_record.logo,
+                    },
+                    teamB: {
+                        name: matchRecord.teamBGroupRecord.team_record.name,
+                        logo: matchRecord.teamBGroupRecord.team_record.logo,
+                    },
+                },
+            };
+            newMatchSocket.send(JSON.stringify(message));
+        };
+
+        setMatchCardSocket(newMatchSocket);
     };
+    const connectScoreCardSocket = () => {
+        const newScoreCardSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/scorecard/${tournament.id}/`);
+
+        newScoreCardSocket.onopen = () => {
+            console.log('ScoreCard WebSocket connected');
+
+            // Send a message to the server after connection
+            const message = {
+                data: {
+                    teamA: {
+                        shortName: matchRecord.teamAGroupRecord.team_record.short_name,
+                        score: teamAGoals.length, // Initial score, replace with the actual initial score
+                        color: colorA, // Replace with the actual color
+                    },
+                    teamB: {
+                        shortName: matchRecord.teamBGroupRecord.team_record.short_name,
+                        score: teamBGoals.length, // Initial score, replace with the actual initial score
+                        color: colorB, // Replace with the actual color
+                    },
+                },
+            };
+
+            newScoreCardSocket.send(JSON.stringify(message));
+        };
+
+        setScoreCardSocket(newScoreCardSocket);
+    };
+    const connectScheduleSocket = () => {
+        const newScheduleSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/schedulecard/${tournament.id}/`);
+
+        newScheduleSocket.onopen = () => {
+            console.log('Schedule WebSocket connected');
+            // Send schedule information to the server after connection
+            const message = {
+                data: {
+                    // Replace the following with your actual schedule information
+                    matches: nextMatches.map(match => ({
+                        teamA: {
+                            name: match.teamAGroupRecord.team_record.name,
+                            logo: match.teamAGroupRecord.team_record.logo,
+                        },
+                        teamB: {
+                            name: match.teamBGroupRecord.team_record.name,
+                            logo: match.teamBGroupRecord.team_record.logo,
+                        },
+                        group: match.group, // Add other relevant fields as needed
+                    })),
+                },
+            };
+            newScheduleSocket.send(JSON.stringify(message));
+        };
+
+        setScheduleSocket(newScheduleSocket);
+    };
+    const connectGoalScorerCardSocket = () => {
+        const newGoalScorerCardSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/goalscorercard/${tournament.id}/`);
+
+        newGoalScorerCardSocket.onopen = () => {
+            console.log('Goal Scorer Card WebSocket connected');
+            // Send a message to the server after connection
+            const message = {
+                data: {
+                    teamA: {
+                        score: teamAGoals.length,
+                        name: matchRecord.teamAGroupRecord.team_record.name,
+                        logo: matchRecord.teamAGroupRecord.team_record.logo,
+                        goals: teamAGoals.map(goal => ({
+                            player: goal.player.name,
+                            minute: 'time'
+                        })),
+                    },
+                    teamB: {
+                        score: teamBGoals.length,
+                        name: matchRecord.teamBGroupRecord.team_record.name,
+                        logo: matchRecord.teamBGroupRecord.team_record.logo,
+                        goals: teamBGoals.map(goal => ({
+                            player: goal.player.name,
+                            minute: 'time'
+                        })),
+                    },
+                },
+            };
+
+            newGoalScorerCardSocket.send(JSON.stringify(message));
+        };
+
+        setGoalScorerCardSocket(newGoalScorerCardSocket);
+    };
+
+    const sendMatchInformationAgain = () => {
+        if (matchCardSocket) {
+            // Send information again
+            const message = {
+                data: {
+                    teamA: {
+                        name: matchRecord.teamAGroupRecord.team_record.name,
+                        logo: matchRecord.teamAGroupRecord.team_record.logo,
+                    },
+                    teamB: {
+                        name: matchRecord.teamBGroupRecord.team_record.name,
+                        logo: matchRecord.teamBGroupRecord.team_record.logo,
+                    },
+                },
+            };
+            matchCardSocket.send(JSON.stringify(message));
+        }
+    };
+    const sendScoreInformationAgain = () => {
+        if (scoreCardSocket) {
+            // Send updated scores
+            const message = {
+                data: {
+                    teamA: {
+                        shortName: matchRecord.teamAGroupRecord.team_record.short_name,
+                        score: teamAGoals.length, // Replace with the updated score
+                        color: colorA, // Replace with the updated color
+                    },
+                    teamB: {
+                        shortName: matchRecord.teamBGroupRecord.team_record.short_name,
+                        score: teamBGoals.length, // Replace with the updated score
+                        color: colorB, // Replace with the updated color
+                    },
+                },
+            };
+            scoreCardSocket.send(JSON.stringify(message));
+        }
+    };
+    const sendScheduleInformationAgain = () => {
+        if (scheduleCardSocket) {
+            // Send updated schedule information
+            const message = {
+                data: {
+                    // Replace the following with your actual schedule information
+                    matches: nextMatches.map(match => ({
+                        teamA: {
+                            name: match.teamAGroupRecord.team_record.name,
+                            logo: match.teamAGroupRecord.team_record.logo,
+                        },
+                        teamB: {
+                            name: match.teamBGroupRecord.team_record.name,
+                            logo: match.teamBGroupRecord.team_record.logo,
+                        },
+                        group: match.group, // Add other relevant fields as needed
+                    })),
+                },
+            };
+
+            console.log(message)
+            scheduleCardSocket.send(JSON.stringify(message));
+        }
+    };
+    const sendGoalScorerInformationAgain = () => {
+        if (goalScorerCardSocket) {
+            // Send updated goal scorer information
+            const message = {
+                data: {
+                    teamA: {
+                        score: teamAGoals.length,
+                        name: matchRecord.teamAGroupRecord.team_record.name,
+                        logo: matchRecord.teamAGroupRecord.team_record.logo,
+                        goals: teamAGoals.map(goal => ({
+                            player: goal.player.name,
+                            minute: 'time'
+                        })),
+                    },
+                    teamB: {
+                        score: teamBGoals.length,
+                        name: matchRecord.teamBGroupRecord.team_record.name,
+                        logo: matchRecord.teamBGroupRecord.team_record.logo,
+                        goals: teamBGoals.map(goal => ({
+                            player: goal.player.name,
+                            minute: 'time'
+                        })),
+                    },
+                },
+            };
+            goalScorerCardSocket.send(JSON.stringify(message));
+        }
+    };
+
+    useEffect(() => {
+        // Connect WebSocket when the component mounts
+        connectMatchSocket();
+
+        // Clean up the WebSocket connection when the component unmounts
+        return () => {
+            if (matchCardSocket) {
+                matchCardSocket.close();
+            }
+        };
+    }, [matchRecord, tournament]);
+
+    useEffect(() => {
+        // Connect WebSocket when the component mounts
+        connectScoreCardSocket();
+
+        // Clean up the WebSocket connection when the component unmounts
+        return () => {
+            if (scoreCardSocket) {
+                scoreCardSocket.close();
+            }
+        };
+    }, [matchRecord, tournament]);
+
+    useEffect(() => {
+        // Connect WebSocket when the component mounts
+        connectScheduleSocket();
+
+        // Clean up the WebSocket connection when the component unmounts
+        return () => {
+            if (scheduleCardSocket) {
+                scheduleCardSocket.close();
+            }
+        };
+    }, [matchRecord, tournament, schedule]);
+
+    useEffect(() => {
+        // Connect WebSocket when the component mounts
+        connectGoalScorerCardSocket();
+
+        // Clean up the WebSocket connection when the component unmounts
+        return () => {
+            if (goalScorerCardSocket) {
+                goalScorerCardSocket.close();
+            }
+        };
+    }, [matchRecord, tournament, teamAGoals, teamBGoals]);
 
     // Function to fetch stadiums
     const fetchStadiums = async () => {
@@ -82,6 +332,51 @@ export const MatchDashboard: React.FC = () => {
             setReferees(response.data);
         } catch (error) {
             console.error('Error fetching referees:', error);
+        }
+    };
+
+    const fetchGoalRecords = async () => {
+        try {
+            // Make a GET request to fetch all goal records for the current match
+            const response = await axios.get(`/matchgoalrecord/?match=${match_id}`);
+            console.log(response.data);
+
+            // Filter goal records based on group_team_record
+            const allGoals = response.data;
+            const teamAGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamAGroupRecord.id);
+            const teamBGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamBGroupRecord.id);
+
+            // Filter out own goals
+            const teamAGoalsWithoutOwnGoals = teamAGoalsFiltered.filter(goal => !goal.is_own_goal);
+            const teamBGoalsWithoutOwnGoals = teamBGoalsFiltered.filter(goal => !goal.is_own_goal);
+
+            // Set the filtered goals in state
+            setTeamAGoals(teamAGoalsWithoutOwnGoals);
+            setTeamBGoals(teamBGoalsWithoutOwnGoals);
+
+            sendScoreInformationAgain()
+
+            // Handle the fetched goal records, you may want to set them in state or perform other actions
+        } catch (error) {
+            console.error('Error fetching goal records:', error);
+        }
+    };
+
+    const findNextMatches = () => {
+        const matchIndex = schedule.findIndex(match => {
+            const currentMatchId = `${match.teamAGroupRecord.id}-${match.teamBGroupRecord.id}`;
+            return currentMatchId === match_id;
+        });
+
+        // If the match with the specified matchId is found
+        if (matchIndex !== -1) {
+            // Extract the next 4 matches if they exist
+            const nextMatchesData = schedule.slice(matchIndex + 1, matchIndex + 5);
+
+            // Set the nextMatches state
+            setNextMatches(nextMatchesData);
+        } else {
+            console.log('Match not found in the schedule.');
         }
     };
 
@@ -143,6 +438,9 @@ export const MatchDashboard: React.FC = () => {
 
             // Make an axios PUT request to update the status
             await axios.put(`/match/${match_id}/`, updateData);
+
+            // Show Ant Design success message
+            message.success('Status updated successfully');
 
             // Add any additional logic or UI updates after a successful update
 
@@ -327,63 +625,9 @@ export const MatchDashboard: React.FC = () => {
     };
 
     useEffect(() => {
-        const fetchGoalRecords = async () => {
-            try {
-                // Make a GET request to fetch all goal records for the current match
-                const response = await axios.get(`/matchgoalrecord/?match=${match_id}`);
-                console.log(response.data);
-
-                // Filter goal records based on group_team_record
-                const allGoals = response.data;
-                const teamAGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamAGroupRecord.id);
-                const teamBGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamBGroupRecord.id);
-
-                // Filter out own goals
-                const teamAGoalsWithoutOwnGoals = teamAGoalsFiltered.filter(goal => !goal.is_own_goal);
-                const teamBGoalsWithoutOwnGoals = teamBGoalsFiltered.filter(goal => !goal.is_own_goal);
-
-                // Set the filtered goals in state
-                setTeamAGoals(teamAGoalsWithoutOwnGoals);
-                setTeamBGoals(teamBGoalsWithoutOwnGoals);
-
-                // Handle the fetched goal records, you may want to set them in state or perform other actions
-            } catch (error) {
-                console.error('Error fetching goal records:', error);
-            }
-        };
-
+        findNextMatches();
         fetchGoalRecords();
     }, [matchRecord, updater]);
-
-    useEffect(() => {
-        // WebSocket connection for MatchCard
-        const matchSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/matchcard/${tournament.id}/`);
-
-        matchSocket.onopen = () => {
-            console.log('Match WebSocket connected');
-
-            // Send a message to the server after connection
-            const message = {
-                data: {
-                    teamA: {
-                        name: matchRecord.teamAGroupRecord.team_record.name,
-                        logo: matchRecord.teamAGroupRecord.team_record.logo
-                    },
-                    teamB: {
-                        name: matchRecord.teamBGroupRecord.team_record.name,
-                        logo: matchRecord.teamBGroupRecord.team_record.logo
-                    },
-                }
-            };
-
-            matchSocket.send(JSON.stringify(message));
-        };
-
-        return () => {
-            // Clean up the WebSocket connection when the component unmounts
-            matchSocket.close();
-        };
-    }, [matchRecord, tournament.id])
 
     useEffect(() => {
         fetchStadiums();
@@ -477,7 +721,10 @@ export const MatchDashboard: React.FC = () => {
                                     label="Select Jersey Color"
                                     initialValue={colorPickerValueTeamA}
                                 >
-                                    <ColorPicker onChange={(color) => setColorPickerValueTeamA(color.toHexString())} />
+                                    <ColorPicker onChange={(color) => {
+                                        setColorPickerValueTeamA(color.toHexString())
+                                        colorA = color.toHexString()
+                                    }} />
                                 </Form.Item>
 
                                 <Form.Item
@@ -536,7 +783,7 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formPenaltyTeamA} onFinish={() => handleButtonClick(formPenaltyTeamA)}>
+                        <Form form={formPenaltyTeamA} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>CARD / PENALTY</div>
@@ -585,7 +832,7 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formSubstitutionTeamA} onFinish={() => handleButtonClick(formSubstitutionTeamA)}>
+                        <Form form={formSubstitutionTeamA} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>SUBSTITUTION</div>
@@ -648,6 +895,28 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </div>
                     }
+
+                    <div className='flex flex-wrap justify-center gap-2'>
+                        <Button type='primary' onClick={sendMatchInformationAgain}>
+                            FORCE MATCH CARD
+                        </Button>
+                        <Button type='primary' onClick={sendScoreInformationAgain}>
+                            FORCE SCORE CARD
+                        </Button>
+                        <Button type='primary' onClick={sendScheduleInformationAgain}>
+                            FORCE SCHEDULE CARD
+                        </Button>
+                        <Button type='primary' onClick={sendGoalScorerInformationAgain}>
+                            FORCE GOAL SCORER CARD
+                        </Button>
+                    </div>
+
+                    <div className='flex flex-col items-center justify-center'>
+                        <div className='font-bold'>LIVE @</div>
+                        <a className='text-xl' href={`${import.meta.env.VITE_HOST_BASE_URL}/live/${tournament.id}`}>
+                            {import.meta.env.VITE_HOST_BASE_URL}/live/{tournament.id}
+                        </a>
+                    </div>
 
                     <div className='flex justify-center'>
                         <div className='border bg-white rounded p-2 shadow'>
@@ -863,7 +1132,10 @@ export const MatchDashboard: React.FC = () => {
                                     label="Select Jersey Color"
                                     initialValue={colorPickerValueTeamB}
                                 >
-                                    <ColorPicker onChange={(color) => setColorPickerValueTeamB(color.toHexString())} />
+                                    <ColorPicker onChange={(color) => {
+                                        setColorPickerValueTeamB(color.toHexString())
+                                        colorB = color.toHexString()
+                                    }} />
                                 </Form.Item>
 
                                 <Form.Item
@@ -921,7 +1193,7 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formPenaltyTeamB} onFinish={() => handleButtonClick(formPenaltyTeamB)}>
+                        <Form form={formPenaltyTeamB} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>CARD / PENALTY</div>
@@ -970,7 +1242,7 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formSubstitutionTeamB} onFinish={() => handleButtonClick(formSubstitutionTeamB)}>
+                        <Form form={formSubstitutionTeamB} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>SUBSTITUTION</div>

@@ -21,7 +21,11 @@ interface ScheduleCardProps {
     data?: any;
 }
 
-const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => {
+const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive, data }) => {
+
+    const matches = data?.matches
+    console.log(matches)
+
     const isDraggable = typeof x === 'undefined' || typeof y === 'undefined';
 
     const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
@@ -55,14 +59,14 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
                             <div className='flex justify-center gap-2 items-center text-white text-xl'>
                                 <div className='text-sm'>
                                     <div>
-                                        10:30
+                                        Time 1
                                     </div>
                                     <div>
-                                        Grp A
+                                        Group
                                     </div>
                                 </div>
                                 <div className='flex justify-end gap-2 items-center w-64'>
-                                    <div className=''>VfB Stuttgart</div>
+                                    <div className=''>Team A</div>
                                     <img src={Team1} className='w-12 h-12 object-contain rounded' />
                                 </div>
                                 <div>
@@ -71,20 +75,20 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
 
                                 <div className='flex justify-start gap-2 items-center w-64'>
                                     <img src={Team2} className='w-12 h-12 object-contain rounded' />
-                                    <div className=''>FC Schalke 04</div>
+                                    <div className=''>Team B</div>
                                 </div>
                             </div>
                             <div className='flex justify-center gap-2 items-center text-white text-xl'>
                                 <div className='text-sm'>
                                     <div>
-                                        11:35
+                                        Time 2
                                     </div>
                                     <div>
-                                        Grp A
+                                        Group
                                     </div>
                                 </div>
                                 <div className='flex justify-end gap-2 items-center w-64'>
-                                    <div className=''>FC Midtylland</div>
+                                    <div className=''>Team C</div>
                                     <img src={Team3} className='w-12 h-12 object-contain rounded' />
                                 </div>
                                 <div>
@@ -93,20 +97,20 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
 
                                 <div className='flex justify-start gap-2 items-center w-64'>
                                     <img src={Team4} className='w-12 h-12 object-contain rounded' />
-                                    <div className=''>Palmeiras</div>
+                                    <div className=''>Team D</div>
                                 </div>
                             </div>
                             <div className='flex justify-center gap-2 items-center text-white text-xl'>
                                 <div className='text-sm'>
                                     <div>
-                                        12:40
+                                        Time 3
                                     </div>
                                     <div>
-                                        Grp B
+                                        Group
                                     </div>
                                 </div>
                                 <div className='flex justify-end gap-2 items-center w-64'>
-                                    <div className=''>SC Freiburg</div>
+                                    <div className=''>Team E</div>
                                     <img src={Team5} className='w-12 h-12 object-contain rounded' />
                                 </div>
                                 <div>
@@ -115,20 +119,20 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
 
                                 <div className='flex justify-start gap-2 items-center w-64'>
                                     <img src={Team6} className='w-12 h-12 object-contain rounded' />
-                                    <div className=''>FSV Mainz 05</div>
+                                    <div className=''>Team F</div>
                                 </div>
                             </div>
                             <div className='flex justify-center gap-2 items-center text-white text-xl'>
                                 <div className='text-sm'>
                                     <div>
-                                        12:45
+                                        Time 4
                                     </div>
                                     <div>
-                                        Grp B
+                                        Group
                                     </div>
                                 </div>
                                 <div className='flex justify-end gap-2 items-center w-64'>
-                                    <div className=''>Everton FC</div>
+                                    <div className=''>Team G</div>
                                     <img src={Team7} className='w-12 h-12 object-contain rounded' />
                                 </div>
                                 <div>
@@ -137,10 +141,10 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
 
                                 <div className='flex justify-start gap-2 items-center w-64'>
                                     <img src={Team8} className='w-12 h-12 object-contain rounded' />
-                                    <div className=''>AS Rom</div>
+                                    <div className=''>Team H</div>
                                 </div>
                             </div>
-                            <div className='flex flex-col justify-center  items-center text-white text-xl'>
+                            {/* <div className='flex flex-col justify-center  items-center text-white text-xl'>
                                 <div>
                                     Livestream Powered by
                                 </div>
@@ -148,7 +152,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
                                     <img src={PoweredBy1} className='h-12 object-contain' />
                                     <img src={PoweredBy2} className='h-12 object-contain' />
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </Draggable>
@@ -159,92 +163,110 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
                         <div className='flex justify-center gap-2 items-center text-white text-xl'>
                             <div className='text-sm'>
                                 <div>
-                                    10:30
+                                    {/* Time  */}
                                 </div>
                                 <div>
-                                    Grp A
+                                    {matches && matches[0]?.group}
                                 </div>
                             </div>
                             <div className='flex justify-end gap-2 items-center w-64'>
-                                <div className=''>VfB Stuttgart</div>
-                                <img src={Team1} className='w-12 h-12 object-contain rounded' />
+                                {matches && matches[0] &&
+                                    <div className=''>{matches && matches[0]?.teamA.name}</div>
+                                }
+                                <img src={matches && matches[0]?.teamA.logo} className='w-12 h-12 object-contain rounded' />
                             </div>
-                            <div>
-                                :
-                            </div>
-
+                            {matches && matches[0] &&
+                                <div>
+                                    :
+                                </div>
+                            }
                             <div className='flex justify-start gap-2 items-center w-64'>
-                                <img src={Team2} className='w-12 h-12 object-contain rounded' />
-                                <div className=''>FC Schalke 04</div>
+                                {matches && matches[0] &&
+                                    <img src={matches && matches[0]?.teamB.logo} className='w-12 h-12 object-contain rounded' />
+                                }
+                                <div className=''>{matches && matches[0]?.teamB.name}</div>
                             </div>
                         </div>
                         <div className='flex justify-center gap-2 items-center text-white text-xl'>
                             <div className='text-sm'>
                                 <div>
-                                    11:35
+                                    {/* Time  */}
                                 </div>
                                 <div>
-                                    Grp A
+                                    {matches && matches[1]?.group}
                                 </div>
                             </div>
                             <div className='flex justify-end gap-2 items-center w-64'>
-                                <div className=''>FC Midtylland</div>
-                                <img src={Team3} className='w-12 h-12 object-contain rounded' />
+                                <div className=''>{matches && matches[1]?.teamA.name}</div>
+                                {matches && matches[1] &&
+                                    <img src={matches && matches[1]?.teamA.logo} className='w-12 h-12 object-contain rounded' />
+                                }
                             </div>
-                            <div>
-                                :
-                            </div>
-
+                            {matches && matches[1] &&
+                                <div>
+                                    :
+                                </div>
+                            }
                             <div className='flex justify-start gap-2 items-center w-64'>
-                                <img src={Team4} className='w-12 h-12 object-contain rounded' />
-                                <div className=''>Palmeiras</div>
+                                <img src={matches && matches[1]?.teamB.logo} className='w-12 h-12 object-contain rounded' />
+                                <div className=''>{matches && matches[1]?.teamB.name}</div>
                             </div>
                         </div>
                         <div className='flex justify-center gap-2 items-center text-white text-xl'>
                             <div className='text-sm'>
                                 <div>
-                                    12:40
+                                    {/* Time  */}
                                 </div>
                                 <div>
-                                    Grp B
+                                    {matches && matches[2]?.group}
                                 </div>
                             </div>
                             <div className='flex justify-end gap-2 items-center w-64'>
-                                <div className=''>SC Freiburg</div>
-                                <img src={Team5} className='w-12 h-12 object-contain rounded' />
+                                <div className=''>{matches && matches[2]?.teamA.name}</div>
+                                {matches && matches[2] &&
+                                    <img src={matches && matches[2]?.teamA.logo} className='w-12 h-12 object-contain rounded' />
+                                }
                             </div>
-                            <div>
-                                :
-                            </div>
-
+                            {matches && matches[2] &&
+                                <div>
+                                    :
+                                </div>
+                            }
                             <div className='flex justify-start gap-2 items-center w-64'>
-                                <img src={Team6} className='w-12 h-12 object-contain rounded' />
-                                <div className=''>FSV Mainz 05</div>
+                                {matches && matches[2] &&
+                                    <img src={matches && matches[2]?.teamB.logo} className='w-12 h-12 object-contain rounded' />
+                                }
+                                <div className=''>{matches && matches[2]?.teamB.name}</div>
                             </div>
                         </div>
                         <div className='flex justify-center gap-2 items-center text-white text-xl'>
                             <div className='text-sm'>
                                 <div>
-                                    12:45
+                                    {/* Time  */}
                                 </div>
                                 <div>
-                                    Grp B
+                                    {matches && matches[3]?.group}
                                 </div>
                             </div>
                             <div className='flex justify-end gap-2 items-center w-64'>
-                                <div className=''>Everton FC</div>
-                                <img src={Team7} className='w-12 h-12 object-contain rounded' />
+                                <div className=''>{matches && matches[3]?.teamA.name}</div>
+                                {matches && matches[3] &&
+                                    <img src={matches && matches[3]?.teamA.logo} className='w-12 h-12 object-contain rounded' />
+                                }
                             </div>
-                            <div>
-                                :
-                            </div>
-
+                            {matches && matches[3] &&
+                                <div>
+                                    :
+                                </div>
+                            }
                             <div className='flex justify-start gap-2 items-center w-64'>
-                                <img src={Team8} className='w-12 h-12 object-contain rounded' />
-                                <div className=''>AS Rom</div>
+                                {matches && matches[3] &&
+                                    <img src={matches && matches[3]?.teamB.logo} className='w-12 h-12 object-contain rounded' />
+                                }
+                                <div className=''>{matches && matches[3]?.teamA.name}</div>
                             </div>
                         </div>
-                        <div className='flex flex-col justify-center  items-center text-white text-xl'>
+                        {/* <div className='flex flex-col justify-center  items-center text-white text-xl'>
                             <div>
                                 Livestream Powered by
                             </div>
@@ -252,7 +274,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive }) => 
                                 <img src={PoweredBy1} className='h-12 object-contain' />
                                 <img src={PoweredBy2} className='h-12 object-contain' />
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             )}

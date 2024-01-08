@@ -56,9 +56,9 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => 
                                     <div>
                                         /
                                     </div>
-                                    <div className='text-xs text-zinc-500'>
+                                    {/* <div className='text-xs text-zinc-500'>
                                         Powered by
-                                    </div>
+                                    </div> */}
                                 </div>
 
                                 <div className='flex flex-grow justify-around items-center'>
@@ -67,12 +67,12 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => 
                                 </div>
                             </div>
                             <div className='flex justify-between items-center text-zinc-500'>
-                                <div className='flex flex-grow justify-around items-center'>
+                                {/* <div className='flex flex-grow justify-around items-center'>
                                     <div className=''>Heckler & Koch</div>
                                 </div>
                                 <div className='flex flex-grow justify-around items-center'>
                                     <div className=''>Merz Immobilien</div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
@@ -90,9 +90,9 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => 
                                 <div>
                                     /
                                 </div>
-                                <div className='text-xs text-zinc-500'>
+                                {/* <div className='text-xs text-zinc-500'>
                                     Powered by
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className='flex flex-grow justify-around items-center'>
@@ -100,14 +100,14 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => 
                                 <img src={data?.teamB?.logo ?? Team2} className='w-12 h-full rounded' />
                             </div>
                         </div>
-                        <div className='flex justify-between items-center text-zinc-500'>
+                        {/* <div className='flex justify-between items-center text-zinc-500'>
                             <div className='flex flex-grow justify-around items-center'>
                                 <div className=''>Heckler & Koch</div>
                             </div>
                             <div className='flex flex-grow justify-around items-center'>
                                 <div className=''>Merz Immobilien</div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             )}

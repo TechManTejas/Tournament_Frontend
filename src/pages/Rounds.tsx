@@ -702,7 +702,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                             <Button type="primary" onClick={() => {
 
                                                                 console.log(record)
-                                                                navigate('/dashboard/match', { state: { matchRecord: record, tournament } })
+                                                                navigate('/dashboard/match', { state: { matchRecord: record, tournament, schedule: scheduleData } })
 
                                                             }}>
                                                                 Match Dashboard

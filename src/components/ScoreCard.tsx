@@ -11,7 +11,11 @@ interface ScoreCardProps {
     data?: any;
 }
 
-const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive }) => {
+const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data }) => {
+    console.log(data)
+    const teamA = data?.teamA
+    const teamB = data?.teamB
+
     const isDraggable = typeof x === 'undefined' || typeof y === 'undefined';
 
     const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
@@ -44,12 +48,12 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive }) => {
                             {/* Your draggable box content goes here */}
                             <div className='relative px-4 flex flex-col justify-center h-full text-white text-xl'>
                                 <div className='flex justify-center w-full'>
-                                    09: 17
+                                    00 : 00
                                 </div>
                                 <div className='flex justify-between'>
                                     <div className='flex flex-grow justify-around'>
                                         <div className='w-2 h-full bg-blue-500 rounded' />
-                                        <div className=''>STGK</div>
+                                        <div className=''>{teamA?.shortName ?? 'A'}</div>
                                         <div className=''>0</div>
                                     </div>
                                     <div>
@@ -57,8 +61,8 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive }) => {
                                     </div>
                                     <div className='flex flex-grow justify-around'>
                                         <div className=''>0</div>
-                                        <div className=''>KSC</div>
-                                        <div className='w-2 bg-yellow-500 rounded' />
+                                        <div className=''>{teamB?.shortName ?? 'B'}</div>
+                                        <div className='w-2 bg-red-500 rounded' />
                                     </div>
                                 </div>
                             </div>
@@ -70,21 +74,21 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive }) => {
                     {/* Your non-draggable box content goes here */}
                     <div className='relative px-4 flex flex-col justify-center h-full text-white text-xl'>
                         <div className='flex justify-center w-full'>
-                            09: 17
+                            09 : 17
                         </div>
                         <div className='flex justify-between'>
                             <div className='flex flex-grow justify-around'>
-                                <div className='w-2 h-full bg-blue-500 rounded' />
-                                <div className=''>STGK</div>
-                                <div className=''>0</div>
+                                <div className={`w-2 h-full rounded`} style={{backgroundColor: teamA?.color}}/>
+                                <div className=''>{teamA?.shortName ?? 'A'}</div>
+                                <div className=''>{teamA?.score ?? '0'}</div>
                             </div>
                             <div>
                                 -
                             </div>
                             <div className='flex flex-grow justify-around'>
-                                <div className=''>0</div>
-                                <div className=''>KSC</div>
-                                <div className='w-2 bg-yellow-500 rounded' />
+                                <div className=''>{teamB?.score ?? '0'}</div>
+                                <div className=''>{teamB?.shortName ?? 'A'}</div>
+                                <div className={`w-2 h-full rounded`} style={{backgroundColor: teamB?.color}}/>
                             </div>
                         </div>
                     </div>
