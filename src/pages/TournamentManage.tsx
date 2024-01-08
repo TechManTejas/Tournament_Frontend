@@ -59,7 +59,7 @@ const ManageTournament: React.FC = () => {
                         <div><strong>Start Date:</strong> {tournament.start_date}</div>
                     </div>
                     <div className='p-2'>
-                        <div><strong>Status:</strong> {tournament.status}</div>
+                        {/* <div><strong>Status:</strong> {tournament.status}</div> */}
                         <div><strong>Game Mode:</strong> {tournament.game_mode?.name}</div>
                     </div>
                     <div className='p-2 flex flex-col jus'>

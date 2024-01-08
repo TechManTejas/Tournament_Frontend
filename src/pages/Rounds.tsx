@@ -651,12 +651,12 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                     {
                         selectedSubMenu === "schedule" &&
                         <>
-                            {tournament.status === "Not Started" &&
+                            {/* {tournament.status === "Not Started" &&
                                 <div className="py-2 flex justify-between gap-4">
                                     <Button className="bg-red-500 text-white" onClick={handleStartTournament}>START TOURNAMENT</Button>
                                     <Button onClick={() => toPDF()}>Download PDF</Button>
                                 </div>
-                            }
+                            } */}
                             <div ref={targetRef} className=" h-screen rounded p-2 flex flex-col gap-10">
                                 {scheduleData.length > 0 && (
                                     <Table
