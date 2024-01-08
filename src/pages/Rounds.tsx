@@ -29,8 +29,6 @@ interface RoundsProps {
 
 export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup, tournament }) => {
 
-    console.log(tournament)
-
     const navigate = useNavigate()
 
     const { toPDF, targetRef } = usePDF({ filename: 'page.pdf' });
@@ -238,6 +236,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
 
     useEffect(() => {
         fetchGroups();
+        setSelectedSubMenu("groups")
     }, [selectedRound]);
 
     useEffect(() => {
@@ -247,26 +246,39 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
 
 
     const schedule = () => {
+        fetchGroups();
+
+        console.log(groups)
+
         const roundData = tournament.game_mode.data.find((round: IRound) => round.name === selectedRound?.name);
-        console.log(roundData?.schedule);
 
         let matches: Match[] = [];
 
         roundData?.schedule.forEach((selected_group: any, index: number) => {
             const group_to_schedule = groupsAll.find((group: any) => group.name === selected_group.group);
-            console.log(group_to_schedule);
-
             console.log(selected_group);
-            const groupA = groupsAll.find((group: any) => group.name === selected_group.teamA.group)?.group_team_records
-            console.log(groupA)
 
+            const teamA = selected_group.teamA
+            const selected_team_id_A = tournament.data.find(r => r.name === teamA.round)?.results?.find(g => g.name === teamA.group).teams[teamA.team - 1]
+            const teamB = selected_group.teamB
+            const selected_team_id_B = tournament.data.find(r => r.name === teamB.round)?.results?.find(g => g.name === teamB.group).teams[teamB.team - 1]
+
+            const foundGroupTeamRecordA = groupsAll.filter(group => !groups.includes(group)).find((group) => group.group_team_records.find(g => g.team_record && g.team_record.id === selected_team_id_A));
+            const groupTeamRecord_A = foundGroupTeamRecordA?.group_team_records.find(g => g.team_record && g.team_record.id === selected_team_id_A);
+            const foundGroupTeamRecordASameRound = groups.find((group) => group.group_team_records.find(g => g.team_record && g.team_record.id === groupTeamRecord_A?.team_record.id))
+            const groupTeamRecord_ASameRound = foundGroupTeamRecordASameRound?.group_team_records.find(g => g.team_record && g.team_record.id === groupTeamRecord_A?.team_record.id);
+  
+            const foundGroupTeamRecordB = groupsAll.filter(group => !groups.includes(group)).find((group) => group.group_team_records.find(g => g.team_record && g.team_record.id === selected_team_id_B));
+            const groupTeamRecord_B = foundGroupTeamRecordB?.group_team_records.find(g => g.team_record && g.team_record.id === selected_team_id_B);
+            const foundGroupTeamRecordBSameRound = groups.find((group) => group.group_team_records.find(g => g.team_record && g.team_record.id === groupTeamRecord_B?.team_record.id))
+            const groupTeamRecord_BSameRound = foundGroupTeamRecordBSameRound?.group_team_records.find(g => g.team_record && g.team_record.id === groupTeamRecord_B?.team_record.id);
 
             const groupTeamRecordA = typeof selected_group.teamA === 'object'
-                ? groupsAll.find((group: any) => group.name === selected_group.teamA.group)?.group_team_records[selected_group.teamA.team - 1]
+                ? groupTeamRecord_ASameRound
                 : group_to_schedule?.group_team_records[parseInt(selected_group.teamA) - 1];
 
             const groupTeamRecordB = typeof selected_group.teamB === 'object'
-                ? groupsAll.find((group: any) => group.name === selected_group.teamB.group)?.group_team_records[selected_group.teamB.team - 1]
+                ? groupTeamRecord_BSameRound
                 : group_to_schedule?.group_team_records[parseInt(selected_group.teamB) - 1];
 
             console.log(groupTeamRecordA, groupTeamRecordB);
@@ -297,7 +309,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
             // and update the 'tournament' state or perform any additional actions
             // const updatedTournament = await axios.get(`/tournament/${tournament.id}`);
             // setTournament(updatedTournament.data);
-            window.location.href = '/dashboard/tournament'
+            window.location.href = '/dashboard/tournaments'
 
             // Display a success message or handle any additional actions
             message.success('Tournament started successfully!');
@@ -329,12 +341,11 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
 
                 group.teams.forEach((team, index: number) => {
 
-                    const groupTeamRecord = groupsAll
-                        .find(g => g.name === team.team.group)
-                        ?.group_team_records[team.team.team - 1];
+                    console.log(team)
+                    const selected_team_id = tournament.data.find(r => r.name === team.team.round).results.find(g => g.name === team.team.group).teams[team.team.team - 1]
 
                     team_records.push({
-                        id: groupTeamRecord?.team_record.id,
+                        id: selected_team_id,
                         group_team_id: group_team_records[v].id,
                         order: index + 1,
                     });
@@ -352,6 +363,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                         const response = await axios.patch(`/group/${existingGroup.id}/`, formData);
                         console.log(response.data);
                         message.success('Group updated successfully!');
+
+                        window.location.href = '/dashboard/tournaments/'
                     } else {
                         // If the group doesn't exist, create a new one
                         const response = await axios.post('/group/', formData);
@@ -370,17 +383,51 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
         }
     };
 
-    const finaliseRound = () => {
+    const finaliseRound = async () => {
         // Ensure that selectedRound is not null
         if (selectedRound) {
-            // Find the groups for the selected round
-            const currentRoundGroups = groupsAll.filter((group) => group.round.name === selectedRound.name);
+            // Show confirmation dialog
+            const shouldProceed = await confirmation('Are you sure you want to finalize the round?');
+    
+            if (shouldProceed) {
+                // Find the groups for the selected round
+                const currentRoundGroups = groupsAll.filter((group) => group.round.name === selectedRound.name);
+    
+                const result = calculateGroupRanks(groups);
+                console.log("results:", result);
+    
+                let updatedTournament = { ...tournament };
+                updatedTournament.data = updatedTournament.data.map((round) => {
+                    if (round.name === selectedRound.name) {
+                        round.results = result;
+                    }
+                    return round;
+                });
+    
+                const { logo, ...dataWithoutLogo } = updatedTournament;
+    
+                try {
+                    const response = await axios.patch(`/tournament/${tournament.id}/`, dataWithoutLogo);
+                    console.log('Tournament updated successfully:', response.data);
+    
+                    // Show Ant Design success message
+                    message.success('Tournament updated successfully');
 
-            const result = calculateGroupRanks(groups);
-            console.log("results:", result);
-
-            // Print the groups in the console
-            console.log('Groups in the current round:', currentRoundGroups);
+                    window.location.href = '/dashboard/tournaments/'
+    
+                    // Print the groups in the console
+                    console.log('Groups in the current round:', currentRoundGroups);
+    
+                    // Add additional logic or API calls as needed after confirmation
+                } catch (error) {
+                    console.error('Error updating tournament:', error.message);
+    
+                    // Show Ant Design error message
+                    message.error('Failed to update tournament');
+                }
+            } else {
+                console.log('Round finalization canceled.');
+            }
         } else {
             console.error('No round selected.');
         }
@@ -408,7 +455,7 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                     }
                     return teamB.goals_pos - teamA.goals_pos; // Higher goals scored come first
                 })
-                .map((team) => team.id);
+                .map((team) => team.team_record.id);
 
             groupRanks.push({
                 name: group.name,

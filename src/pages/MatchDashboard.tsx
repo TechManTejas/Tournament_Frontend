@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { Select, TimePicker, Button, RadioChangeEvent, Radio, Form, Tabs, Input, Table, Space, ColorPicker } from 'antd';
+import { Select, TimePicker, Button, RadioChangeEvent, Radio, Form, Tabs, Input, Table, Space, ColorPicker, message } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import { DeleteOutlined, EditOutlined, MenuFoldOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
@@ -10,6 +10,9 @@ import { IReferee } from '../types/referee.types';
 import { IStadium } from '../types/stadium.types';
 import { ITournament } from '../types/tournament.types';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
+import { IPlayer } from '../types/player.types';
+import { IGroupTeam } from '../types/group.types';
+import { confirmation } from '../components/Confirmation';
 
 const { Option } = Select;
 
@@ -17,13 +20,20 @@ export const MatchDashboard: React.FC = () => {
 
     const location = useLocation();
     const { matchRecord, tournament } = location.state;
-    console.log(matchRecord);
-    console.log(tournament);
 
     const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
+
+    console.log(match_id)
+
+    const [updater, setUpdater] = useState<number>(0)
+
     const [matchData, setMatchData] = useState()
-    const [teamAPlayers, setTeamAPlayers] = useState([])
-    const [teamBPlayers, setTeamBPlayers] = useState([])
+    const [teamAPlayers, setTeamAPlayers] = useState<IPlayer[]>([])
+    const [teamBPlayers, setTeamBPlayers] = useState<IPlayer[]>([])
+    const [groupTeamA, setGroupTeamA] = useState<IGroupTeam>()
+    const [groupTeamB, setGroupTeamB] = useState<IGroupTeam>()
+    const [teamAGoals, setTeamAGoals] = useState([]);
+    const [teamBGoals, setTeamBGoals] = useState([]);
 
     const [stadiums, setStadiums] = useState<IStadium[]>([]);
     const [referees, setReferees] = useState<IReferee[]>([]);
@@ -158,6 +168,9 @@ export const MatchDashboard: React.FC = () => {
 
             // Add any additional logic or UI updates after a successful update
             console.log('Jersey color for Team A updated successfully');
+
+            // Display success message using Ant Design message
+            message.success('Jersey color for Team A updated successfully');
         } catch (error) {
             // Handle validation or axios error
             console.error('Error updating jersey color for Team A:', error);
@@ -179,11 +192,168 @@ export const MatchDashboard: React.FC = () => {
 
             // Add any additional logic or UI updates after a successful update
             console.log('Jersey color for Team B updated successfully');
+
+            // Display success message using Ant Design message
+            message.success('Jersey color for Team B updated successfully');
         } catch (error) {
             // Handle validation or axios error
             console.error('Error updating jersey color for Team B:', error);
         }
     };
+
+    const createMatchGoalRecordTeamA = async (values: any) => {
+        try {
+            const playerId = values.selectOption;
+
+            const goalRecordData = {
+                match: match_id,
+                group_team_record: matchRecord.teamAGroupRecord.id,
+                other_group_team_record: matchRecord.teamBGroupRecord.id,
+                player: playerId,
+                is_penalty_goal: values.radioValue === 3,
+                is_own_goal: values.radioValue === 2,
+                is_standard_goal: values.radioValue === 1,
+            };
+
+            console.log(goalRecordData);
+
+            // Make a POST request to create the MatchGoalRecord
+            await axios.post('/matchgoalrecord/', goalRecordData);
+
+            // Display success message using Ant Design message
+            message.success('Goal recorded successfully');
+
+            setUpdater(updater + 1)
+
+            // Add any additional logic or UI updates after a successful goal record creation
+            console.log('Goal recorded successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error recording goal:', error);
+
+            // Display error message using Ant Design message
+            message.error('Error recording goal. Please try again.');
+        }
+    };
+
+    const createMatchGoalRecordTeamB = async (values: any) => {
+        try {
+            const playerId = values.selectOption;
+
+            const goalRecordData = {
+                match: match_id,
+                group_team_record: matchRecord.teamBGroupRecord.id,
+                other_group_team_record: matchRecord.teamAGroupRecord.id,
+                player: playerId,
+                is_penalty_goal: values.radioValue === 3,
+                is_own_goal: values.radioValue === 2,
+                is_standard_goal: values.radioValue === 1,
+            };
+
+            console.log(goalRecordData);
+
+            // Make a POST request to create the MatchGoalRecord
+            await axios.post('/matchgoalrecord/', goalRecordData);
+
+            // Display success message using Ant Design message
+            message.success('Goal recorded successfully');
+
+            setUpdater(updater + 1)
+
+            // Add any additional logic or UI updates after a successful goal record creation
+            console.log('Goal recorded successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error recording goal:', error);
+
+            // Display error message using Ant Design message
+            message.error('Error recording goal. Please try again.');
+        }
+    };
+
+    const finalizeMatch = async () => {
+        try {
+            // Ask for confirmation before finalizing the match
+            const isConfirmed = await confirmation('Are you sure you want to finalize the match?');
+
+            if (!isConfirmed) {
+                // If not confirmed, return without finalizing the match
+                return;
+            }
+
+            // Determine the winning team based on the highest score
+            const teamAScore = teamAGoals.length;
+            const teamBScore = teamBGoals.length;
+
+            let winningTeamId;
+            if (teamAScore > teamBScore) {
+                winningTeamId = matchRecord.teamAGroupRecord.id;
+            } else if (teamBScore > teamAScore) {
+                winningTeamId = matchRecord.teamBGroupRecord.id;
+            } else {
+                // Handle the case of a draw (if needed)
+                // You might want to implement additional logic for a draw
+            }
+
+            // Update the group_team_record with the points after winning
+            const winningTeamRecord = {
+                id: winningTeamId,
+                points: tournament.points_winner,
+            };
+
+            // Make an axios PUT request to update the winning team's group_team_record
+            await axios.put(`/group-team/${winningTeamId}/`, winningTeamRecord);
+
+            // Update the match status to "Ended"
+            const updatedMatchStatus = {
+                id: match_id,
+                status: "Ended",
+            };
+
+            // Make an axios PUT request to update the match status
+            await axios.put(`/match/${match_id}/`, updatedMatchStatus);
+
+            // Show success message using Ant Design message
+            message.success('Match finalized successfully');
+
+            window.location.href = 'dashboard/tournaments/manage'
+
+            // Additional logic or UI updates after a successful update
+            console.log('Match finalized successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error finalizing match:', error);
+        }
+    };
+
+    useEffect(() => {
+        const fetchGoalRecords = async () => {
+            try {
+                // Make a GET request to fetch all goal records for the current match
+                const response = await axios.get(`/matchgoalrecord/?match=${match_id}`);
+                console.log(response.data);
+
+                // Filter goal records based on group_team_record
+                const allGoals = response.data;
+                const teamAGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamAGroupRecord.id);
+                const teamBGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamBGroupRecord.id);
+
+                // Filter out own goals
+                const teamAGoalsWithoutOwnGoals = teamAGoalsFiltered.filter(goal => !goal.is_own_goal);
+                const teamBGoalsWithoutOwnGoals = teamBGoalsFiltered.filter(goal => !goal.is_own_goal);
+
+                // Set the filtered goals in state
+                setTeamAGoals(teamAGoalsWithoutOwnGoals);
+                setTeamBGoals(teamBGoalsWithoutOwnGoals);
+
+                // Handle the fetched goal records, you may want to set them in state or perform other actions
+            } catch (error) {
+                console.error('Error fetching goal records:', error);
+            }
+        };
+
+        fetchGoalRecords();
+    }, [matchRecord, updater]);
 
     useEffect(() => {
         // WebSocket connection for MatchCard
@@ -213,13 +383,67 @@ export const MatchDashboard: React.FC = () => {
             // Clean up the WebSocket connection when the component unmounts
             matchSocket.close();
         };
-    }, [tournament.id])
+    }, [matchRecord, tournament.id])
 
     useEffect(() => {
         fetchStadiums();
         fetchReferees();
         getOrCreateMatchRecord(matchRecord.teamAGroupRecord.id, matchRecord.teamBGroupRecord.id)
     }, [matchRecord])
+
+    useEffect(() => {
+        const team_record_A = matchRecord.teamAGroupRecord.team_record;
+        const team_record_B = matchRecord.teamBGroupRecord.team_record;
+
+        // Create a list of playing players excluding null values
+        const playingPlayersA: IPlayer[] = [
+            team_record_A.playing_player_1,
+            team_record_A.playing_player_2,
+            team_record_A.playing_player_3,
+            team_record_A.playing_player_4,
+            team_record_A.playing_player_5,
+            team_record_A.playing_player_6,
+            team_record_A.playing_player_7,
+            team_record_A.playing_player_8,
+            team_record_A.playing_player_9,
+            team_record_A.playing_player_10,
+            team_record_A.playing_player_11,
+        ].filter((player) => player !== null);
+
+        const playingPlayersB: IPlayer[] = [
+            team_record_B.playing_player_1,
+            team_record_B.playing_player_2,
+            team_record_B.playing_player_3,
+            team_record_B.playing_player_4,
+            team_record_B.playing_player_5,
+            team_record_B.playing_player_6,
+            team_record_B.playing_player_7,
+            team_record_B.playing_player_8,
+            team_record_B.playing_player_9,
+            team_record_B.playing_player_10,
+            team_record_B.playing_player_11,
+        ].filter((player) => player !== null);
+
+        // Create a list of substitute players excluding null values
+        const substitutePlayersA: IPlayer[] = [
+            team_record_B.substitute_player_1,
+            team_record_B.substitute_player_2,
+            team_record_B.substitute_player_3,
+            team_record_B.substitute_player_4,
+            team_record_B.substitute_player_5,
+        ].filter((player) => player !== null);
+
+        const substitutePlayersB: IPlayer[] = [
+            team_record_B.substitute_player_1,
+            team_record_B.substitute_player_2,
+            team_record_B.substitute_player_3,
+            team_record_B.substitute_player_4,
+            team_record_B.substitute_player_5,
+        ].filter((player) => player !== null);
+
+        setTeamAPlayers([...playingPlayersA, ...substitutePlayersA])
+        setTeamBPlayers([...playingPlayersB, ...substitutePlayersB])
+    }, [matchRecord]);
 
     // const tabData = Array.from({ length: 100 }, (_, index) => index + 1);
 
@@ -240,9 +464,9 @@ export const MatchDashboard: React.FC = () => {
             </div> */}
             <div className='flex gap-4 h-full'>
                 {/* Team A */}
-                <div className='w-72 h-full rounded p-2'>
+                <div className='w-80 h-full rounded p-2'>
                     <div className='text-center text-xl mb-1'>
-                        {matchRecord.teamA}
+                        {matchRecord.teamA} - ({teamAGoals.length})
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Form form={formColorTeamA} onFinish={updateTeamJerseyColorA}>
@@ -266,7 +490,7 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formGoalTeamA} onFinish={() => handleButtonClick(formGoalTeamA)}>
+                        <Form form={formGoalTeamA} onFinish={createMatchGoalRecordTeamA}>
                             <div className='bg-white p-4 rounded shadow'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>GOAL</div>
@@ -285,10 +509,13 @@ export const MatchDashboard: React.FC = () => {
                                         placeholder="Select a Player"
                                         className='w-full mb-2'
                                     >
-                                        <Option value="option1">Option 1</Option>
-                                        <Option value="option2">Option 2</Option>
-                                        <Option value="option3">Option 3</Option>
+                                        {teamAPlayers.map((player) => (
+                                            <Option key={player.id} value={player.id}>
+                                                {`${player.name} - ${player.squad_number}`}
+                                            </Option>
+                                        ))}
                                     </Select>
+
                                 </FormItem>
                                 {/* RADIO GROUP */}
                                 <FormItem
@@ -297,22 +524,10 @@ export const MatchDashboard: React.FC = () => {
                                     rules={[{ required: true, message: 'Please select a radio option' }]}
                                 >
                                     <Radio.Group defaultValue={1} onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
-                                        <Radio value={1}>Own</Radio>
-                                        <Radio value={2}>Penalty?</Radio>
+                                        <Radio value={1}>Standard</Radio>
+                                        <Radio value={2}>Own</Radio>
+                                        <Radio value={3}>Penalty</Radio>
                                     </Radio.Group>
-                                </FormItem>
-                                {/* TIME INPUT */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="matchTime"
-                                    rules={[{ required: true, message: 'Please select a time' }]}
-                                >
-                                    <TimePicker
-                                        id="matchTime"
-                                        placeholder="Select a time"
-                                        format="HH:mm"
-                                        className='w-full mb-2'
-                                    />
                                 </FormItem>
                                 {/* BUTTON */}
                                 <Button type="primary" htmlType="submit" className='w-full'>
@@ -361,20 +576,6 @@ export const MatchDashboard: React.FC = () => {
                                         <Option value="yellow">Yellow Card</Option>
                                         <Option value="red">Red Card</Option>
                                     </Select>
-                                </FormItem>
-
-                                {/* TIME INPUT */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyTime"
-                                    rules={[{ required: true, message: 'Please select a time for the penalty' }]}
-                                >
-                                    <TimePicker
-                                        id="penaltyTime"
-                                        placeholder="Select a time"
-                                        format="HH:mm"
-                                        className='w-full mb-2'
-                                    />
                                 </FormItem>
 
                                 {/* BUTTON */}
@@ -438,6 +639,16 @@ export const MatchDashboard: React.FC = () => {
                 {/* CENTER */}
                 <div className='flex flex-col justify-evenly flex-grow rounded p-2 gap-4'>
 
+                    {matchData && matchData.status !== "Ended" &&
+                        <div className='flex justify-center'>
+                            <div className='border bg-white rounded p-2 shadow'>
+                                <Button className='font-bold bg-red-500 border-red-500 text-white' onClick={finalizeMatch}>
+                                    FINALISE MATCH
+                                </Button>
+                            </div>
+                        </div>
+                    }
+
                     <div className='flex justify-center'>
                         <div className='border bg-white rounded p-2 shadow'>
                             <div className='flex items-center gap-1'>
@@ -472,7 +683,7 @@ export const MatchDashboard: React.FC = () => {
                                     <Option value="notStarted">Not Started</Option>
                                     <Option value="started">Started</Option>
                                     <Option value="halftime">Halftime</Option>
-                                    <Option value="ended">Ended</Option>
+                                    {/* <Option value="ended">Ended</Option> */}
                                 </Select>
                             </Form.Item>
 
@@ -639,9 +850,9 @@ export const MatchDashboard: React.FC = () => {
                 </div>
 
                 {/* Team B */}
-                <div className='w-72 h-full rounded p-2'>
+                <div className='w-80 h-full rounded p-2'>
                     <div className='text-center text-xl mb-1'>
-                        {matchRecord.teamB}
+                        {matchRecord.teamB} - ({teamBGoals.length})
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Form form={formColorTeamB} onFinish={updateTeamJerseyColorB}>
@@ -665,7 +876,7 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formGoalTeamB} onFinish={() => handleButtonClick(formGoalTeamB)}>
+                        <Form form={formGoalTeamB} onFinish={createMatchGoalRecordTeamB}>
                             <div className='bg-white p-4 rounded shadow'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>GOAL</div>
@@ -684,9 +895,11 @@ export const MatchDashboard: React.FC = () => {
                                         placeholder="Select a Player"
                                         className='w-full mb-2'
                                     >
-                                        <Option value="option1">Option 1</Option>
-                                        <Option value="option2">Option 2</Option>
-                                        <Option value="option3">Option 3</Option>
+                                        {teamBPlayers.map((player) => (
+                                            <Option key={player.id} value={player.id}>
+                                                {`${player.name} - ${player.squad_number}`}
+                                            </Option>
+                                        ))}
                                     </Select>
                                 </FormItem>
                                 {/* RADIO GROUP */}
@@ -696,22 +909,10 @@ export const MatchDashboard: React.FC = () => {
                                     rules={[{ required: true, message: 'Please select a radio option' }]}
                                 >
                                     <Radio.Group defaultValue={1} onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
-                                        <Radio value={1}>Own</Radio>
-                                        <Radio value={2}>Penalty?</Radio>
+                                        <Radio value={1}>Standard</Radio>
+                                        <Radio value={2}>Own</Radio>
+                                        <Radio value={3}>Penalty</Radio>
                                     </Radio.Group>
-                                </FormItem>
-                                {/* TIME INPUT */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="matchTime"
-                                    rules={[{ required: true, message: 'Please select a time' }]}
-                                >
-                                    <TimePicker
-                                        id="matchTime"
-                                        placeholder="Select a time"
-                                        format="HH:mm"
-                                        className='w-full mb-2'
-                                    />
                                 </FormItem>
                                 {/* BUTTON */}
                                 <Button type="primary" htmlType="submit" className='w-full'>
@@ -760,20 +961,6 @@ export const MatchDashboard: React.FC = () => {
                                         <Option value="yellow">Yellow Card</Option>
                                         <Option value="red">Red Card</Option>
                                     </Select>
-                                </FormItem>
-
-                                {/* TIME INPUT */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyTime"
-                                    rules={[{ required: true, message: 'Please select a time for the penalty' }]}
-                                >
-                                    <TimePicker
-                                        id="penaltyTime"
-                                        placeholder="Select a time"
-                                        format="HH:mm"
-                                        className='w-full mb-2'
-                                    />
                                 </FormItem>
 
                                 {/* BUTTON */}
