@@ -9,9 +9,19 @@ interface ScoreCardProps {
     y?: number;
     isLive?: boolean;
     data?: any;
+    time?: number;
 }
 
-const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data }) => {
+// Function to format seconds to mm:ss
+const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')} : ${String(remainingSeconds).padStart(2, '0')}`;
+};
+
+const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time }) => {
+
+    console.log(time)
 
     const teamA = data?.teamA
     const teamB = data?.teamB
@@ -76,7 +86,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data }) => 
                     {/* Your non-draggable box content goes here */}
                     <div className='relative px-4 flex flex-col justify-center h-full text-white text-xl'>
                         <div className='flex justify-center w-full'>
-                            09 : 17
+                            {formatTime(time)}
                         </div>
                         <div className='flex justify-between'>
                             <div className='flex flex-grow justify-around'>

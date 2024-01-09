@@ -67,6 +67,7 @@ const Live: React.FC = () => {
   const [draggableScore, setDraggableScore] = useState<DraggableScore>({ x: ((parentWidth - 320) / 2) - 32, y: ((parentHeight - 96) / 2) - 30 });
   const [scoreCardIsLive, setScoreCardIsLive] = useState(false);
   const [scoreCardData, setScoreCardData] = useState<unknown>()
+  const [scoreCardTime, setScoreCardTime] = useState<number>(0);
 
   const [draggableMatch, setDraggableMatch] = useState<DraggableMatch>({ x: ((parentWidth - 560) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
   const [matchCardIsLive, setMatchCardIsLive] = useState(false);
@@ -106,13 +107,20 @@ const Live: React.FC = () => {
     scoreSocket.onopen = () => console.log('Score WebSocket connected');
     scoreSocket.onmessage = (event) => {
       const data = JSON.parse(event.data as string);
+
+      console.log(data)
+
       if (data.isLive !== undefined) {
         setScoreCardIsLive(data.isLive);
-      } else {
+      }
+      if (data.x && data.y) {
         setDraggableScore({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
         setScoreCardData(data.data.data);
+      }
+      if (data?.time && data.time?.type === 'send_time') {
+        setScoreCardTime(data.time.time_value);
       }
     };
 
@@ -121,10 +129,12 @@ const Live: React.FC = () => {
     matchSocket.onopen = () => console.log('Match WebSocket connected');
     matchSocket.onmessage = (event) => {
       const data = JSON.parse(event.data as string);
+      console.log(data)
 
       if (data.isLive !== undefined) {
         setMatchCardIsLive(data.isLive);
-      } else {
+      }
+      if (data.x && data.y) {
         setDraggableMatch({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -139,7 +149,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setScheduleCardIsLive(data.isLive);
-      } else {
+      }
+      if (data.x && data.y) {
         setDraggableSchedule({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -154,7 +165,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setRefereesCardIsLive(data.isLive);
-      } else {
+      } 
+      if (data.x && data.y) {
         setDraggableReferees({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -169,7 +181,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setGoalScorerCardIsLive(data.isLive);
-      } else {
+      } 
+      if (data.x && data.y) {
         setDraggableGoalScorer({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -184,7 +197,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setCardsCardIsLive(data.isLive);
-      } else {
+      } 
+      if (data.x && data.y) {
         setDraggableCards({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -199,7 +213,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setFreeTextCardIsLive(data.isLive);
-      } else {
+      } 
+      if (data.x && data.y) {
         setDraggableFreeText({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -214,7 +229,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setSwapsCardIsLive(data.isLive);
-      } else {
+      } 
+      if (data.x && data.y) {
         setDraggableSwaps({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -229,7 +245,8 @@ const Live: React.FC = () => {
       const data = JSON.parse(event.data as string);
       if (data.isLive !== undefined) {
         setTimeCardIsLive(data.isLive);
-      } else {
+      } 
+      if (data.x && data.y) {
         setDraggableTime({ x: data.x, y: data.y });
       }
       if (data?.data && data.data?.type === 'send_data') {
@@ -243,7 +260,7 @@ const Live: React.FC = () => {
     <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)]'>
       {scoreCardIsLive && (
         <div style={{ position: 'absolute', left: draggableScore.x, top: draggableScore.y }} className='p-6'>
-          <ScoreCard x={0} y={0} data={scoreCardData} />
+          <ScoreCard x={0} y={0} data={scoreCardData} time={scoreCardTime}/>
         </div>
       )}
 

@@ -1,17 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { Select, TimePicker, Button, RadioChangeEvent, Radio, Form, Tabs, Input, Table, Space, ColorPicker, message, InputNumber } from 'antd';
+import { Select, Button, RadioChangeEvent, Radio, Form, Tabs, ColorPicker, message, InputNumber } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
-import { DeleteOutlined, EditOutlined, MenuFoldOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
 import { useLocation } from 'react-router-dom';
 import axios from "../api/axios"
 import { IReferee } from '../types/referee.types';
 import { IStadium } from '../types/stadium.types';
-import { ITournament } from '../types/tournament.types';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import { IPlayer } from '../types/player.types';
-import { IGroupTeam } from '../types/group.types';
 import { confirmation } from '../components/Confirmation';
 
 const { Option } = Select;
@@ -26,6 +24,55 @@ export const MatchDashboard: React.FC = () => {
 
     const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
 
+    const [timerValue, setTimerValue] = useState(600);
+    const [isPaused, setIsPaused] = useState(true);
+
+    // Function to format seconds to mm:ss
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    };
+
+    useEffect(() => {
+        let timer;
+
+        if (!isPaused && timerValue > 0) {
+            timer = setInterval(() => {
+                setTimerValue((prevTime) => {
+                    console.log(prevTime); // Logging the current timer value
+
+                    if (scoreCardSocket) {
+                        const message = {
+                            time: prevTime,
+                        };
+                        scoreCardSocket.send(JSON.stringify(message));
+                    }
+
+                    return prevTime - 1;
+                });
+            }, 1000);
+        }
+
+        return () => clearInterval(timer);
+    }, [isPaused, timerValue]);
+
+    const handleIncrement = (value) => {
+        setTimerValue((prevTime) => prevTime + value);
+    };
+
+    const handleDecrement = (value) => {
+        setTimerValue((prevTime) => (prevTime - value >= 0 ? prevTime - value : 0));
+    };
+
+    const handlePlayPause = () => {
+        setIsPaused((prevPaused) => !prevPaused);
+    };
+
+    const handleReset = () => {
+        setTimerValue(600);
+        setIsPaused(true);
+    };
 
     const [updater, setUpdater] = useState<number>(0)
 
@@ -121,6 +168,16 @@ export const MatchDashboard: React.FC = () => {
             };
 
             newScoreCardSocket.send(JSON.stringify(message));
+        };
+
+        newScoreCardSocket.onmessage = (event) => {
+            const data = JSON.parse(event.data as string);
+            // Handle timer updates
+            if (data?.timer_value !== undefined) {
+                console.log(data)
+                // Update your component state or perform actions based on the timer value
+                setTimerValue(data.timer_value);
+            }
         };
 
         setScoreCardSocket(newScoreCardSocket);
@@ -365,6 +422,14 @@ export const MatchDashboard: React.FC = () => {
         }
     };
 
+    const handleTimerAction = () => {
+        // Send timer-related message to the server
+        const message = {
+            time_value: timerValue,
+        };
+        console.log(message)
+        scoreCardSocket?.send(JSON.stringify(message));
+    };
 
     useEffect(() => {
         // Connect WebSocket when the component mounts
@@ -507,7 +572,7 @@ export const MatchDashboard: React.FC = () => {
             const lastTimeRecord = response.data.reverse().find(card => card.minute !== null && card.card_type === null);
 
             console.log(lastTimeRecord);
-            
+
             setCurrentCardPenalty(lastCardRecord);
             setCurrentTimePenalty(lastTimeRecord)
 
@@ -518,7 +583,6 @@ export const MatchDashboard: React.FC = () => {
             console.error('Error fetching goal records:', error);
         }
     };
-
 
     const findNextMatch = () => {
         const matchIndex = schedule.findIndex(match => {
@@ -1201,22 +1265,22 @@ export const MatchDashboard: React.FC = () => {
                     <div className='flex justify-center'>
                         <div className='border bg-white rounded p-2 shadow'>
                             <div className='flex items-center gap-1'>
-                                <Button type='primary' className='font-bold'>-1</Button>
-                                <Button type='primary' className='font-bold'>-5</Button>
-                                <Button type='primary' className='font-bold'>-10</Button>
-                                <div className='text-2xl font-bold w-20 text-center'>00:00</div>
-                                <Button type='primary' className='font-bold'>+1</Button>
-                                <Button type='primary' className='font-bold'>+5</Button>
-                                <Button type='primary' className='font-bold'>+10</Button>
+                                <Button type='primary' className='font-bold' onClick={() => handleDecrement(1)}>-1</Button>
+                                <Button type='primary' className='font-bold' onClick={() => handleDecrement(5)}>-5</Button>
+                                <Button type='primary' className='font-bold' onClick={() => handleDecrement(10)}>-10</Button>
+                                <div className='text-2xl font-bold w-20 text-center'>{formatTime(timerValue)}</div>
+                                <Button type='primary' className='font-bold' onClick={() => handleIncrement(1)}>+1</Button>
+                                <Button type='primary' className='font-bold' onClick={() => handleIncrement(5)}>+5</Button>
+                                <Button type='primary' className='font-bold' onClick={() => handleIncrement(10)}>+10</Button>
                             </div>
                             <div className='m-1' />
                             <div className='flex items-center gap-1'>
-                                <Button type='primary' className='font-bold' icon={<PlayCircleOutlined />} />
-                                <Button className='font-bold bg-blue-500 border-blue-500 text-white' icon={<PauseCircleOutlined />} />
-                                <div className='w-72 border border-green-500 h-8 rounded flex justify-center items-center'>
-                                    Paused
+                                <Button type='primary' className='font-bold' icon={<PlayCircleOutlined />} onClick={handlePlayPause} />
+                                <Button className='font-bold bg-blue-500 border-blue-500 text-white' icon={<PauseCircleOutlined />} onClick={handlePlayPause} />
+                                <div className='w-72 border border-green-500 h-8 rounded flex justify-center items-center' onClick={handlePlayPause}>
+                                    {isPaused ? 'Paused' : 'Running'}
                                 </div>
-                                <Button className='font-bold bg-red-500 border-red-500 text-white' icon={<ReloadOutlined />} />
+                                <Button className='font-bold bg-red-500 border-red-500 text-white' icon={<ReloadOutlined />} onClick={handleReset} />
                             </div>
                         </div>
                     </div>
