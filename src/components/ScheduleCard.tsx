@@ -263,7 +263,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ onDrag, x, y, isLive, data 
                                 {matches && matches[3] &&
                                     <img src={matches && matches[3]?.teamB.logo} className='w-12 h-12 object-contain rounded' />
                                 }
-                                <div className=''>{matches && matches[3]?.teamA.name}</div>
+                                <div className=''>{matches && matches[3]?.teamB.name}</div>
                             </div>
                         </div>
                         {/* <div className='flex flex-col justify-center  items-center text-white text-xl'>

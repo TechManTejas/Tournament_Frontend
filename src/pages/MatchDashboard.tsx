@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { Select, TimePicker, Button, RadioChangeEvent, Radio, Form, Tabs, Input, Table, Space, ColorPicker, message } from 'antd';
+import { Select, TimePicker, Button, RadioChangeEvent, Radio, Form, Tabs, Input, Table, Space, ColorPicker, message, InputNumber } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import { DeleteOutlined, EditOutlined, MenuFoldOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
@@ -35,7 +35,13 @@ export const MatchDashboard: React.FC = () => {
 
     const [teamAGoals, setTeamAGoals] = useState([]);
     const [teamBGoals, setTeamBGoals] = useState([]);
+    const [teamAOwnGoals, setTeamAOwnGoals] = useState(0);
+    const [teamBOwnGoals, setTeamBOwnGoals] = useState(0);
+
     const [nextMatches, setNextMatches] = useState([]);
+    const [nextMatch, setNextMatch] = useState({});
+    const [currentCardPenalty, setCurrentCardPenalty] = useState({});
+    const [currentTimePenalty, setCurrentTimePenalty] = useState({});
 
     const [stadiums, setStadiums] = useState<IStadium[]>([]);
     const [referees, setReferees] = useState<IReferee[]>([]);
@@ -43,11 +49,13 @@ export const MatchDashboard: React.FC = () => {
     const [formColorTeamA] = Form.useForm();
     const [formGoalTeamA] = Form.useForm();
     const [formPenaltyTeamA] = Form.useForm();
+    const [formTimeTeamA] = Form.useForm();
     const [formSubstitutionTeamA] = Form.useForm();
 
     const [formColorTeamB] = Form.useForm();
     const [formGoalTeamB] = Form.useForm();
     const [formPenaltyTeamB] = Form.useForm();
+    const [formTimeTeamB] = Form.useForm();
     const [formSubstitutionTeamB] = Form.useForm();
 
     const [colorPickerValueTeamA, setColorPickerValueTeamA] = useState<string>('#ff0000'); // Initial color for Team A
@@ -61,8 +69,13 @@ export const MatchDashboard: React.FC = () => {
     const [scoreCardSocket, setScoreCardSocket] = useState<W3CWebSocket | null>(null);
     const [scheduleCardSocket, setScheduleSocket] = useState<W3CWebSocket | null>(null);
     const [goalScorerCardSocket, setGoalScorerCardSocket] = useState<W3CWebSocket | null>(null);
+    const [penaltyCardSocket, setPenaltyCardSocket] = useState<W3CWebSocket | null>(null);
+    const [penaltyTimeSocket, setPenaltyTimeSocket] = useState<W3CWebSocket | null>(null);
 
     const connectMatchSocket = () => {
+
+        findNextMatch()
+
         const newMatchSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/matchcard/${tournament.id}/`);
 
         newMatchSocket.onopen = () => {
@@ -71,12 +84,12 @@ export const MatchDashboard: React.FC = () => {
             const message = {
                 data: {
                     teamA: {
-                        name: matchRecord.teamAGroupRecord.team_record.name,
-                        logo: matchRecord.teamAGroupRecord.team_record.logo,
+                        name: nextMatch.teamA,
+                        logo: nextMatch.teamAGroupRecord.team_record.logo,
                     },
                     teamB: {
-                        name: matchRecord.teamBGroupRecord.team_record.name,
-                        logo: matchRecord.teamBGroupRecord.team_record.logo,
+                        name: nextMatch.teamB,
+                        logo: nextMatch.teamBGroupRecord.team_record.logo,
                     },
                 },
             };
@@ -96,12 +109,12 @@ export const MatchDashboard: React.FC = () => {
                 data: {
                     teamA: {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
-                        score: teamAGoals.length, // Initial score, replace with the actual initial score
+                        score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Initial score, replace with the actual initial score
                         color: colorA, // Replace with the actual color
                     },
                     teamB: {
                         shortName: matchRecord.teamBGroupRecord.team_record.short_name,
-                        score: teamBGoals.length, // Initial score, replace with the actual initial score
+                        score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals, // Initial score, replace with the actual initial score
                         color: colorB, // Replace with the actual color
                     },
                 },
@@ -148,20 +161,22 @@ export const MatchDashboard: React.FC = () => {
             const message = {
                 data: {
                     teamA: {
-                        score: teamAGoals.length,
+                        score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals,
                         name: matchRecord.teamAGroupRecord.team_record.name,
                         logo: matchRecord.teamAGroupRecord.team_record.logo,
                         goals: teamAGoals.map(goal => ({
                             player: goal.player.name,
+                            own: goal.is_own_goal,
                             minute: 'time'
                         })),
                     },
                     teamB: {
-                        score: teamBGoals.length,
+                        score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals,
                         name: matchRecord.teamBGroupRecord.team_record.name,
                         logo: matchRecord.teamBGroupRecord.team_record.logo,
                         goals: teamBGoals.map(goal => ({
                             player: goal.player.name,
+                            own: goal.is_own_goal,
                             minute: 'time'
                         })),
                     },
@@ -173,19 +188,70 @@ export const MatchDashboard: React.FC = () => {
 
         setGoalScorerCardSocket(newGoalScorerCardSocket);
     };
+    const connectPenaltyCardSocket = () => {
+
+        const newPenaltyCardSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/cardscard/${tournament.id}/`);
+
+        newPenaltyCardSocket.onopen = () => {
+            console.log('Match WebSocket connected');
+            // Send a message to the server after connection
+
+            console.log(currentCardPenalty)
+
+            const message = {
+                data: {
+                    name: currentCardPenalty?.player?.name,
+                    logo: currentCardPenalty?.group_team_record?.team_record.logo,
+                    card_type: currentCardPenalty?.card_type
+                },
+            };
+
+            newPenaltyCardSocket.send(JSON.stringify(message));
+        };
+
+
+        setPenaltyCardSocket(newPenaltyCardSocket);
+    };
+    const connectPenaltyTimeSocket = () => {
+
+        const newPenaltyTimeSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/timecard/${tournament.id}/`);
+
+        newPenaltyTimeSocket.onopen = () => {
+            console.log('Time WebSocket connected');
+            // Send a message to the server after connection
+
+            console.log(currentTimePenalty)
+
+            const message = {
+                data: {
+                    name: currentCardPenalty?.player?.name,
+                    logo: currentCardPenalty?.group_team_record?.team_record.logo,
+                    minute: currentCardPenalty?.minute
+                },
+            };
+
+            newPenaltyTimeSocket.send(JSON.stringify(message));
+        };
+
+
+        setPenaltyTimeSocket(newPenaltyTimeSocket);
+    };
 
     const sendMatchInformationAgain = () => {
+
+        findNextMatch()
+
         if (matchCardSocket) {
             // Send information again
             const message = {
                 data: {
                     teamA: {
-                        name: matchRecord.teamAGroupRecord.team_record.name,
-                        logo: matchRecord.teamAGroupRecord.team_record.logo,
+                        name: nextMatch.teamA,
+                        logo: nextMatch.teamAGroupRecord.team_record.logo,
                     },
                     teamB: {
-                        name: matchRecord.teamBGroupRecord.team_record.name,
-                        logo: matchRecord.teamBGroupRecord.team_record.logo,
+                        name: nextMatch.teamB,
+                        logo: nextMatch.teamAGroupRecord.team_record.logo,
                     },
                 },
             };
@@ -199,12 +265,12 @@ export const MatchDashboard: React.FC = () => {
                 data: {
                     teamA: {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
-                        score: teamAGoals.length, // Replace with the updated score
+                        score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Replace with the updated score
                         color: colorA, // Replace with the updated color
                     },
                     teamB: {
                         shortName: matchRecord.teamBGroupRecord.team_record.short_name,
-                        score: teamBGoals.length, // Replace with the updated score
+                        score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals, // Replace with the updated score
                         color: colorB, // Replace with the updated color
                     },
                 },
@@ -242,20 +308,22 @@ export const MatchDashboard: React.FC = () => {
             const message = {
                 data: {
                     teamA: {
-                        score: teamAGoals.length,
+                        score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals,
                         name: matchRecord.teamAGroupRecord.team_record.name,
                         logo: matchRecord.teamAGroupRecord.team_record.logo,
                         goals: teamAGoals.map(goal => ({
                             player: goal.player.name,
+                            own: goal.is_own_goal,
                             minute: 'time'
                         })),
                     },
                     teamB: {
-                        score: teamBGoals.length,
+                        score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals,
                         name: matchRecord.teamBGroupRecord.team_record.name,
                         logo: matchRecord.teamBGroupRecord.team_record.logo,
                         goals: teamBGoals.map(goal => ({
                             player: goal.player.name,
+                            own: goal.is_own_goal,
                             minute: 'time'
                         })),
                     },
@@ -264,6 +332,39 @@ export const MatchDashboard: React.FC = () => {
             goalScorerCardSocket.send(JSON.stringify(message));
         }
     };
+    const sendPenaltyCardInformation = () => {
+        if (penaltyCardSocket) {
+            // Send penalty card information
+
+            console.log(currentCardPenalty)
+
+            const message = {
+                data: {
+                    name: currentCardPenalty.player.name,
+                    logo: currentCardPenalty.group_team_record.team_record.logo,
+                    card_type: currentCardPenalty.card_type
+                },
+            };
+            penaltyCardSocket.send(JSON.stringify(message));
+        }
+    };
+    const sendPenaltyTimeInformation = () => {
+        if (penaltyTimeSocket) {
+            // Send penalty card information
+
+            console.log(currentTimePenalty)
+
+            const message = {
+                data: {
+                    name: currentCardPenalty?.player.name,
+                    logo: currentCardPenalty?.group_team_record.team_record.logo,
+                    minute: currentCardPenalty?.minute
+                },
+            };
+            penaltyTimeSocket.send(JSON.stringify(message));
+        }
+    };
+
 
     useEffect(() => {
         // Connect WebSocket when the component mounts
@@ -313,6 +414,29 @@ export const MatchDashboard: React.FC = () => {
         };
     }, [matchRecord, tournament, teamAGoals, teamBGoals]);
 
+    useEffect(() => {
+        connectPenaltyCardSocket();
+
+        // Clean up the WebSocket connection when the component unmounts
+        return () => {
+            if (penaltyCardSocket) {
+                penaltyCardSocket.close();
+            }
+        };
+    }, [matchRecord, tournament]);
+
+    useEffect(() => {
+        connectPenaltyTimeSocket();
+
+        // Clean up the WebSocket connection when the component unmounts
+        return () => {
+            if (penaltyTimeSocket) {
+                penaltyTimeSocket.close();
+            }
+        };
+    }, [matchRecord, tournament]);
+
+
     // Function to fetch stadiums
     const fetchStadiums = async () => {
         try {
@@ -345,20 +469,76 @@ export const MatchDashboard: React.FC = () => {
             const allGoals = response.data;
             const teamAGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamAGroupRecord.id);
             const teamBGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamBGroupRecord.id);
+            console.log(teamAGoalsFiltered)
+            console.log(teamBGoalsFiltered);
 
             // Filter out own goals
             const teamAGoalsWithoutOwnGoals = teamAGoalsFiltered.filter(goal => !goal.is_own_goal);
             const teamBGoalsWithoutOwnGoals = teamBGoalsFiltered.filter(goal => !goal.is_own_goal);
 
-            // Set the filtered goals in state
-            setTeamAGoals(teamAGoalsWithoutOwnGoals);
-            setTeamBGoals(teamBGoalsWithoutOwnGoals);
+            // Count the number of own goals separately
+            const teamAOwnGoals = teamAGoalsFiltered.filter(goal => goal.is_own_goal).length;
+            const teamBOwnGoals = teamBGoalsFiltered.filter(goal => goal.is_own_goal).length;
 
-            sendScoreInformationAgain()
+            // Set the filtered goals and own goals in state
+            setTeamAGoals(teamAGoalsFiltered);
+            setTeamBGoals(teamBGoalsFiltered);
+            setTeamAOwnGoals(teamAOwnGoals);
+            setTeamBOwnGoals(teamBOwnGoals);
+
+            sendScoreInformationAgain();
 
             // Handle the fetched goal records, you may want to set them in state or perform other actions
         } catch (error) {
             console.error('Error fetching goal records:', error);
+        }
+    };
+
+    const fetchCardRecords = async () => {
+        try {
+            // Make a GET request to fetch all goal records for the current match
+            const response = await axios.get(`/matchcardrecord/?match=${match_id}`);
+            console.log(response.data);
+
+
+            // Get the last card record from the response
+            const lastCardRecord = response.data.length > 0 ? response.data[response.data.length - 1] : null;
+            // Find the last card record with a non-null minute and null card_type
+            const lastTimeRecord = response.data.reverse().find(card => card.minute !== null && card.card_type === null);
+
+            console.log(lastTimeRecord);
+            
+            setCurrentCardPenalty(lastCardRecord);
+            setCurrentTimePenalty(lastTimeRecord)
+
+
+            sendPenaltyCardInformation()
+            // Handle the fetched goal records, you may want to set them in state or perform other actions
+        } catch (error) {
+            console.error('Error fetching goal records:', error);
+        }
+    };
+
+
+    const findNextMatch = () => {
+        const matchIndex = schedule.findIndex(match => {
+            const currentMatchId = `${match.teamAGroupRecord.id}-${match.teamBGroupRecord.id}`;
+            return currentMatchId === match_id;
+        });
+
+        // If the match with the specified matchId is found
+        if (matchIndex !== -1 && matchIndex + 1 < schedule.length) {
+            // Extract the next match
+            const nextMatchData = schedule[matchIndex + 1];
+
+            console.log(nextMatchData)
+
+            // Set the next match information in the nextMatches state
+            setNextMatch(nextMatchData);
+        } else {
+            console.log('Next match not found in the schedule.');
+            // Clear the nextMatches state if no next match is found
+            setNextMatches([]);
         }
     };
 
@@ -569,6 +749,44 @@ export const MatchDashboard: React.FC = () => {
         }
     };
 
+    const createMatchCardRecordTeam = async (values: any) => {
+        console.log(values);
+
+        try {
+            const playerId = values.penaltyPlayer;
+            const cardType = values.penaltyCard;
+            const minute = values.minute;
+
+            const penaltyCardData = {
+                match: match_id,
+                group_team_record: matchRecord.teamAGroupRecord.id,
+                player: playerId,
+                card_type: cardType,
+                penalty_time: null, // Set the penalty time accordingly if needed
+                minute: minute, // Set the minute based on the form input
+            };
+
+            console.log(penaltyCardData);
+
+            // Make a POST request to create the MatchCardRecord
+            await axios.post('/matchcardrecord/', penaltyCardData);
+
+            // Display success message using Ant Design message
+            message.success('Penalty card recorded successfully');
+
+            setUpdater(updater + 1);
+
+            // Add any additional logic or UI updates after a successful penalty card record creation
+            console.log('Penalty card recorded successfully');
+        } catch (error) {
+            // Handle validation or axios error
+            console.error('Error recording penalty card:', error);
+
+            // Display error message using Ant Design message
+            message.error('Error recording penalty card. Please try again.');
+        }
+    };
+
     const finalizeMatch = async () => {
         try {
             // Ask for confirmation before finalizing the match
@@ -625,8 +843,10 @@ export const MatchDashboard: React.FC = () => {
     };
 
     useEffect(() => {
+        findNextMatch();
         findNextMatches();
         fetchGoalRecords();
+        fetchCardRecords();
     }, [matchRecord, updater]);
 
     useEffect(() => {
@@ -689,6 +909,12 @@ export const MatchDashboard: React.FC = () => {
         setTeamBPlayers([...playingPlayersB, ...substitutePlayersB])
     }, [matchRecord]);
 
+    useEffect(() => {
+        sendScoreInformationAgain()
+        sendMatchInformationAgain()
+        sendScheduleInformationAgain()
+        sendGoalScorerInformationAgain()
+    }, [])
     // const tabData = Array.from({ length: 100 }, (_, index) => index + 1);
 
     return (
@@ -708,9 +934,9 @@ export const MatchDashboard: React.FC = () => {
             </div> */}
             <div className='flex gap-4 h-full'>
                 {/* Team A */}
-                <div className='w-80 h-full rounded p-2'>
+                <div className='w-80 flex-shrink-0 h-full rounded p-2'>
                     <div className='text-center text-xl mb-1'>
-                        {matchRecord.teamA} - ({teamAGoals.length})
+                        {matchRecord.teamA} - ({teamAGoals.length - teamAOwnGoals + teamBOwnGoals})
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Form form={formColorTeamA} onFinish={updateTeamJerseyColorA}>
@@ -783,10 +1009,10 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formPenaltyTeamA} onFinish={() => { }}>
+                        <Form form={formPenaltyTeamA} onFinish={createMatchCardRecordTeam}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>CARD / PENALTY</div>
+                                    <div className='font-bold text-primary'>CARD PENALTY</div>
                                     <div>
                                         <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
                                     </div>
@@ -799,13 +1025,15 @@ export const MatchDashboard: React.FC = () => {
                                     rules={[{ required: true, message: 'Please select a player for the penalty' }]}
                                 >
                                     <Select
-                                        id="penaltyPlayer"
+                                        id="selectOption"
                                         placeholder="Select a Player"
                                         className='w-full mb-2'
                                     >
-                                        <Option value="player1">Player 1</Option>
-                                        <Option value="player2">Player 2</Option>
-                                        <Option value="player3">Player 3</Option>
+                                        {teamAPlayers.map((player) => (
+                                            <Option key={player.id} value={player.id}>
+                                                {`${player.name} - ${player.squad_number}`}
+                                            </Option>
+                                        ))}
                                     </Select>
                                 </FormItem>
 
@@ -832,7 +1060,56 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formSubstitutionTeamA} onFinish={() => { }}>
+                        <Form form={formTimeTeamA} onFinish={createMatchCardRecordTeam}>
+                            <div className='bg-white p-4 rounded shadow mt-4'>
+                                <div className='flex justify-between mb-1'>
+                                    <div className='font-bold text-primary'>TIME PENALTY</div>
+                                    <div>
+                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
+                                    </div>
+                                </div>
+
+                                {/* SELECT PLAYER input */}
+                                <FormItem
+                                    className='p-0 m-0'
+                                    name="penaltyPlayer"
+                                    rules={[{ required: true, message: 'Please select a player for the penalty' }]}
+                                >
+                                    <Select
+                                        id="penaltyPlayer"
+                                        placeholder="Select a Player"
+                                        className='w-full mb-2'
+                                    >
+                                        {teamAPlayers.map((player) => (
+                                            <Option key={player.id} value={player.id}>
+                                                {`${player.name} - ${player.squad_number}`}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </FormItem>
+
+                                {/* NUMBER INPUT FOR MINUTE */}
+                                <FormItem
+                                    className='p-0 m-0'
+                                    name="minute"
+                                    rules={[{ required: true, message: 'Please enter the penalty time in minutes' }]}
+                                >
+                                    <InputNumber
+                                        id="penaltyCard"
+                                        placeholder="Enter Penalty Time (minutes)"
+                                        className='w-full mb-2'
+                                        min={1}  // Set a minimum value if needed
+                                    />
+                                </FormItem>
+
+                                {/* BUTTON */}
+                                <Button type="primary" htmlType="submit" className='w-full'>
+                                    Add Penalty
+                                </Button>
+                            </div>
+                        </Form>
+
+                        {/* <Form form={formSubstitutionTeamA} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>SUBSTITUTION</div>
@@ -840,7 +1117,6 @@ export const MatchDashboard: React.FC = () => {
                                         <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
                                     </div>
                                 </div>
-                                {/* SELECT PLAYER 1 input */}
                                 <FormItem
                                     className='p-0 m-0'
                                     name="substitutionPlayer1"
@@ -857,7 +1133,6 @@ export const MatchDashboard: React.FC = () => {
                                     </Select>
                                 </FormItem>
 
-                                {/* SELECT PLAYER 2 input */}
                                 <FormItem
                                     className='p-0 m-0'
                                     name="substitutionPlayer2"
@@ -874,12 +1149,11 @@ export const MatchDashboard: React.FC = () => {
                                     </Select>
                                 </FormItem>
 
-                                {/* BUTTON */}
                                 <Button type="primary" htmlType="submit" className='w-full'>
                                     Make Substitution
                                 </Button>
                             </div>
-                        </Form>
+                        </Form> */}
                     </div>
                 </div>
 
@@ -908,6 +1182,12 @@ export const MatchDashboard: React.FC = () => {
                         </Button>
                         <Button type='primary' onClick={sendGoalScorerInformationAgain}>
                             FORCE GOAL SCORER CARD
+                        </Button>
+                        <Button type='primary' onClick={sendPenaltyCardInformation}>
+                            FORCE PENALTY CARD
+                        </Button>
+                        <Button type='primary' onClick={sendPenaltyTimeInformation}>
+                            FORCE TIME CARD
                         </Button>
                     </div>
 
@@ -1119,9 +1399,9 @@ export const MatchDashboard: React.FC = () => {
                 </div>
 
                 {/* Team B */}
-                <div className='w-80 h-full rounded p-2'>
+                <div className='w-80 flex-shrink-0 h-full rounded p-2'>
                     <div className='text-center text-xl mb-1'>
-                        {matchRecord.teamB} - ({teamBGoals.length})
+                        {matchRecord.teamB} - ({teamBGoals.length - teamBOwnGoals + teamAOwnGoals})
                     </div>
                     <div className='flex flex-col gap-2'>
                         <Form form={formColorTeamB} onFinish={updateTeamJerseyColorB}>
@@ -1193,10 +1473,10 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formPenaltyTeamB} onFinish={() => { }}>
+                        <Form form={formPenaltyTeamB} onFinish={createMatchCardRecordTeam}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>CARD / PENALTY</div>
+                                    <div className='font-bold text-primary'>CARD PENALTY</div>
                                     <div>
                                         <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
                                     </div>
@@ -1209,13 +1489,15 @@ export const MatchDashboard: React.FC = () => {
                                     rules={[{ required: true, message: 'Please select a player for the penalty' }]}
                                 >
                                     <Select
-                                        id="penaltyPlayer"
+                                        id="selectOption"
                                         placeholder="Select a Player"
                                         className='w-full mb-2'
                                     >
-                                        <Option value="player1">Player 1</Option>
-                                        <Option value="player2">Player 2</Option>
-                                        <Option value="player3">Player 3</Option>
+                                        {teamBPlayers.map((player) => (
+                                            <Option key={player.id} value={player.id}>
+                                                {`${player.name} - ${player.squad_number}`}
+                                            </Option>
+                                        ))}
                                     </Select>
                                 </FormItem>
 
@@ -1242,7 +1524,56 @@ export const MatchDashboard: React.FC = () => {
                             </div>
                         </Form>
 
-                        <Form form={formSubstitutionTeamB} onFinish={() => { }}>
+                        <Form form={formTimeTeamB} onFinish={createMatchCardRecordTeam}>
+                            <div className='bg-white p-4 rounded shadow mt-4'>
+                                <div className='flex justify-between mb-1'>
+                                    <div className='font-bold text-primary'>TIME PENALTY</div>
+                                    <div>
+                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
+                                    </div>
+                                </div>
+
+                                {/* SELECT PLAYER input */}
+                                <FormItem
+                                    className='p-0 m-0'
+                                    name="penaltyPlayer"
+                                    rules={[{ required: true, message: 'Please select a player for the penalty' }]}
+                                >
+                                    <Select
+                                        id="penaltyPlayer"
+                                        placeholder="Select a Player"
+                                        className='w-full mb-2'
+                                    >
+                                        {teamBPlayers.map((player) => (
+                                            <Option key={player.id} value={player.id}>
+                                                {`${player.name} - ${player.squad_number}`}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </FormItem>
+
+                                {/* NUMBER INPUT FOR MINUTE */}
+                                <FormItem
+                                    className='p-0 m-0'
+                                    name="minute"
+                                    rules={[{ required: true, message: 'Please enter the penalty time in minutes' }]}
+                                >
+                                    <InputNumber
+                                        id="penaltyCard"
+                                        placeholder="Enter Penalty Time (minutes)"
+                                        className='w-full mb-2'
+                                        min={1}  // Set a minimum value if needed
+                                    />
+                                </FormItem>
+
+                                {/* BUTTON */}
+                                <Button type="primary" htmlType="submit" className='w-full'>
+                                    Add Penalty
+                                </Button>
+                            </div>
+                        </Form>
+
+                        {/* <Form form={formSubstitutionTeamB} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>SUBSTITUTION</div>
@@ -1250,7 +1581,7 @@ export const MatchDashboard: React.FC = () => {
                                         <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
                                     </div>
                                 </div>
-                                {/* SELECT PLAYER 1 input */}
+
                                 <FormItem
                                     className='p-0 m-0'
                                     name="substitutionPlayer1"
@@ -1267,7 +1598,6 @@ export const MatchDashboard: React.FC = () => {
                                     </Select>
                                 </FormItem>
 
-                                {/* SELECT PLAYER 2 input */}
                                 <FormItem
                                     className='p-0 m-0'
                                     name="substitutionPlayer2"
@@ -1284,12 +1614,11 @@ export const MatchDashboard: React.FC = () => {
                                     </Select>
                                 </FormItem>
 
-                                {/* BUTTON */}
                                 <Button type="primary" htmlType="submit" className='w-full'>
                                     Make Substitution
                                 </Button>
                             </div>
-                        </Form>
+                        </Form> */}
                     </div>
                 </div>
             </div>

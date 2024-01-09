@@ -13,7 +13,10 @@ interface CardsCardProps {
     data?: any;
 }
 
-const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive }) => {
+const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive, data }) => {
+
+    console.log(data)
+
     const isDraggable = typeof x === 'undefined' || typeof y === 'undefined';
 
     const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
@@ -46,7 +49,7 @@ const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive }) => {
                         <div className='relative px-4 flex flex-col justify-center h-full '>
                             <div className='flex justify-between items-center text-white text-xl mx-8'>
                                 <img src={Team1} className='w-12 h-12 rounded' />
-                                <div className=''>Thomas Schefold</div>
+                                <div className=''>Player Name</div>
                                 <div className='w-10 h-16 bg-yellow-500 rounded'></div>
                             </div>
                         </div>
@@ -57,9 +60,9 @@ const CardsCard: React.FC<CardsCardProps> = ({ onDrag, x, y, isLive }) => {
                     {/* Your non-draggable box content goes here */}
                     <div className='relative px-4 flex flex-col justify-center h-full '>
                         <div className='flex justify-between items-center text-white text-xl mx-8'>
-                            <img src={Team1} className='w-12 h-12 rounded' />
-                            <div className=''>Thomas Schefold</div>
-                            <div className='w-10 h-16 bg-yellow-500 rounded'></div>
+                            <img src={data.logo} className='w-12 h-12 rounded' />
+                            <div className=''>{data.name}</div>
+                            <div className='w-10 h-16 bg-yellow-500 rounded' style={{backgroundColor: data.card_type}}></div>
                         </div>
                     </div>
                 </div>

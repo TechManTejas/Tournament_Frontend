@@ -12,6 +12,7 @@ import GoalScorerCard from '../components/GoalScorerCard';
 import CardsCard from '../components/CardsCard';
 import FreeTextCard from '../components/FreeTextCard';
 import SwapsCard from '../components/SwapsCard';
+import TimeCard from '../components/TimeCard';
 
 export const StreamOperatorDashboard: React.FC = () => {
 
@@ -55,6 +56,10 @@ export const StreamOperatorDashboard: React.FC = () => {
     const [cardsCardIsLive, setCardsCardIsLive] = useState(false);
     const [isDraggableCardsCardVisible, setDraggableCardsCardVisible] = useState(false);
 
+    const [socketTimeCard, setSocketTimeCard] = useState<w3cwebsocket | null>(null);
+    const [timeCardIsLive, setTimeCardIsLive] = useState(false);
+    const [isDraggableTimeCardVisible, setDraggableTimeCardVisible] = useState(false);
+
     const [socketSwapsCard, setSocketSwapsCard] = useState<w3cwebsocket | null>(null);
     const [swapsCardIsLive, setSwapsCardIsLive] = useState(false);
     const [isDraggableSwapsCardVisible, setDraggableSwapsCardVisible] = useState(false);
@@ -86,6 +91,9 @@ export const StreamOperatorDashboard: React.FC = () => {
     };
     const openDraggableSwapsCard = () => {
         setDraggableSwapsCardVisible(true);
+    };
+    const openDraggableTimeCard = () => {
+        setDraggableTimeCardVisible(true);
     };
 
     const closeDraggableScoreCard = () => {
@@ -119,6 +127,10 @@ export const StreamOperatorDashboard: React.FC = () => {
     const closeDraggableSwapsCard = () => {
         setDraggableSwapsCardVisible(false);
         handleToggleSwapsCardLive(false)
+    };
+    const closeDraggableTimeCard = () => {
+        setDraggableTimeCardVisible(false);
+        handleToggleTimeCardLive(false)
     };
 
     const handleToggleScoreCardVisible = () => {
@@ -177,6 +189,13 @@ export const StreamOperatorDashboard: React.FC = () => {
             closeDraggableSwapsCard()
         }
     };
+    const handleToggleTimeCardVisible = () => {
+        if (!isDraggableTimeCardVisible) {
+            openDraggableTimeCard()
+        } else {
+            closeDraggableTimeCard()
+        }
+    };
 
     const handleToggleScoreCardLive = (checked: boolean) => {
         setScoreCardIsLive(checked)
@@ -201,6 +220,9 @@ export const StreamOperatorDashboard: React.FC = () => {
     };
     const handleToggleSwapsCardLive = (checked: boolean) => {
         setSwapsCardIsLive(checked)
+    };
+    const handleToggleTimeCardLive = (checked: boolean) => {
+        setTimeCardIsLive(checked)
     };
 
     useEffect(() => {
@@ -332,6 +354,22 @@ export const StreamOperatorDashboard: React.FC = () => {
     }, [match]);
 
     useEffect(() => {
+        const ws = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/timecard/${match}/`);
+
+        ws.onopen = () => {
+            console.log('WebSocket TimeCard connected');
+        };
+
+        setSocketTimeCard(ws);
+
+        return () => {
+            if (ws) {
+                ws.close();
+            }
+        };
+    }, [match]);
+
+    useEffect(() => {
         // Send the isLive status to the socket when it becomes true
         if (socketScoreCard && socketScoreCard.readyState === socketScoreCard.OPEN) {
             socketScoreCard.send(
@@ -426,6 +464,18 @@ export const StreamOperatorDashboard: React.FC = () => {
             );
         }
     }, [socketSwapsCard, swapsCardIsLive]);
+
+    useEffect(() => {
+        // Send the isLive status to the socket when it becomes true
+        if (socketTimeCard && socketTimeCard.readyState === socketTimeCard.OPEN) {
+            socketTimeCard.send(
+                JSON.stringify({
+                    type: 'live_status',
+                    isLive: timeCardIsLive,
+                })
+            );
+        }
+    }, [socketTimeCard, timeCardIsLive]);
 
     const handleDragScoreCard = (event: DraggableEvent, data: DraggableData) => {
         // Send the drag information to the server via WebSocket
@@ -531,6 +581,18 @@ export const StreamOperatorDashboard: React.FC = () => {
         }
     };
 
+    const handleDragTimeCard = (event: DraggableEvent, data: DraggableData) => {
+        // Send the drag information to the server via WebSocket
+        if (socketTimeCard && socketTimeCard.readyState === socketTimeCard.OPEN) {
+            socketTimeCard.send(
+                JSON.stringify({
+                    type: 'drag_event',
+                    x: data.x,
+                    y: data.y,
+                })
+            );
+        }
+    };
 
     return (
         <>
@@ -544,6 +606,7 @@ export const StreamOperatorDashboard: React.FC = () => {
                     {isDraggableCardsCardVisible && <CardsCard onDrag={handleDragCardsCard} isLive={cardsCardIsLive} />}
                     {isDraggableFreeTextCardVisible && <FreeTextCard onDrag={handleDragFreeTextCard} isLive={freeTextCardIsLive} />}
                     {isDraggableSwapsCardVisible && <SwapsCard onDrag={handleDragSwapsCard} isLive={swapsCardIsLive} />}
+                    {isDraggableTimeCardVisible && <TimeCard onDrag={handleDragTimeCard} isLive={timeCardIsLive} />}
                     <div className='flex justify-center items-center h-full text-red-500 font-bold z-50'>
                         <div className='absolute border w-full border-red-200'/>
                         <div className='absolute border h-full border-red-200'/>
@@ -589,7 +652,7 @@ export const StreamOperatorDashboard: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className='flex flex-col gap-2'>
+                            {/* <div className='flex flex-col gap-2'>
                                 <div>
                                     <Button type={isDraggableRefereesCardVisible ? 'primary' : 'default'} onClick={handleToggleRefereesCardVisible}>Referees</Button>
                                 </div>
@@ -599,7 +662,7 @@ export const StreamOperatorDashboard: React.FC = () => {
                                 <div>
                                     {refereesCardIsLive ? 'Live' : 'Inactive'}
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className='flex flex-col gap-2'>
                                 <div>
@@ -627,6 +690,18 @@ export const StreamOperatorDashboard: React.FC = () => {
 
                             <div className='flex flex-col gap-2'>
                                 <div>
+                                    <Button type={isDraggableTimeCardVisible ? 'primary' : 'default'} onClick={handleToggleTimeCardVisible}>Time Card</Button>
+                                </div>
+                                <div>
+                                    <Switch checked={timeCardIsLive} onChange={handleToggleTimeCardLive} className='bg-red-500' />
+                                </div>
+                                <div>
+                                    {timeCardIsLive ? 'Live' : 'Inactive'}
+                                </div>
+                            </div>
+
+                            {/* <div className='flex flex-col gap-2'>
+                                <div>
                                     <Button type={isDraggableFreeTextCardVisible ? 'primary' : 'default'} onClick={handleToggleFreeTextCardVisible}>Free Text</Button>
                                 </div>
                                 <div>
@@ -647,7 +722,7 @@ export const StreamOperatorDashboard: React.FC = () => {
                                 <div>
                                     {swapsCardIsLive ? 'Live' : 'Inactive'}
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                     </div>

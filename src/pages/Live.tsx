@@ -9,6 +9,7 @@ import GoalScorerCard from '../components/GoalScorerCard';
 import CardsCard from '../components/CardsCard';
 import FreeTextCard from '../components/FreeTextCard';
 import SwapsCard from '../components/SwapsCard';
+import TimeCard from '../components/TimeCard';
 
 interface DraggableScore {
   x: number;
@@ -50,6 +51,12 @@ interface DraggableSwaps {
   y: number;
 }
 
+interface DraggableTime {
+  x: number;
+  y: number;
+}
+
+
 const Live: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const matchId = id ? parseInt(id, 10) : 0;
@@ -89,6 +96,10 @@ const Live: React.FC = () => {
   const [swapsCardIsLive, setSwapsCardIsLive] = useState(false);
   const [swapsCardData, setSwapsCardData] = useState<unknown>()
 
+  const [draggableTime, setDraggableTime] = useState<DraggableTime>({ x: ((parentWidth - 580) / 2) - 32, y: ((parentHeight - 180) / 2) - 30 });
+  const [timeCardIsLive, setTimeCardIsLive] = useState(false);
+  const [timeCardData, setTimeCardData] = useState<unknown>()
+
   useEffect(() => {
     // WebSocket connection for ScoreCard
     const scoreSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/scorecard/${matchId}/`);
@@ -100,7 +111,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableScore({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setScoreCardData(data.data.data);
       }
     };
@@ -116,7 +127,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableMatch({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setMatchCardData(data.data.data);
       }
     };
@@ -131,7 +142,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableSchedule({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setScheduleCardData(data.data.data);
       }
     };
@@ -146,7 +157,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableReferees({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setRefereesCardData(data.data.data);
       }
     };
@@ -161,7 +172,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableGoalScorer({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setGoalScorerCardData(data.data.data);
       }
     };
@@ -176,7 +187,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableCards({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setCardsCardData(data.data.data);
       }
     };
@@ -191,7 +202,7 @@ const Live: React.FC = () => {
       } else {
         setDraggableFreeText({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setFreeTextCardData(data.data.data);
       }
     };
@@ -206,8 +217,23 @@ const Live: React.FC = () => {
       } else {
         setDraggableSwaps({ x: data.x, y: data.y });
       }
-      if(data?.data && data.data?.type === 'send_data'){
+      if (data?.data && data.data?.type === 'send_data') {
         setSwapsCardData(data.data.data);
+      }
+    };
+
+    // WebSocket connection for TimeCard
+    const timeSocket = new W3CWebSocket(`${import.meta.env.VITE_BASE_SOCKET_URL}/ws/timecard/${matchId}/`);
+    timeSocket.onopen = () => console.log('Time WebSocket connected');
+    timeSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data as string);
+      if (data.isLive !== undefined) {
+        setTimeCardIsLive(data.isLive);
+      } else {
+        setDraggableTime({ x: data.x, y: data.y });
+      }
+      if (data?.data && data.data?.type === 'send_data') {
+        setTimeCardData(data.data.data);
       }
     };
 
@@ -217,49 +243,55 @@ const Live: React.FC = () => {
     <div className='rounded-xl m-6 flex justify-center items-center h-[calc(100vh-50px)]'>
       {scoreCardIsLive && (
         <div style={{ position: 'absolute', left: draggableScore.x, top: draggableScore.y }} className='p-6'>
-          <ScoreCard x={draggableScore.x} y={draggableScore.y} data={scoreCardData}/>
+          <ScoreCard x={0} y={0} data={scoreCardData} />
         </div>
       )}
 
       {matchCardIsLive && (
         <div style={{ position: 'absolute', left: draggableMatch.x, top: draggableMatch.y }} className='p-6'>
-          <MatchCard x={draggableMatch.x} y={draggableMatch.y} data={matchCardData}/>
+          <MatchCard x={0} y={0} data={matchCardData} />
         </div>
       )}
 
       {scheduleCardIsLive && (
         <div style={{ position: 'absolute', left: draggableSchedule.x, top: draggableSchedule.y }} className='p-6'>
-          <ScheduleCard x={draggableSchedule.x} y={draggableSchedule.y} data={scheduleCardData}/>
+          <ScheduleCard x={0} y={0} data={scheduleCardData} />
         </div>
       )}
 
       {refereesCardIsLive && (
         <div style={{ position: 'absolute', left: draggableReferees.x, top: draggableReferees.y }} className='p-6'>
-          <RefereesCard x={draggableReferees.x} y={draggableReferees.y} data={refereesCardData}/>
+          <RefereesCard x={0} y={0} data={refereesCardData} />
         </div>
       )}
 
       {goalScorerCardIsLive && (
         <div style={{ position: 'absolute', left: draggableGoalScorer.x, top: draggableGoalScorer.y }} className='p-6'>
-          <GoalScorerCard x={draggableGoalScorer.x} y={draggableGoalScorer.y} data={goalScorerCardData}/>
+          <GoalScorerCard x={0} y={0} data={goalScorerCardData} />
         </div>
       )}
 
       {cardsCardIsLive && (
         <div style={{ position: 'absolute', left: draggableCards.x, top: draggableCards.y }} className='p-6'>
-          <CardsCard x={draggableCards.x} y={draggableCards.y} data={cardsCardData}/>
+          <CardsCard x={0} y={0} data={cardsCardData} />
         </div>
       )}
 
       {freeTextCardIsLive && (
         <div style={{ position: 'absolute', left: draggableFreeText.x, top: draggableFreeText.y }} className='p-6'>
-          <FreeTextCard x={draggableFreeText.x} y={draggableFreeText.y} data={freeTextCardData}/>
+          <FreeTextCard x={0} y={0} data={freeTextCardData} />
         </div>
       )}
 
       {swapsCardIsLive && (
         <div style={{ position: 'absolute', left: draggableSwaps.x, top: draggableSwaps.y }} className='p-6'>
-          <SwapsCard x={draggableSwaps.x} y={draggableSwaps.y} data={swapsCardData}/>
+          <SwapsCard x={0} y={0} data={swapsCardData} />
+        </div>
+      )}
+
+      {timeCardIsLive && (
+        <div style={{ position: 'absolute', left: draggableTime.x, top: draggableTime.y }} className='p-6'>
+          <TimeCard x={0} y={0} data={timeCardData} />
         </div>
       )}
     </div>

@@ -52,26 +52,35 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                 <div className='flex flex-grow justify-around items-start'>
                                     <img src={Team1} className='w-12 h-full rounded' />
                                     <div>
-                                        <div className=''>Everton FC</div>
+                                        <div className=''>Team A</div>
                                         <div className='text-sm'>
                                             <div>
-                                                A. Schulz - 12 , 40
+                                                Player - time
                                             </div>
                                             <div>
-                                                P. Wunderlich - 16
+                                                Player - time
+                                            </div>
+                                            <div>
+                                                Player - time
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className='text-2xl font-semibold'>
-                                    3:2
+                                    0 : 0
                                 </div>
                                 <div className='flex flex-grow justify-around items-start'>
                                     <div>
-                                        <div className=''>VfB Stuttgart</div>
+                                        <div className=''>Team B</div>
                                         <div className='text-sm'>
                                             <div>
-                                                S. Winkler - 12 , 40
+                                                Player - time
+                                            </div>
+                                            <div>
+                                                Player - time
+                                            </div>
+                                            <div>
+                                                Player - time
                                             </div>
                                         </div>
                                     </div>
@@ -92,8 +101,13 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                     <div className=''>{data?.teamA.name}</div>
                                     <div className='text-sm'>
                                         {data?.teamA.goals.map((goal: any, index: number) => (
-                                            <div key={index}>
-                                                {`${goal.player} - ${goal.minute}`}
+                                            <div key={index} className='flex gap-2'>
+                                                <div>
+                                                    {`${goal.player} - ${goal.minute}`}
+                                                </div>
+                                                <div>
+                                                    {goal.own && <div>OWN</div>}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -107,9 +121,14 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                     <div className=''>{data?.teamB.name}</div>
                                     <div className='text-sm'>
                                         {data?.teamB.goals.map((goal: any, index: number) => (
-                                            <div key={index}>
+                                            <div key={index} className='flex gap-2'>
+                                            <div>
                                                 {`${goal.player} - ${goal.minute}`}
                                             </div>
+                                            <div>
+                                                {goal.own && <div>OWN</div>}
+                                            </div>
+                                        </div>
                                         ))}
                                     </div>
                                 </div>
