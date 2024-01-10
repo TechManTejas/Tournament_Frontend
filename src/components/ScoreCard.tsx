@@ -21,7 +21,7 @@ const formatTime = (seconds) => {
 
 const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time }) => {
 
-    console.log(time)
+    console.log(data)
 
     const teamA = data?.teamA
     const teamB = data?.teamB
@@ -65,6 +65,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                                 <div className='flex justify-between'>
                                     <div className='flex flex-grow justify-around'>
                                         <div className='w-2 h-full bg-blue-500 rounded' />
+                                        <img src={teamA?.logo} className='w-10 h-10'/>
                                         <div className=''>{teamA?.shortName ?? 'A'}</div>
                                         <div className=''>0</div>
                                     </div>
@@ -74,6 +75,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                                     <div className='flex flex-grow justify-around'>
                                         <div className=''>0</div>
                                         <div className=''>{teamB?.shortName ?? 'B'}</div>
+                                        <img src={teamB?.logo} className='w-10 h-10'/>
                                         <div className='w-2 bg-red-500 rounded' />
                                     </div>
                                 </div>
@@ -91,6 +93,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                         <div className='flex justify-between'>
                             <div className='flex flex-grow justify-around'>
                                 <div className={`w-2 h-full rounded`} style={{backgroundColor: teamA?.color}}/>
+                                <img src={teamA?.logo} className='w-8 h-8 rounded-lg'/>
                                 <div className=''>{teamA?.shortName ?? 'A'}</div>
                                 <div className=''>{teamA?.score ?? '0'}</div>
                             </div>
@@ -100,6 +103,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                             <div className='flex flex-grow justify-around'>
                                 <div className=''>{teamB?.score ?? '0'}</div>
                                 <div className=''>{teamB?.shortName ?? 'A'}</div>
+                                <img src={teamB?.logo} className='w-8 h-8 rounded-lg'/>
                                 <div className={`w-2 h-full rounded`} style={{backgroundColor: teamB?.color}}/>
                             </div>
                         </div>

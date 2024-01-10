@@ -157,12 +157,14 @@ export const MatchDashboard: React.FC = () => {
                     teamA: {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
                         score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Initial score, replace with the actual initial score
-                        color: colorA, // Replace with the actual color
+                        color: colorA, 
+                        logo: matchRecord.teamAGroupRecord.team_record.logo
                     },
                     teamB: {
                         shortName: matchRecord.teamBGroupRecord.team_record.short_name,
                         score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals, // Initial score, replace with the actual initial score
-                        color: colorB, // Replace with the actual color
+                        color: colorB,
+                        logo: matchRecord.teamBGroupRecord.team_record.logo
                     },
                 },
             };
@@ -324,11 +326,13 @@ export const MatchDashboard: React.FC = () => {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
                         score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Replace with the updated score
                         color: colorA, // Replace with the updated color
+                        logo: matchRecord.teamAGroupRecord.team_record.logo
                     },
                     teamB: {
                         shortName: matchRecord.teamBGroupRecord.team_record.short_name,
                         score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals, // Replace with the updated score
                         color: colorB, // Replace with the updated color
+                        logo: matchRecord.teamBGroupRecord.team_record.logo
                     },
                 },
             };
