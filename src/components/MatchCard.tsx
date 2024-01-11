@@ -62,7 +62,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => 
                                 </div>
 
                                 <div className='flex flex-grow justify-around items-center'>
-                                    <div className=''>{data?.teamA?.name ?? "Team B Name"}</div>
+                                    <div className=''>{data?.teamB?.name ?? "Team B Name"}</div>
                                     <img src={data?.teamB?.logo ?? Team2} className='w-12 h-full rounded' />
                                 </div>
                             </div>
