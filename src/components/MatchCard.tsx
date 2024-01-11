@@ -58,7 +58,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ onDrag, x, y, isLive, data }) => 
                                     </div>
                                     {/* <div className='text-xs text-zinc-500'>
                                         Powered by
-                                    </div> */}
+                                    </div> */}find /
                                 </div>
 
                                 <div className='flex flex-grow justify-around items-center'>
