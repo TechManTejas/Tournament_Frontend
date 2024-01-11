@@ -747,7 +747,10 @@ export const MatchDashboard: React.FC = () => {
         }
     };
 
-    const createMatchGoalRecordTeamA = async (values: any) => {
+    const createMatchGoalRecordTeamA = async () => {
+
+        const values = await formGoalTeamA.validateFields();
+
         try {
             const playerId = values.selectOption;
 

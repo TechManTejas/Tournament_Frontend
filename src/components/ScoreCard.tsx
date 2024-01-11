@@ -60,7 +60,15 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                             {/* Your draggable box content goes here */}
                             <div className='relative px-4 flex flex-col justify-center h-full text-white text-xl'>
                                 <div className='flex justify-center w-full'>
-                                    00 : 00
+                                    <div>
+
+                                    </div>
+                                    <div>
+                                        00 : 00
+                                    </div>
+                                    <div>
+                                        
+                                    </div>
                                 </div>
                                 <div className='flex justify-between'>
                                     <div className='flex flex-grow justify-around'>
@@ -87,13 +95,20 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                 <div className='w-[340px] h-[96px]' style={{ left: `${x}px`, top: `${y}px`, backgroundImage: `url(${PanelSmall})`, backgroundSize: 'cover' }}>
                     {/* Your non-draggable box content goes here */}
                     <div className='relative px-4 flex flex-col justify-center h-full text-white text-xl'>
-                        <div className='flex justify-center w-full'>
-                            {formatTime(time)}
+                        <div className='flex justify-evenly w-full'>
+                            <div>
+                                <img src={teamA?.logo} className='w-8 h-8 rounded-lg'/>
+                            </div>
+                            <div>
+                                {formatTime(time)}
+                            </div>
+                            <div>
+                                <img src={teamB?.logo} className='w-8 h-8 rounded-lg'/>
+                            </div>
                         </div>
                         <div className='flex justify-between'>
                             <div className='flex flex-grow justify-around'>
                                 <div className={`w-2 h-full rounded`} style={{backgroundColor: teamA?.color}}/>
-                                <img src={teamA?.logo} className='w-8 h-8 rounded-lg'/>
                                 <div className=''>{teamA?.shortName ?? 'A'}</div>
                                 <div className=''>{teamA?.score ?? '0'}</div>
                             </div>
@@ -103,7 +118,6 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                             <div className='flex flex-grow justify-around'>
                                 <div className=''>{teamB?.score ?? '0'}</div>
                                 <div className=''>{teamB?.shortName ?? 'A'}</div>
-                                <img src={teamB?.logo} className='w-8 h-8 rounded-lg'/>
                                 <div className={`w-2 h-full rounded`} style={{backgroundColor: teamB?.color}}/>
                             </div>
                         </div>

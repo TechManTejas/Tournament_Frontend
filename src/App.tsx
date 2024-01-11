@@ -4,6 +4,7 @@ import { Authentication } from "./pages/Authentication"
 import { Dashboard } from "./pages/Dashboard"
 import { Lobby } from "./pages/Lobby"
 import Live from './pages/Live';
+import LiveTV from './pages/LiveTV';
 
 function App() {
 
@@ -15,6 +16,10 @@ function App() {
         <Route
           path="/live/:id/"
           element={<Live/>}
+        />
+         <Route
+          path="/live-tv/:id/"
+          element={<LiveTV/>}
         />
         <Route
           path="/"
