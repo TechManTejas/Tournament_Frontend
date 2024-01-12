@@ -55,13 +55,13 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                         <div className=''>Team A</div>
                                         <div className='text-sm'>
                                             <div>
-                                                Player - time
+                                                Player
                                             </div>
                                             <div>
-                                                Player - time
+                                                Player
                                             </div>
                                             <div>
-                                                Player - time
+                                                Player
                                             </div>
                                         </div>
                                     </div>
@@ -74,13 +74,13 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                         <div className=''>Team B</div>
                                         <div className='text-sm'>
                                             <div>
-                                                Player - time
+                                                Player
                                             </div>
                                             <div>
-                                                Player - time
+                                                Player
                                             </div>
                                             <div>
-                                                Player - time
+                                                Player
                                             </div>
                                         </div>
                                     </div>
@@ -103,7 +103,7 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                         {data?.teamA.goals.map((goal: any, index: number) => (
                                             <div key={index} className='flex gap-2'>
                                                 <div>
-                                                    {`${goal.player} - ${goal.minute}`}
+                                                    {`${goal.player}`}
                                                 </div>
                                                 <div>
                                                     {goal.own && <div>OWN</div>}
@@ -123,7 +123,7 @@ const GoalScorerCard: React.FC<GoalScorerCardProps> = ({ onDrag, x, y, isLive, d
                                         {data?.teamB.goals.map((goal: any, index: number) => (
                                             <div key={index} className='flex gap-2'>
                                             <div>
-                                                {`${goal.player} - ${goal.minute}`}
+                                                {`${goal.player}`}
                                             </div>
                                             <div>
                                                 {goal.own && <div>OWN</div>}

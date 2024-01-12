@@ -156,12 +156,14 @@ export const MatchDashboard: React.FC = () => {
                 data: {
                     teamA: {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
+                        name: matchRecord.teamAGroupRecord.team_record.name,
                         score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Initial score, replace with the actual initial score
                         color: colorA, 
                         logo: matchRecord.teamAGroupRecord.team_record.logo
                     },
                     teamB: {
                         shortName: matchRecord.teamBGroupRecord.team_record.short_name,
+                        name: matchRecord.teamBGroupRecord.team_record.name,
                         score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals, // Initial score, replace with the actual initial score
                         color: colorB,
                         logo: matchRecord.teamBGroupRecord.team_record.logo
@@ -324,12 +326,14 @@ export const MatchDashboard: React.FC = () => {
                 data: {
                     teamA: {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
+                        name: matchRecord.teamAGroupRecord.team_record.name,
                         score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Replace with the updated score
                         color: colorA, // Replace with the updated color
                         logo: matchRecord.teamAGroupRecord.team_record.logo
                     },
                     teamB: {
                         shortName: matchRecord.teamBGroupRecord.team_record.short_name,
+                        name: matchRecord.teamBGroupRecord.team_record.name,
                         score: teamBGoals.length - teamBOwnGoals + teamAOwnGoals, // Replace with the updated score
                         color: colorB, // Replace with the updated color
                         logo: matchRecord.teamBGroupRecord.team_record.logo
@@ -1046,7 +1050,6 @@ export const MatchDashboard: React.FC = () => {
                                 <FormItem
                                     className='p-0 m-0'
                                     name="selectOption"
-                                    rules={[{ required: true, message: 'Please select an option' }]}
                                 >
                                     <Select
                                         id="selectOption"
@@ -1067,7 +1070,7 @@ export const MatchDashboard: React.FC = () => {
                                     name="radioValue"
                                     rules={[{ required: true, message: 'Please select a radio option' }]}
                                 >
-                                    <Radio.Group defaultValue={1} onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
+                                    <Radio.Group onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
                                         <Radio value={1}>Standard</Radio>
                                         <Radio value={2}>Own</Radio>
                                         <Radio value={3}>Penalty</Radio>
@@ -1511,7 +1514,6 @@ export const MatchDashboard: React.FC = () => {
                                 <FormItem
                                     className='p-0 m-0'
                                     name="selectOption"
-                                    rules={[{ required: true, message: 'Please select an option' }]}
                                 >
                                     <Select
                                         id="selectOption"
@@ -1531,7 +1533,7 @@ export const MatchDashboard: React.FC = () => {
                                     name="radioValue"
                                     rules={[{ required: true, message: 'Please select a radio option' }]}
                                 >
-                                    <Radio.Group defaultValue={1} onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
+                                    <Radio.Group onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
                                         <Radio value={1}>Standard</Radio>
                                         <Radio value={2}>Own</Radio>
                                         <Radio value={3}>Penalty</Radio>

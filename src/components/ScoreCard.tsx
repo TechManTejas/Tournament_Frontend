@@ -92,7 +92,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ onDrag, x, y, isLive, data, time 
                     </Draggable>
                 </>
             ) : (
-                <div className='w-[340px] h-[96px]' style={{ left: `${x}px`, top: `${y}px`, backgroundImage: `url(${PanelSmall})`, backgroundSize: 'cover' }}>
+                <div className='w-[340px] h-[120px]' style={{ left: `${x}px`, top: `${y}px`, backgroundImage: `url(${PanelSmall})`, backgroundSize: '340px 120px', backgroundRepeat:'no-repeat' }}>
                     {/* Your non-draggable box content goes here */}
                     <div className='relative px-4 flex flex-col justify-center h-full text-white text-xl'>
                         <div className='flex justify-evenly w-full'>
