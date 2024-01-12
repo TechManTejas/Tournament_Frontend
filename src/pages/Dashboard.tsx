@@ -82,7 +82,8 @@ export const Dashboard = () => {
                 </div>
             }
             <FloatButton.Group shape="circle">
-                <FloatButton type='primary' badge={{ count: 123, overflowCount: 99 }} onClick={openChat} icon={<MessageOutlined />} />
+                {/* To-do: Add Num of Messages <FloatButton type='primary' badge={{ count: 123, overflowCount: 99 }} onClick={openChat} icon={<MessageOutlined />} /> */}
+                <FloatButton type='primary'  onClick={openChat} icon={<MessageOutlined />} />
             </FloatButton.Group>
         </Layout>
     );

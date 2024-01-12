@@ -20,7 +20,7 @@ const Users: React.FC = () => {
 
   const columns: ColumnsType<IUser> = [
     {
-      title: 'USERNAME',
+      title: 'Benutzername',
       dataIndex: 'username',
       key: 'username',
       width: 100,
@@ -32,25 +32,25 @@ const Users: React.FC = () => {
       width: 100,
     },
     {
-      title: 'FIRSTNAME',
+      title: 'Vorname',
       dataIndex: 'first_name',
       key: 'first_name',
       width: 100,
     },
     {
-      title: 'LASTNAME',
+      title: 'Nachname',
       dataIndex: 'last_name',
       key: 'last_name',
       width: 100,
     },
     {
-      title: 'ROLE',
+      title: 'Berechtigung',
       dataIndex: 'role',
       key: 'role',
       width: 100,
     },
     {
-      title: 'ACTIONS',
+      title: 'Aktionen',
       dataIndex: 'actions',
       key: 'actions',
       fixed: 'right',
@@ -155,11 +155,11 @@ const Users: React.FC = () => {
     <div className='px-10 py-6'>
       <div className=''>
         <div className='flex justify-between items-center w-full gap-x-4'>
-          <div className='text-2xl'>USERS</div>
+          <div className='text-2xl'>Benutzerverwaltung</div>
           <div className='flex space-x-3'>
             <Input
               size='large'
-              placeholder='Search...'
+              placeholder='Suchen...'
               onChange={(e) => handleSearch(e.target.value)}
             />
             {isClubAdmin &&
@@ -173,7 +173,7 @@ const Users: React.FC = () => {
                     navigate('/dashboard/users/add-edit');
                   }}
                 >
-                  ADD NEW
+                  Hinzufügen
                 </Button>
               </div>
             }

@@ -49,15 +49,15 @@ const UserAddEdit: React.FC = () => {
       <div className="text-2xl font-light">{id ? 'EDIT USER' : 'ADD NEW USER'}</div>
       <Form form={form} onFinish={onFinish} layout="vertical" className="max-w-md mt-8">
 
-        <Form.Item name="username" label="Username" rules={[{ required: true, message: 'Please enter the username' }]}>
+        <Form.Item name="username" label="Benutzername" rules={[{ required: true, message: 'Please enter the username' }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item name="first_name" label="First Name" rules={[{ required: true, message: 'Please enter the first name' }]}>
+        <Form.Item name="first_name" label="Vorname" rules={[{ required: true, message: 'Please enter the first name' }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item name="last_name" label="Last Name" rules={[{ required: true, message: 'Please enter the last name' }]}>
+        <Form.Item name="last_name" label="Nachname" rules={[{ required: true, message: 'Please enter the last name' }]}>
           <Input />
         </Form.Item>
 
@@ -65,14 +65,14 @@ const UserAddEdit: React.FC = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item name="password" label="Password" rules={[{ required: !id, message: 'Please enter the password' }]}>
+        <Form.Item name="password" label="Passwort" rules={[{ required: !id, message: 'Please enter the password' }]}>
           <Input.Password />
         </Form.Item>
 
-        <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Please select the role' }]}>
-          <Select placeholder="Select a role">
-            <Option value="club_admin">Club Admin</Option>
-            <Option value="club_user">Club User</Option>
+        <Form.Item name="role" label="Berechtigung" rules={[{ required: true, message: 'Please select the role' }]}>
+          <Select placeholder="Wähle eine Rolle">
+            <Option value="club_admin">Vereinsadmin</Option>
+            <Option value="club_user">Benutzer</Option>
           </Select>
         </Form.Item>
 

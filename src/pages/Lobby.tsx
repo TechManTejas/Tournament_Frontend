@@ -28,7 +28,8 @@ export const Lobby = () => {
             console.log(response.data)
 
             if (response.data.verified) {
-                message.success("Your account has been verified");
+                //message.success("Your account has been verified");
+                message.success("Ihr Konto wurde verifiziert");
                 setUserVerified(response.data.verified)
                 if(token){
                     saveUserDataToStorage({ token: user_data?.token, user: { ...response.data } })
@@ -71,13 +72,15 @@ export const Lobby = () => {
                 console.log(response.data);
 
                 // Optionally, show a success message
-                message.success('Message sent successfully!');
+                //message.success('Message sent successfully!');
+                message.success('Nachricht erfolgreich gesendet!');
             } catch (error) {
                 // Handle errors
                 console.error('Error sending message:', error);
 
                 // Optionally, show an error message
-                message.error('Failed to send message. Please try again.');
+                //message.error('Failed to send message. Please try again.');
+                message.error('Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
             }
         };
 
@@ -98,19 +101,20 @@ export const Lobby = () => {
                             <Form.Item>
 
                                 <div className='flex justify-center items-center text-zinc-500'>
-                                    <div className='mx-2'>Hello, you need the message us about who you are etc and after we active your account you can access the software</div>
+                                    <div className='mx-2'>Hallo, Sie müssen uns mitteilen, wer Sie sind. Nachdem wir Ihr Konto geprüft und aktiviert haben, können Sie auf die Software zugreifen</div>
                                 </div>
                             </Form.Item>
                             <Form.Item
                                 name="message"
-                                rules={[{ required: true, message: 'Please enter your message!' }]}
+                                //rules={[{ required: true, message: 'Please enter your message!' }]}
+                                rules={[{ required: true, message: 'Bitte geben Sie Ihre Nachricht ein!' }]}
                             >
-                                <Input.TextArea placeholder="Enter your message" autoSize={{ minRows: 3, maxRows: 6 }} />
+                                <Input.TextArea placeholder="Ihre Nachricht eingeben" autoSize={{ minRows: 3, maxRows: 6 }} />
                             </Form.Item>
 
                             <Form.Item>
                                 <Button type="primary" htmlType="submit" className='h-10 w-full font-semibold shadow-xl'>
-                                    SEND MESSAGE
+                                    Nachricht senden
                                 </Button>
                             </Form.Item>
                         </Form>

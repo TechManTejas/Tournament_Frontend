@@ -117,11 +117,11 @@ const Stadiums: React.FC = () => {
                 </div>
                 <div>
                     <div className='flex justify-between items-center w-full gap-x-4'>
-                        <div className='text-2xl'>STADIUMS</div>
+                        <div className='text-2xl'>Stadien & Plätze</div>
                         <div className='flex space-x-3'>
                             <Input
                                 size='large'
-                                placeholder='Search...'
+                                placeholder='Suchen...'
                                 onChange={(e) => handleSearch(e.target.value)}
                             />
                             {isClubAdmin && (
@@ -135,7 +135,7 @@ const Stadiums: React.FC = () => {
                                             navigate('/dashboard/stadiums/add-edit');
                                         }}
                                     >
-                                        ADD NEW
+                                        Hinzufügen
                                     </Button>
                                 </div>
                             )}

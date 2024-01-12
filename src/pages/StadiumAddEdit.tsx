@@ -88,17 +88,17 @@ const StadiumAddEdit: React.FC = () => {
                 </Form.Item>
 
                 {/* Address Input */}
-                <Form.Item name="address" label="Address" rules={[{ required: true, message: 'Please enter the address' }]}>
+                <Form.Item name="address" label="Adresse" rules={[{ required: true, message: 'Please enter the address' }]}>
                     <Input.TextArea />
                 </Form.Item>
 
                 <Form.Item>
                     <Space className="space-x-4">
                         <Button type="primary" htmlType="submit" className="font-semibold w-28 h-10">
-                            {id ? 'SAVE' : 'ADD'}
+                            {id ? 'Speichern' : 'Hinzufügen'}
                         </Button>
                         <Button className="font-semibold w-28 h-10" onClick={goBack}>
-                            CANCEL
+                            Abbrechen
                         </Button>
                     </Space>
                 </Form.Item>
