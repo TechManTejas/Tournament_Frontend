@@ -31,7 +31,7 @@ const Referees: React.FC = () => {
       width: 100,
     },
     {
-      title: 'ACTIONS',
+      title: 'Aktionen',
       dataIndex: 'actions',
       key: 'actions',
       fixed: 'right',
@@ -131,11 +131,11 @@ const Referees: React.FC = () => {
     <div className='px-10 py-6'>
       <div className=''>
         <div className='flex justify-between items-center w-full gap-x-4'>
-          <div className='text-2xl'>REFEREES</div>
+          <div className='text-2xl'>Schiedsrichter</div>
           <div className='flex space-x-3'>
             <Input
               size='large'
-              placeholder='Search...'
+              placeholder='Suchen...'
               onChange={(e) => handleSearch(e.target.value)}
             />
             {isClubAdmin && (
@@ -149,7 +149,7 @@ const Referees: React.FC = () => {
                     navigate('/dashboard/referees/add-edit');
                   }}
                 >
-                  ADD NEW
+                  Hinzufügen
                 </Button>
               </div>
             )}

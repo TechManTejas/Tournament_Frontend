@@ -40,13 +40,15 @@ export const Authentication = () => {
         window.location.href = '/'
 
         // Optionally, show a success message
-        message.success('Login successful!');
+        //message.success('Login successful!');
+        message.success('Login erfolgreich!');
       } catch (error) {
         // Handle login errors
         console.error('Error logging in:', error);
 
         // Optionally, show an error message
-        message.error('Failed to si. Please check your credentials.');
+        //message.error('Failed to si. Please check your credentials.');
+        message.error('Fehler bei der Anmeldung. Bitte überprüfen Sie Ihre Anmeldedaten.');
       }
     };
 
@@ -64,16 +66,18 @@ export const Authentication = () => {
               >
                 <Form.Item
                     name="username"
-                    rules={[{required: true, message: 'Please enter your username!'}]}
+                    //rules={[{required: true, message: 'Please enter your username!'}]}
+                    rules={[{required: true, message: 'Bitte geben Sie Ihren Benutzernamen ein!'}]}
                 >
-                  <Input placeholder="Username" className='h-10'/>
+                  <Input placeholder="Benutzername" className='h-10'/>
                 </Form.Item>
 
                 <Form.Item
                     name="password"
-                    rules={[{required: true, message: 'Please enter your password!'}]}
+                    //rules={[{required: true, message: 'Please enter your password!'}]}
+                    rules={[{required: true, message: 'Bitte geben Sie Ihr Passwort ein!'}]}
                 >
-                  <Input.Password placeholder="Password" className='h-10'/>
+                  <Input.Password placeholder="Passwort" className='h-10'/>
                 </Form.Item>
 
                 {/* <Form.Item name="remember" valuePropName="checked">
@@ -102,9 +106,9 @@ export const Authentication = () => {
             </div> */}
             </div>
             <div className='my-6 text-center'>
-              Don't have an account?
+              Sie haben noch kein Konto?
               <button className='mx-1 text-primary underline hover:text-green-500' onClick={switchForm}>
-                Register Now
+                Jetzt registrieren
               </button>
             </div>
           </div>
@@ -118,7 +122,8 @@ export const Authentication = () => {
       // Check if password and confirmPassword match
       if (values.password !== values.confirmpassword) {
         // Show an error message if passwords do not match
-        message.error('Password and Confirm Password do not match. Please check your information.');
+        //message.error('Password and Confirm Password do not match. Please check your information.');
+        message.error('Passwort und Bestätigungspasswort stimmen nicht überein. Bitte überprüfen Sie Ihre Angaben.');
         return;
       }
 
@@ -133,17 +138,20 @@ export const Authentication = () => {
         });
 
         // Optionally, show a success message
-        message.success('Signup successful! Please login.');
+        //message.success('Signup successful! Please login.');
+        message.success('Anmeldung erfolgreich! Bitte anmelden.');
         setIsLogin(true)
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (error.response && error.response.status === 400 && error.response.data.username) {
           // If the error is due to the username already existing, set the state
-          message.error('A User with that username already exists, please try with a different username');
+          //message.error('A User with that username already exists, please try with a different username');
+          message.error('Ein Benutzer mit diesem Benutzernamen existiert bereits, bitte versuchen Sie es mit einem anderen Benutzernamen');
         } else {
           console.error('Error logging in:', error);
-          message.error('Failed to signup. Please check your credentials.');
+          //message.error('Failed to signup. Please check your credentials.');
+          message.error('Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.');
         }
       }
     };
@@ -153,7 +161,7 @@ export const Authentication = () => {
       <>
         <div className='bg-white p-16 rounded-2xl shadow-xl z-50'>
           <div className='text-3xl my-6 text-center font-medium'>
-            Signup
+            Registrierung
           </div>
           <div className='flex flex-col w-80 text-lg space-y-3'>
             <Form
@@ -163,50 +171,56 @@ export const Authentication = () => {
               <Flex className='space-x-4'>
                 <Form.Item
                   name="first_name"
-                  rules={[{ required: true, message: 'Please enter your email!' }]}
+                  //rules={[{ required: true, message: 'Please enter your email!' }]}
+                  rules={[{ required: true, message: 'Bitte geben Sie Ihren Vorname ein!' }]}
                 >
-                  <Input placeholder="Firstname" className='h-10' />
+                  <Input placeholder="Vorname" className='h-10' />
                 </Form.Item>
 
                 <Form.Item
                   name="last_name"
-                  rules={[{ required: true, message: 'Please enter your email!' }]}
+                  //rules={[{ required: true, message: 'Please enter your email!' }]}
+                  rules={[{ required: true, message: 'Bitte geben Sie Ihren Nachnamen ein!' }]}
                 >
-                  <Input placeholder="Lastname" className='h-10' />
+                  <Input placeholder="Nachname" className='h-10' />
                 </Form.Item>
               </Flex>
 
               <Form.Item
                 name="email"
-                rules={[{ required: true, message: 'Please enter your email!' }]}
+                //rules={[{ required: true, message: 'Please enter your email!' }]}
+                rules={[{ required: true, message: 'Bitte geben Sie Ihre Email ein!' }]}
               >
                 <Input placeholder="Email" className='h-10' />
               </Form.Item>
 
               <Form.Item
                 name="username"
-                rules={[{ required: true, message: 'Please enter your username!' }]}
+                //rules={[{ required: true, message: 'Please enter your username!' }]}
+                rules={[{ required: true, message: 'Bitte geben Sie Ihren Benutzername ein!' }]}
               >
-                <Input placeholder="Username" className='h-10' />
+                <Input placeholder="Benutzername" className='h-10' />
               </Form.Item>
 
               <Form.Item
                 name="password"
-                rules={[{ required: true, message: 'Please enter your password!' }]}
+                //rules={[{ required: true, message: 'Please enter your password!' }]}
+                rules={[{ required: true, message: 'Bitte geben Sie Ihr Passwort ein!' }]}
               >
-                <Input.Password placeholder="Password" className='h-10' visibilityToggle={false} />
+                <Input.Password placeholder="Passwort" className='h-10' visibilityToggle={false} />
               </Form.Item>
 
               <Form.Item
                 name="confirmpassword"
-                rules={[{ required: true, message: 'Please enter your password!' }]}
+                //rules={[{ required: true, message: 'Please enter your password!' }]}
+                rules={[{ required: true, message: 'Bitte bestätigen Sie Ihr Passwort ein!' }]}
               >
-                <Input.Password placeholder="Confirm Password" className='h-10' visibilityToggle={false} />
+                <Input.Password placeholder="Bestätigen Sie Ihr Passwort" className='h-10' visibilityToggle={false} />
               </Form.Item>
 
               <Form.Item>
                 <Button type="primary" htmlType="submit" className='h-10 w-full font-semibold shadow-xl'>
-                  SIGNUP
+                  Registrieren
                 </Button>
               </Form.Item>
             </Form>
@@ -226,9 +240,9 @@ export const Authentication = () => {
             </div> */}
           </div>
           <div className='my-6 text-center'>
-            Already have an account?
+            Sie haben bereits ein Konto?
             <button className='mx-1 text-primary underline hover:text-green-500' onClick={switchForm}>
-              Login Now
+              Jetzt Einloggen
             </button>
           </div>
         </div>

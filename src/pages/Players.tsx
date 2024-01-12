@@ -95,7 +95,7 @@ const Players: React.FC = () => {
                     />
                 ]}
             >
-                <Card.Meta title={player.name} description={`Squad Number: ${player.squad_number}`} />
+                <Card.Meta title={player.name} description={`Trikotnummer: ${player.squad_number}`} />
             </Card>
         ));
     };
@@ -114,11 +114,11 @@ const Players: React.FC = () => {
                 </div>
                 <div>
                     <div className='flex justify-between items-center w-full gap-x-4'>
-                        <div className='text-2xl'>PLAYERS</div>
+                        <div className='text-2xl'>Alle Spieler</div>
                         <div className='flex space-x-3'>
                             <Input
                                 size='large'
-                                placeholder='Search...'
+                                placeholder='Suchen...'
                                 onChange={(e) => handleSearch(e.target.value)}
                             />
                             {isClubAdmin && (
@@ -132,7 +132,7 @@ const Players: React.FC = () => {
                                             navigate('/dashboard/players/add-edit');
                                         }}
                                     >
-                                        ADD NEW
+                                        Hinzufügen
                                     </Button>
                                 </div>
                             )}
