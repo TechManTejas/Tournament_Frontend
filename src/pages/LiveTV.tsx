@@ -10,29 +10,29 @@ const LiveTV: React.FC = () => {
         <div className='p-4 bg-blue-500'>
             <div className='flex justify-between text-5xl font-bold'>
                 <div className='flex w-full justify-center items-center bg-slate-100'>
-                    FFW Guiltstein
+                    Team A
                 </div>
                 <div className='w-44 h-32 bg-black text-white flex flex-shrink-0 justify-center items-center'>
                     0 : 0
                 </div>
                 <div className='flex w-full justify-center items-center bg-slate-100'>
-                    FFW Maichingen
+                    Team B
                 </div>
             </div>
             <div>
                 <div className='text-center text-3xl text-white'>
-                    Next Matches
+                    Nächste Spiele
                 </div>
                 <div className='text-3xl text-white'>
                     <div className='flex justify-center w-full gap-4 text-5xl'>
                         <div className='flex justify-end w-full'>
-                            FFW Sindelfing
+                            Team C
                         </div>
                         <div>
                             -
                         </div>
                         <div className='flex justify-start w-full'>
-                            FFW Kuppingen-Monchberg
+                            Team D
                         </div>
                     </div>
                 </div>
