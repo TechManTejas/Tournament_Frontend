@@ -28,10 +28,10 @@ export const Sidebar = () => {
                 <Sider style={{ background: 'transparent' }}>
                     <Menu className='font-bold' style={{ background: 'transparent' }} mode="inline" defaultSelectedKeys={['club']} onClick={({ key }) => handleMenuClick(key)}>
                         <Menu.Item key="club" icon={<DashboardOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Club
+                            Mein Verein
                         </Menu.Item>
                         <Menu.Item key="tournaments" icon={<TrophyOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Tournaments
+                            Turniere
                         </Menu.Item>
                         {/* <Menu.Item key="matches" icon={<CalendarOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
                             Matches
@@ -40,19 +40,19 @@ export const Sidebar = () => {
                             Teams
                         </Menu.Item> */}
                         <Menu.Item key="players" icon={<UserOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Players
+                            Spieler
                         </Menu.Item>
                         <Menu.Item key="referees" icon={<UserSwitchOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Referees
+                            Schiedsrichter
                         </Menu.Item>
                         <Menu.Item key="stadiums" icon={<BankOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Stadiums
+                            Stadien & Plätze
                         </Menu.Item>
                         <Menu.Item key="users" icon={<UsergroupAddOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Users
+                            Benutzer
                         </Menu.Item>
                         <Menu.Item key="profile" icon={<UserOutlined className='shadow-lg p-2 rounded bg-green-500' style={{ color: 'white' }} />}>
-                            Profile
+                            Mein Profil
                         </Menu.Item>
                     </Menu>
                 </Sider>
