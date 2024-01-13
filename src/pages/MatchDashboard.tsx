@@ -312,7 +312,7 @@ export const MatchDashboard: React.FC = () => {
                     },
                     teamB: {
                         name: nextMatch.teamB,
-                        logo: nextMatch.teamAGroupRecord.team_record.logo,
+                        logo: nextMatch.teamBGroupRecord.team_record.logo,
                     },
                 },
             };
