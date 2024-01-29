@@ -537,9 +537,9 @@ export const MatchDashboard: React.FC = () => {
             // Make a GET request to fetch all goal records for the current match
             const response = await axios.get(`/matchgoalrecord/?match=${match_id}`);
             console.log(response.data);
-
+            console.log(response.data.filter(goal => goal.match.id === match_id));
             // Filter goal records based on group_team_record
-            const allGoals = response.data;
+            const allGoals = response.data.filter(goal => goal.match.id === match_id);
             const teamAGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamAGroupRecord.id);
             const teamBGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamBGroupRecord.id);
             console.log(teamAGoalsFiltered)
