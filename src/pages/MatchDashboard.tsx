@@ -573,11 +573,12 @@ export const MatchDashboard: React.FC = () => {
             const response = await axios.get(`/matchcardrecord/?match=${match_id}`);
             console.log(response.data);
 
+            const allCards = response.data.filter(card => card.match.id === match_id)
 
             // Get the last card record from the response
-            const lastCardRecord = response.data.length > 0 ? response.data[response.data.length - 1] : null;
+            const lastCardRecord = allCards.length > 0 ? allCards[allCards.length - 1] : null;
             // Find the last card record with a non-null minute and null card_type
-            const lastTimeRecord = response.data.reverse().find(card => card.minute !== null && card.card_type === null);
+            const lastTimeRecord = allCards.reverse().find(card => card.minute !== null && card.card_type === null);
 
             console.log(lastTimeRecord);
 
