@@ -293,6 +293,8 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
             });
         });
 
+        console.log(matches)
+
         setScheduleData(matches);
     };
 
@@ -702,8 +704,13 @@ export const Rounds: React.FC<RoundsProps> = ({ toggleAddEdit, handleSelectGroup
                                                             <Button type="primary" onClick={() => {
 
                                                                 console.log(record)
-                                                                navigate('/dashboard/match', { state: { matchRecord: record, tournament, schedule: scheduleData } })
-
+                                                                navigate('/dashboard/match', { 
+                                                                    state: { 
+                                                                        matchRecordState: record, 
+                                                                        tournament, 
+                                                                        schedule: scheduleData
+                                                                    } 
+                                                                })
                                                             }}>
                                                                 Match Dashboard
                                                             </Button>

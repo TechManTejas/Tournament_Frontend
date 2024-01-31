@@ -20,7 +20,11 @@ let colorB = '#0000ff';
 export const MatchDashboard: React.FC = () => {
 
     const location = useLocation();
-    const { matchRecord, tournament, schedule } = location.state;
+    const { matchRecordState, tournament, schedule } = location.state;
+
+    console.log(matchRecordState)
+
+    const [matchRecord, setMatchRecord] = useState(matchRecordState)
 
     const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
 
@@ -510,7 +514,6 @@ export const MatchDashboard: React.FC = () => {
     }, [matchRecord, tournament]);
 
 
-    // Function to fetch stadiums
     const fetchStadiums = async () => {
         try {
             const response = await axios.get('/stadium-all/');
@@ -521,7 +524,6 @@ export const MatchDashboard: React.FC = () => {
         }
     };
 
-    // Function to fetch referees
     const fetchReferees = async () => {
         try {
             const response = await axios.get('/referee-all/');
@@ -991,23 +993,32 @@ export const MatchDashboard: React.FC = () => {
         sendScheduleInformationAgain()
         sendGoalScorerInformationAgain()
     }, [])
-    // const tabData = Array.from({ length: 100 }, (_, index) => index + 1);
+    
+    const mappedSchedule = schedule.map(match => ({
+        label: `${match.teamA} vs ${match.teamB}`,
+        key: `${match.teamAGroupRecord.id}-${match.teamBGroupRecord.id}`,
+        match: match
+      }));
 
     return (
         <div className='rounded-lg flex flex-col' style={{ background: `linear-gradient(to right, rgba(${parseInt(colorPickerValueTeamA.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamA.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamA.slice(-2), 16)}, 0.5), rgba(${parseInt(colorPickerValueTeamB.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamB.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamB.slice(-2), 16)}, 0.5))` }}>
-            {/* <div className='bg-white rounded p-1 flex gap-1'>
+            <div className='bg-white rounded p-1 flex gap-1'>
                 <Tabs
                     type="card"
                     tabBarGutter={5}
                     className='flex-grow-0 overflow-x-auto'
                     activeKey={activeTab}
-                    onChange={(key) => setActiveTab(key)}
+                    onChange={(match) => {
+                        console.log(JSON.parse(match))
+                        setActiveTab(match.key)
+                        setMatchRecord(JSON.parse(match).match)
+                    }}
                 >
-                    {tabData.map((tabKey) => (
-                        <TabPane tab={"T v B"} key={tabKey.toString()} />
+                    {mappedSchedule.map((match) => (
+                        <TabPane tab={match.label} key={JSON.stringify(match)}/>
                     ))}
                 </Tabs>
-            </div> */}
+            </div>
             <div className='flex gap-4 h-full'>
                 {/* Team A */}
                 <div className='w-80 flex-shrink-0 h-full rounded p-2'>
