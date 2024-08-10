@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
-import { Select, Button, RadioChangeEvent, Radio, Form, Tabs, ColorPicker, message, InputNumber } from 'antd';
+import { Select, Button, RadioChangeEvent, Radio, Form, Tabs, ColorPicker, message, InputNumber, Modal, Table, Input } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import { MenuFoldOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import TabPane from 'antd/es/tabs/TabPane';
@@ -22,8 +22,6 @@ export const MatchDashboard: React.FC = () => {
     const location = useLocation();
     const { matchRecordState, tournament, schedule } = location.state;
 
-    console.log(matchRecordState)
-
     const [matchRecord, setMatchRecord] = useState(matchRecordState)
 
     const match_id = matchRecord.teamAGroupRecord.id + "-" + matchRecord.teamBGroupRecord.id
@@ -44,7 +42,6 @@ export const MatchDashboard: React.FC = () => {
         if (!isPaused && timerValue > 0) {
             timer = setInterval(() => {
                 setTimerValue((prevTime) => {
-                    console.log(prevTime); // Logging the current timer value
 
                     if (scoreCardSocket) {
                         const message = {
@@ -162,7 +159,7 @@ export const MatchDashboard: React.FC = () => {
                         shortName: matchRecord.teamAGroupRecord.team_record.short_name,
                         name: matchRecord.teamAGroupRecord.team_record.name,
                         score: teamAGoals.length - teamAOwnGoals + teamBOwnGoals, // Initial score, replace with the actual initial score
-                        color: colorA, 
+                        color: colorA,
                         logo: matchRecord.teamAGroupRecord.team_record.logo
                     },
                     teamB: {
@@ -182,7 +179,6 @@ export const MatchDashboard: React.FC = () => {
             const data = JSON.parse(event.data as string);
             // Handle timer updates
             if (data?.timer_value !== undefined) {
-                console.log(data)
                 // Update your component state or perform actions based on the timer value
                 setTimerValue(data.timer_value);
             }
@@ -261,8 +257,6 @@ export const MatchDashboard: React.FC = () => {
             console.log('Match WebSocket connected');
             // Send a message to the server after connection
 
-            console.log(currentCardPenalty)
-
             const message = {
                 data: {
                     name: currentCardPenalty?.player?.name,
@@ -285,8 +279,6 @@ export const MatchDashboard: React.FC = () => {
             console.log('Time WebSocket connected');
             // Send a message to the server after connection
 
-            console.log(currentTimePenalty)
-
             const message = {
                 data: {
                     name: currentCardPenalty?.player?.name,
@@ -301,7 +293,6 @@ export const MatchDashboard: React.FC = () => {
 
         setPenaltyTimeSocket(newPenaltyTimeSocket);
     };
-
     const sendMatchInformationAgain = () => {
 
         findNextMatch()
@@ -367,7 +358,6 @@ export const MatchDashboard: React.FC = () => {
                 },
             };
 
-            console.log(message)
             scheduleCardSocket.send(JSON.stringify(message));
         }
     };
@@ -405,8 +395,6 @@ export const MatchDashboard: React.FC = () => {
         if (penaltyCardSocket) {
             // Send penalty card information
 
-            console.log(currentCardPenalty)
-
             const message = {
                 data: {
                     name: currentCardPenalty.player.name,
@@ -420,8 +408,6 @@ export const MatchDashboard: React.FC = () => {
     const sendPenaltyTimeInformation = () => {
         if (penaltyTimeSocket) {
             // Send penalty card information
-
-            console.log(currentTimePenalty)
 
             const message = {
                 data: {
@@ -439,7 +425,6 @@ export const MatchDashboard: React.FC = () => {
         const message = {
             time_value: timerValue,
         };
-        console.log(message)
         scoreCardSocket?.send(JSON.stringify(message));
     };
 
@@ -517,7 +502,6 @@ export const MatchDashboard: React.FC = () => {
     const fetchStadiums = async () => {
         try {
             const response = await axios.get('/stadium-all/');
-            console.log(response.data)
             setStadiums(response.data);
         } catch (error) {
             console.error('Error fetching stadiums:', error);
@@ -527,7 +511,6 @@ export const MatchDashboard: React.FC = () => {
     const fetchReferees = async () => {
         try {
             const response = await axios.get('/referee-all/');
-            console.log(response.data)
             setReferees(response.data);
         } catch (error) {
             console.error('Error fetching referees:', error);
@@ -538,8 +521,7 @@ export const MatchDashboard: React.FC = () => {
         try {
             // Make a GET request to fetch all goal records for the current match
             const response = await axios.get(`/matchgoalrecord/?match=${match_id}`);
-            console.log(response.data);
-            console.log(response.data.filter(goal => goal.match.id === match_id));
+
             // Filter goal records based on group_team_record
             const allGoals = response.data.filter(goal => goal.match.id === match_id);
             const teamAGoalsFiltered = allGoals.filter(goal => goal.group_team_record === matchRecord.teamAGroupRecord.id);
@@ -573,7 +555,6 @@ export const MatchDashboard: React.FC = () => {
         try {
             // Make a GET request to fetch all goal records for the current match
             const response = await axios.get(`/matchcardrecord/?match=${match_id}`);
-            console.log(response.data);
 
             const allCards = response.data.filter(card => card.match.id === match_id)
 
@@ -582,11 +563,9 @@ export const MatchDashboard: React.FC = () => {
             // Find the last card record with a non-null minute and null card_type
             const lastTimeRecord = allCards.reverse().find(card => card.minute !== null && card.card_type === null);
 
-            console.log(lastTimeRecord);
 
             setCurrentCardPenalty(lastCardRecord);
             setCurrentTimePenalty(lastTimeRecord)
-
 
             sendPenaltyCardInformation()
             // Handle the fetched goal records, you may want to set them in state or perform other actions
@@ -605,8 +584,6 @@ export const MatchDashboard: React.FC = () => {
         if (matchIndex !== -1 && matchIndex + 1 < schedule.length) {
             // Extract the next match
             const nextMatchData = schedule[matchIndex + 1];
-
-            console.log(nextMatchData)
 
             // Set the next match information in the nextMatches state
             setNextMatch(nextMatchData);
@@ -641,7 +618,6 @@ export const MatchDashboard: React.FC = () => {
         try {
             // Attempt to fetch the match record
             const response = await axios.get(`/match/${matchId}/`);
-            console.log(response.data)
             setMatchData(response.data)
 
             // Set initial values for the formComment
@@ -689,8 +665,6 @@ export const MatchDashboard: React.FC = () => {
                 refereeAssistant3: values.refereeAssistant3,
             };
 
-            console.log(updateData)
-
             // Make an axios PUT request to update the status
             await axios.put(`/match/${match_id}/`, updateData);
 
@@ -708,8 +682,6 @@ export const MatchDashboard: React.FC = () => {
 
     const updateTeamJerseyColorA = async (values: any) => {
         try {
-
-            console.log(values);
 
             // Make an axios PUT request to update the jersey color for Team A
             const updateData = {
@@ -732,8 +704,6 @@ export const MatchDashboard: React.FC = () => {
 
     const updateTeamJerseyColorB = async (values: any) => {
         try {
-
-            console.log(values);
 
             // Make an axios PUT request to update the jersey color for Team A
             const updateData = {
@@ -771,8 +741,6 @@ export const MatchDashboard: React.FC = () => {
                 is_standard_goal: values.radioValue === 1,
             };
 
-            console.log(goalRecordData);
-
             // Make a POST request to create the MatchGoalRecord
             await axios.post('/matchgoalrecord/', goalRecordData);
 
@@ -806,8 +774,6 @@ export const MatchDashboard: React.FC = () => {
                 is_standard_goal: values.radioValue === 1,
             };
 
-            console.log(goalRecordData);
-
             // Make a POST request to create the MatchGoalRecord
             await axios.post('/matchgoalrecord/', goalRecordData);
 
@@ -828,7 +794,6 @@ export const MatchDashboard: React.FC = () => {
     };
 
     const createMatchCardRecordTeam = async (values: any) => {
-        console.log(values);
 
         try {
             const playerId = values.penaltyPlayer;
@@ -843,8 +808,6 @@ export const MatchDashboard: React.FC = () => {
                 penalty_time: null, // Set the penalty time accordingly if needed
                 minute: minute, // Set the minute based on the form input
             };
-
-            console.log(penaltyCardData);
 
             // Make a POST request to create the MatchCardRecord
             await axios.post('/matchcardrecord/', penaltyCardData);
@@ -993,209 +956,489 @@ export const MatchDashboard: React.FC = () => {
         sendScheduleInformationAgain()
         sendGoalScorerInformationAgain()
     }, [])
-    
+
     const mappedSchedule = schedule.map(match => ({
         label: `${match.teamA} vs ${match.teamB}`,
         key: `${match.teamAGroupRecord.id}-${match.teamBGroupRecord.id}`,
         match: match
-      }));
+    }));
+
+    const [teamAGoalsModalVisible, setTeamAGoalsModalVisible] = useState(false);
+    const [goalsAData, setGoalsAData] = useState([]);
+    const columnsGoalsA = [
+        {
+            title: 'Goal Minute',
+            dataIndex: 'goal_minute',
+            key: 'goal_minute',
+            render: (text: any, record: any, index: number) => (
+                <Input
+                    value={text}
+                    onChange={(e) => {
+                        handleInputChangeGoalsA(e.target.value, 'goal_minute', index)
+                        console.log(text, record)
+                    }}
+                />
+            ),
+        },
+        {
+            title: 'Player Name',
+            dataIndex: 'new_player',
+            key: 'new_player',
+            render: (text: any, record: any, index: number) => (
+                <Select
+                    defaultValue={`${record.player.name} - ${record.player.squad_number}`}
+                    value={text}
+                    onChange={(value) => handleInputChangeGoalsA(value, 'new_player', index)}
+                    style={{ width: '100%' }}
+                >
+                    {/* Assume you have an array of players, replace it with your actual data */}
+                    {teamAPlayers.map((player) => (
+                        <Option key={player.id} value={player.id}>
+                            {`${player.name} - ${player.squad_number}`}
+                        </Option>
+                    ))}
+                </Select>
+            ),
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (text: any, record: any, index: number) => (
+                <Button type="primary" onClick={() => handleUpdateGoalsA(record)}>
+                    Update
+                </Button>
+            ),
+        },
+    ];
+    const handleInputChangeGoalsA = (value: string, key: string, index: number) => {
+        const updatedData = [...goalsAData];
+        updatedData[index][key] = value;
+        setGoalsAData(updatedData);
+    };
+    const handleUpdateGoalsA = async (record: any) => {
+        // Destructuring the record object excluding the "match" attribute
+        const { match, ...recordWithoutMatch } = record;
+
+        // Now recordWithoutMatch does not contain the "match" attribute
+        console.log(JSON.stringify(recordWithoutMatch));
+
+        try {
+            const response = await axios.patch(`/matchgoalrecord/${recordWithoutMatch.id}/`, {
+                player: recordWithoutMatch.new_player,
+                goal_minute: recordWithoutMatch.goal_minute
+            });
+            console.log('Updated Goal Record:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating Goal Record:', error);
+            throw error;
+        }
+    }
+
+    const showTeamAGoalsModal = () => {
+        setTeamAGoalsModalVisible(true);
+        setGoalsAData(teamAGoals)
+    };
+
+    const handleTeamAGoalsOk = () => {
+        setTeamAGoalsModalVisible(false);
+    };
+
+    const handleTeamAGoalsCancel = () => {
+        setTeamAGoalsModalVisible(false);
+    };
+
+    const [teamBGoalsModalVisible, setTeamBGoalsModalVisible] = useState(false);
+    const [goalsBData, setGoalsBData] = useState([]);
+    const columnsGoalsB = [
+        {
+            title: 'Goal Minute',
+            dataIndex: 'goal_minute',
+            key: 'goal_minute',
+            render: (text: any, record: any, index: number) => (
+                <Input
+                    value={text}
+                    onChange={(e) => {
+                        handleInputChangeGoalsB(e.target.value, 'goal_minute', index)
+                        console.log(text, record)
+                    }}
+                />
+            ),
+        },
+        {
+            title: 'Player Name',
+            dataIndex: 'new_player',
+            key: 'new_player',
+            render: (text: any, record: any, index: number) => (
+                <Select
+                    defaultValue={`${record.player.name} - ${record.player.squad_number}`}
+                    value={text}
+                    onChange={(value) => handleInputChangeGoalsB(value, 'new_player', index)}
+                    style={{ width: '100%' }}
+                >
+                    {/* Assume you have an array of players, replace it with your actual data */}
+                    {teamBPlayers.map((player) => (
+                        <Option key={player.id} value={player.id}>
+                            {`${player.name} - ${player.squad_number}`}
+                        </Option>
+                    ))}
+                </Select>
+            ),
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (text: any, record: any, index: number) => (
+                <Button type="primary" onClick={() => handleUpdateGoalsB(record)}>
+                    Update
+                </Button>
+            ),
+        },
+    ];
+    const handleInputChangeGoalsB = (value: string, key: string, index: number) => {
+        const updatedData = [...goalsAData];
+        updatedData[index][key] = value;
+        setGoalsAData(updatedData);
+    };
+    const handleUpdateGoalsB = async (record: any) => {
+        // Destructuring the record object excluding the "match" attribute
+        const { match, ...recordWithoutMatch } = record;
+
+        // Now recordWithoutMatch does not contain the "match" attribute
+        console.log(JSON.stringify(recordWithoutMatch));
+
+        try {
+            const response = await axios.patch(`/matchgoalrecord/${recordWithoutMatch.id}/`, {
+                player: recordWithoutMatch.new_player,
+                goal_minute: recordWithoutMatch.goal_minute
+            });
+            console.log('Updated Goal Record:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating Goal Record:', error);
+            throw error;
+        }
+    }
+
+    const showTeamBGoalsModal = () => {
+        setTeamBGoalsModalVisible(true);
+        setGoalsBData(teamBGoals)
+    };
+
+    const handleTeamBGoalsOk = () => {
+        setTeamBGoalsModalVisible(false);
+    };
+
+    const handleTeamBGoalsCancel = () => {
+        setTeamBGoalsModalVisible(false);
+    };
+
+    const [teamACardPenaltyModalVisible, setTeamACardPenaltyModalVisible] = useState(false);
+
+    const showTeamACardPenaltyModal = () => {
+        setTeamACardPenaltyModalVisible(true);
+    };
+
+    const handleTeamACardPenaltyOk = () => {
+        setTeamACardPenaltyModalVisible(false);
+    };
+
+    const handleTeamACardPenaltyCancel = () => {
+        setTeamACardPenaltyModalVisible(false);
+    };
+
+    const [teamBCardPenaltyModalVisible, setTeamBCardPenaltyModalVisible] = useState(false);
+
+    const showTeamBCardPenaltyModal = () => {
+        setTeamBCardPenaltyModalVisible(true);
+    };
+
+    const handleTeamBCardPenaltyOk = () => {
+        setTeamBCardPenaltyModalVisible(false);
+    };
+
+    const handleTeamBCardPenaltyCancel = () => {
+        setTeamBCardPenaltyModalVisible(false);
+    };
+
+    const [teamATimePenaltyModalVisible, setTeamATimePenaltyModalVisible] = useState(false);
+
+    const showTeamATimePenaltyModal = () => {
+        setTeamATimePenaltyModalVisible(true);
+    };
+
+    const handleTeamATimePenaltyOk = () => {
+        setTeamATimePenaltyModalVisible(false);
+    };
+
+    const handleTeamATimePenaltyCancel = () => {
+        setTeamATimePenaltyModalVisible(false);
+    };
+
+    const [teamBTimePenaltyModalVisible, setTeamBTimePenaltyModalVisible] = useState(false);
+
+    const showTeamBTimePenaltyModal = () => {
+        setTeamBTimePenaltyModalVisible(true);
+    };
+
+    const handleTeamBTimePenaltyOk = () => {
+        setTeamBTimePenaltyModalVisible(false);
+    };
+
+    const handleTeamBTimePenaltyCancel = () => {
+        setTeamBTimePenaltyModalVisible(false);
+    };
 
     return (
-        <div className='rounded-lg flex flex-col' style={{ background: `linear-gradient(to right, rgba(${parseInt(colorPickerValueTeamA.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamA.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamA.slice(-2), 16)}, 0.5), rgba(${parseInt(colorPickerValueTeamB.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamB.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamB.slice(-2), 16)}, 0.5))` }}>
-            <div className='bg-white rounded p-1 flex gap-1'>
-                <Tabs
-                    type="card"
-                    tabBarGutter={5}
-                    className='flex-grow-0 overflow-x-auto'
-                    activeKey={activeTab}
-                    onChange={(match) => {
-                        console.log(JSON.parse(match))
-                        setActiveTab(match.key)
-                        setMatchRecord(JSON.parse(match).match)
-                    }}
-                >
-                    {mappedSchedule.map((match) => (
-                        <TabPane tab={match.label} key={JSON.stringify(match)}/>
-                    ))}
-                </Tabs>
-            </div>
-            <div className='flex gap-4 h-full'>
-                {/* Team A */}
-                <div className='w-80 flex-shrink-0 h-full rounded p-2'>
-                    <div className='text-center text-xl mb-1'>
-                        {matchRecord.teamA} - ({teamAGoals.length - teamAOwnGoals + teamBOwnGoals})
-                    </div>
-                    <div className='flex flex-col gap-2'>
-                        <Form form={formColorTeamA} onFinish={updateTeamJerseyColorA}>
-                            <div className='bg-white p-4 rounded shadow flex gap-2'>
-                                <Form.Item
-                                    className='p-0 m-0'
-                                    name="colorPicker"
-                                    label="Select Jersey Color"
-                                    initialValue={colorPickerValueTeamA}
-                                >
-                                    <ColorPicker onChange={(color) => {
-                                        setColorPickerValueTeamA(color.toHexString())
-                                        colorA = color.toHexString()
-                                    }} />
-                                </Form.Item>
+        <>
+            <Modal
+                title="TeamAGoals Modal"
+                visible={teamAGoalsModalVisible}
+                onOk={handleTeamAGoalsOk}
+                onCancel={handleTeamAGoalsCancel}
+                footer={null}
+            >
+                <Table
+                    dataSource={goalsAData}
+                    columns={columnsGoalsA}
+                    pagination={false}
+                />
+            </Modal>
+            <Modal
+                title="TeamBGoals Modal"
+                visible={teamBGoalsModalVisible}
+                onOk={handleTeamBGoalsOk}
+                onCancel={handleTeamBGoalsCancel}
+            >
+                <p>Your TeamBGoals modal content goes here.</p>
+            </Modal>
+            <Modal
+                title="TeamACardPenalty Modal"
+                visible={teamACardPenaltyModalVisible}
+                onOk={handleTeamACardPenaltyOk}
+                onCancel={handleTeamACardPenaltyCancel}
+            >
+                <p>Your TeamACardPenalty modal content goes here.</p>
+            </Modal>
+            <Modal
+                title="TeamBCardPenalty Modal"
+                visible={teamBCardPenaltyModalVisible}
+                onOk={handleTeamBCardPenaltyOk}
+                onCancel={handleTeamBCardPenaltyCancel}
+            >
+                <p>Your TeamBCardPenalty modal content goes here.</p>
+            </Modal>
+            <Modal
+                title="TeamATimePenalty Modal"
+                visible={teamATimePenaltyModalVisible}
+                onOk={handleTeamATimePenaltyOk}
+                onCancel={handleTeamATimePenaltyCancel}
+            >
+                <p>Your TeamATimePenalty modal content goes here.</p>
+            </Modal>
+            <Modal
+                title="TeamBTimePenalty Modal"
+                visible={teamBTimePenaltyModalVisible}
+                onOk={handleTeamBTimePenaltyOk}
+                onCancel={handleTeamBTimePenaltyCancel}
+            >
+                <p>Your TeamBTimePenalty modal content goes here.</p>
+            </Modal>
+            <div className='rounded-lg flex flex-col' style={{ background: `linear-gradient(to right, rgba(${parseInt(colorPickerValueTeamA.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamA.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamA.slice(-2), 16)}, 0.5), rgba(${parseInt(colorPickerValueTeamB.slice(-6, -4), 16)}, ${parseInt(colorPickerValueTeamB.slice(-4, -2), 16)}, ${parseInt(colorPickerValueTeamB.slice(-2), 16)}, 0.5))` }}>
+                <div className='bg-white rounded p-1 flex gap-1'>
+                    <Tabs
+                        type="card"
+                        tabBarGutter={5}
+                        className='flex-grow-0 overflow-x-auto'
+                        activeKey={activeTab}
+                        onChange={(match) => {
+                            console.log(JSON.parse(match))
+                            setActiveTab(match.key)
+                            setMatchRecord(JSON.parse(match).match)
+                        }}
+                    >
+                        {mappedSchedule.map((match) => (
+                            <TabPane tab={match.label} key={JSON.stringify(match)} />
+                        ))}
+                    </Tabs>
+                </div>
+                <div className='flex gap-4 h-full'>
+                    {/* Team A */}
+                    <div className='w-80 flex-shrink-0 h-full rounded p-2'>
+                        <div className='text-center text-xl mb-1'>
+                            {matchRecord.teamA} - ({teamAGoals.length - teamAOwnGoals + teamBOwnGoals})
+                        </div>
+                        <div className='flex flex-col gap-2'>
+                            <Form form={formColorTeamA} onFinish={updateTeamJerseyColorA}>
+                                <div className='bg-white p-4 rounded shadow flex gap-2'>
+                                    <Form.Item
+                                        className='p-0 m-0'
+                                        name="colorPicker"
+                                        label="Select Jersey Color"
+                                        initialValue={colorPickerValueTeamA}
+                                    >
+                                        <ColorPicker onChange={(color) => {
+                                            setColorPickerValueTeamA(color.toHexString())
+                                            colorA = color.toHexString()
+                                        }} />
+                                    </Form.Item>
 
-                                <Form.Item
-                                    className='p-0 m-0'
-                                >
+                                    <Form.Item
+                                        className='p-0 m-0'
+                                    >
+                                        <Button type="primary" htmlType="submit" className='w-full'>
+                                            SET
+                                        </Button>
+                                    </Form.Item>
+                                </div>
+                            </Form>
+
+                            <Form form={formGoalTeamA} onFinish={createMatchGoalRecordTeamA}>
+                                <div className='bg-white p-4 rounded shadow'>
+                                    <div className='flex justify-between mb-1'>
+                                        <div className='font-bold text-primary'>GOAL</div>
+                                        <div>
+                                            <Button size='small' type='primary' icon={<MenuFoldOutlined />} onClick={showTeamAGoalsModal} />
+                                        </div>
+                                    </div>
+                                    {/* SELECT input */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="selectOption"
+                                    >
+                                        <Select
+                                            id="selectOption"
+                                            placeholder="Select a Player"
+                                            className='w-full mb-2'
+                                        >
+                                            {teamAPlayers.map((player) => (
+                                                <Option key={player.id} value={player.id}>
+                                                    {`${player.name} - ${player.squad_number}`}
+                                                </Option>
+                                            ))}
+                                        </Select>
+
+                                    </FormItem>
+                                    {/* RADIO GROUP */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="radioValue"
+                                        rules={[{ required: true, message: 'Please select a radio option' }]}
+                                    >
+                                        <Radio.Group onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
+                                            <Radio value={1}>Standard</Radio>
+                                            <Radio value={2}>Own</Radio>
+                                            <Radio value={3}>Penalty</Radio>
+                                        </Radio.Group>
+                                    </FormItem>
+                                    {/* BUTTON */}
                                     <Button type="primary" htmlType="submit" className='w-full'>
-                                        SET
+                                        GOAL!
                                     </Button>
-                                </Form.Item>
-                            </div>
-                        </Form>
-
-                        <Form form={formGoalTeamA} onFinish={createMatchGoalRecordTeamA}>
-                            <div className='bg-white p-4 rounded shadow'>
-                                <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>GOAL</div>
-                                    <div>
-                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
-                                    </div>
                                 </div>
-                                {/* SELECT input */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="selectOption"
-                                >
-                                    <Select
-                                        id="selectOption"
-                                        placeholder="Select a Player"
-                                        className='w-full mb-2'
-                                    >
-                                        {teamAPlayers.map((player) => (
-                                            <Option key={player.id} value={player.id}>
-                                                {`${player.name} - ${player.squad_number}`}
-                                            </Option>
-                                        ))}
-                                    </Select>
+                            </Form>
 
-                                </FormItem>
-                                {/* RADIO GROUP */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="radioValue"
-                                    rules={[{ required: true, message: 'Please select a radio option' }]}
-                                >
-                                    <Radio.Group onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
-                                        <Radio value={1}>Standard</Radio>
-                                        <Radio value={2}>Own</Radio>
-                                        <Radio value={3}>Penalty</Radio>
-                                    </Radio.Group>
-                                </FormItem>
-                                {/* BUTTON */}
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    GOAL!
-                                </Button>
-                            </div>
-                        </Form>
-
-                        <Form form={formPenaltyTeamA} onFinish={createMatchCardRecordTeam}>
-                            <div className='bg-white p-4 rounded shadow mt-4'>
-                                <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>CARD PENALTY</div>
-                                    <div>
-                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
+                            <Form form={formPenaltyTeamA} onFinish={createMatchCardRecordTeam}>
+                                <div className='bg-white p-4 rounded shadow mt-4'>
+                                    <div className='flex justify-between mb-1'>
+                                        <div className='font-bold text-primary'>CARD PENALTY</div>
+                                        <div>
+                                            <Button size='small' type='primary' icon={<MenuFoldOutlined />} onClick={showTeamACardPenaltyModal} />
+                                        </div>
                                     </div>
+
+                                    {/* SELECT PLAYER input */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="penaltyPlayer"
+                                        rules={[{ required: true, message: 'Please select a player for the penalty' }]}
+                                    >
+                                        <Select
+                                            id="selectOption"
+                                            placeholder="Select a Player"
+                                            className='w-full mb-2'
+                                        >
+                                            {teamAPlayers.map((player) => (
+                                                <Option key={player.id} value={player.id}>
+                                                    {`${player.name} - ${player.squad_number}`}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </FormItem>
+
+                                    {/* RADIO GROUP */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="penaltyCard"
+                                        rules={[{ required: true, message: 'Please select a card for the penalty' }]}
+                                    >
+                                        <Select
+                                            id="penaltyCard"
+                                            placeholder="Select a Card"
+                                            className='w-full mb-2'
+                                        >
+                                            <Option value="yellow">Yellow Card</Option>
+                                            <Option value="red">Red Card</Option>
+                                        </Select>
+                                    </FormItem>
+
+                                    {/* BUTTON */}
+                                    <Button type="primary" htmlType="submit" className='w-full'>
+                                        Add Penalty
+                                    </Button>
                                 </div>
+                            </Form>
 
-                                {/* SELECT PLAYER input */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyPlayer"
-                                    rules={[{ required: true, message: 'Please select a player for the penalty' }]}
-                                >
-                                    <Select
-                                        id="selectOption"
-                                        placeholder="Select a Player"
-                                        className='w-full mb-2'
-                                    >
-                                        {teamAPlayers.map((player) => (
-                                            <Option key={player.id} value={player.id}>
-                                                {`${player.name} - ${player.squad_number}`}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </FormItem>
-
-                                {/* RADIO GROUP */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyCard"
-                                    rules={[{ required: true, message: 'Please select a card for the penalty' }]}
-                                >
-                                    <Select
-                                        id="penaltyCard"
-                                        placeholder="Select a Card"
-                                        className='w-full mb-2'
-                                    >
-                                        <Option value="yellow">Yellow Card</Option>
-                                        <Option value="red">Red Card</Option>
-                                    </Select>
-                                </FormItem>
-
-                                {/* BUTTON */}
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    Add Penalty
-                                </Button>
-                            </div>
-                        </Form>
-
-                        <Form form={formTimeTeamA} onFinish={createMatchCardRecordTeam}>
-                            <div className='bg-white p-4 rounded shadow mt-4'>
-                                <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>TIME PENALTY</div>
-                                    <div>
-                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
+                            <Form form={formTimeTeamA} onFinish={createMatchCardRecordTeam}>
+                                <div className='bg-white p-4 rounded shadow mt-4'>
+                                    <div className='flex justify-between mb-1'>
+                                        <div className='font-bold text-primary'>TIME PENALTY</div>
+                                        <div>
+                                            <Button size='small' type='primary' icon={<MenuFoldOutlined />} onClick={showTeamATimePenaltyModal} />
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* SELECT PLAYER input */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyPlayer"
-                                    rules={[{ required: true, message: 'Please select a player for the penalty' }]}
-                                >
-                                    <Select
-                                        id="penaltyPlayer"
-                                        placeholder="Select a Player"
-                                        className='w-full mb-2'
+                                    {/* SELECT PLAYER input */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="penaltyPlayer"
+                                        rules={[{ required: true, message: 'Please select a player for the penalty' }]}
                                     >
-                                        {teamAPlayers.map((player) => (
-                                            <Option key={player.id} value={player.id}>
-                                                {`${player.name} - ${player.squad_number}`}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </FormItem>
+                                        <Select
+                                            id="penaltyPlayer"
+                                            placeholder="Select a Player"
+                                            className='w-full mb-2'
+                                        >
+                                            {teamAPlayers.map((player) => (
+                                                <Option key={player.id} value={player.id}>
+                                                    {`${player.name} - ${player.squad_number}`}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </FormItem>
 
-                                {/* NUMBER INPUT FOR MINUTE */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="minute"
-                                    rules={[{ required: true, message: 'Please enter the penalty time in minutes' }]}
-                                >
-                                    <InputNumber
-                                        id="penaltyCard"
-                                        placeholder="Enter Penalty Time (minutes)"
-                                        className='w-full mb-2'
-                                        min={1}  // Set a minimum value if needed
-                                    />
-                                </FormItem>
+                                    {/* NUMBER INPUT FOR MINUTE */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="minute"
+                                        rules={[{ required: true, message: 'Please enter the penalty time in minutes' }]}
+                                    >
+                                        <InputNumber
+                                            id="penaltyCard"
+                                            placeholder="Enter Penalty Time (minutes)"
+                                            className='w-full mb-2'
+                                            min={1}  // Set a minimum value if needed
+                                        />
+                                    </FormItem>
 
-                                {/* BUTTON */}
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    Add Penalty
-                                </Button>
-                            </div>
-                        </Form>
+                                    {/* BUTTON */}
+                                    <Button type="primary" htmlType="submit" className='w-full'>
+                                        Add Penalty
+                                    </Button>
+                                </div>
+                            </Form>
 
-                        {/* <Form form={formSubstitutionTeamA} onFinish={() => { }}>
+                            {/* <Form form={formSubstitutionTeamA} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>SUBSTITUTION</div>
@@ -1240,167 +1483,167 @@ export const MatchDashboard: React.FC = () => {
                                 </Button>
                             </div>
                         </Form> */}
+                        </div>
                     </div>
-                </div>
 
-                {/* CENTER */}
-                <div className='flex flex-col justify-evenly flex-grow rounded p-2 gap-4'>
+                    {/* CENTER */}
+                    <div className='flex flex-col justify-evenly flex-grow rounded p-2 gap-4'>
 
-                    {matchData && matchData.status !== "Ended" &&
+                        {matchData && matchData.status !== "Ended" &&
+                            <div className='flex justify-center'>
+                                <div className='border bg-white rounded p-2 shadow'>
+                                    <Button className='font-bold bg-red-500 border-red-500 text-white' onClick={finalizeMatch}>
+                                        FINALISE MATCH
+                                    </Button>
+                                </div>
+                            </div>
+                        }
+
+                        <div className='flex flex-wrap justify-center gap-2'>
+                            <Button type='primary' onClick={sendMatchInformationAgain}>
+                                FORCE MATCH CARD
+                            </Button>
+                            <Button type='primary' onClick={sendScoreInformationAgain}>
+                                FORCE SCORE CARD
+                            </Button>
+                            <Button type='primary' onClick={sendScheduleInformationAgain}>
+                                FORCE SCHEDULE CARD
+                            </Button>
+                            <Button type='primary' onClick={sendGoalScorerInformationAgain}>
+                                FORCE GOAL SCORER CARD
+                            </Button>
+                            <Button type='primary' onClick={sendPenaltyCardInformation}>
+                                FORCE PENALTY CARD
+                            </Button>
+                            <Button type='primary' onClick={sendPenaltyTimeInformation}>
+                                FORCE TIME CARD
+                            </Button>
+                        </div>
+
+                        <div className='flex flex-col items-center justify-center'>
+                            <div className='font-bold'>LIVE @</div>
+                            <a className='text-xl' href={`${import.meta.env.VITE_HOST_BASE_URL}/live/${tournament.id}`}>
+                                {import.meta.env.VITE_HOST_BASE_URL}/live/{tournament.id}
+                            </a>
+                        </div>
+
                         <div className='flex justify-center'>
                             <div className='border bg-white rounded p-2 shadow'>
-                                <Button className='font-bold bg-red-500 border-red-500 text-white' onClick={finalizeMatch}>
-                                    FINALISE MATCH
-                                </Button>
-                            </div>
-                        </div>
-                    }
-
-                    <div className='flex flex-wrap justify-center gap-2'>
-                        <Button type='primary' onClick={sendMatchInformationAgain}>
-                            FORCE MATCH CARD
-                        </Button>
-                        <Button type='primary' onClick={sendScoreInformationAgain}>
-                            FORCE SCORE CARD
-                        </Button>
-                        <Button type='primary' onClick={sendScheduleInformationAgain}>
-                            FORCE SCHEDULE CARD
-                        </Button>
-                        <Button type='primary' onClick={sendGoalScorerInformationAgain}>
-                            FORCE GOAL SCORER CARD
-                        </Button>
-                        <Button type='primary' onClick={sendPenaltyCardInformation}>
-                            FORCE PENALTY CARD
-                        </Button>
-                        <Button type='primary' onClick={sendPenaltyTimeInformation}>
-                            FORCE TIME CARD
-                        </Button>
-                    </div>
-
-                    <div className='flex flex-col items-center justify-center'>
-                        <div className='font-bold'>LIVE @</div>
-                        <a className='text-xl' href={`${import.meta.env.VITE_HOST_BASE_URL}/live/${tournament.id}`}>
-                            {import.meta.env.VITE_HOST_BASE_URL}/live/{tournament.id}
-                        </a>
-                    </div>
-
-                    <div className='flex justify-center'>
-                        <div className='border bg-white rounded p-2 shadow'>
-                            <div className='flex items-center gap-1'>
-                                <Button type='primary' className='font-bold' onClick={() => handleDecrement(1)}>-1</Button>
-                                <Button type='primary' className='font-bold' onClick={() => handleDecrement(5)}>-5</Button>
-                                <Button type='primary' className='font-bold' onClick={() => handleDecrement(10)}>-10</Button>
-                                <div className='text-2xl font-bold w-20 text-center'>{formatTime(timerValue)}</div>
-                                <Button type='primary' className='font-bold' onClick={() => handleIncrement(1)}>+1</Button>
-                                <Button type='primary' className='font-bold' onClick={() => handleIncrement(5)}>+5</Button>
-                                <Button type='primary' className='font-bold' onClick={() => handleIncrement(10)}>+10</Button>
-                            </div>
-                            <div className='m-1' />
-                            <div className='flex items-center gap-1'>
-                                <Button type='primary' className='font-bold' icon={<PlayCircleOutlined />} onClick={handlePlayPause} />
-                                <Button className='font-bold bg-blue-500 border-blue-500 text-white' icon={<PauseCircleOutlined />} onClick={handlePlayPause} />
-                                <div className='w-72 border border-green-500 h-8 rounded flex justify-center items-center' onClick={handlePlayPause}>
-                                    {isPaused ? 'Paused' : 'Running'}
+                                <div className='flex items-center gap-1'>
+                                    <Button type='primary' className='font-bold' onClick={() => handleDecrement(1)}>-1</Button>
+                                    <Button type='primary' className='font-bold' onClick={() => handleDecrement(5)}>-5</Button>
+                                    <Button type='primary' className='font-bold' onClick={() => handleDecrement(10)}>-10</Button>
+                                    <div className='text-2xl font-bold w-20 text-center'>{formatTime(timerValue)}</div>
+                                    <Button type='primary' className='font-bold' onClick={() => handleIncrement(1)}>+1</Button>
+                                    <Button type='primary' className='font-bold' onClick={() => handleIncrement(5)}>+5</Button>
+                                    <Button type='primary' className='font-bold' onClick={() => handleIncrement(10)}>+10</Button>
                                 </div>
-                                <Button className='font-bold bg-red-500 border-red-500 text-white' icon={<ReloadOutlined />} onClick={handleReset} />
+                                <div className='m-1' />
+                                <div className='flex items-center gap-1'>
+                                    <Button type='primary' className='font-bold' icon={<PlayCircleOutlined />} onClick={handlePlayPause} />
+                                    <Button className='font-bold bg-blue-500 border-blue-500 text-white' icon={<PauseCircleOutlined />} onClick={handlePlayPause} />
+                                    <div className='w-72 border border-green-500 h-8 rounded flex justify-center items-center' onClick={handlePlayPause}>
+                                        {isPaused ? 'Paused' : 'Running'}
+                                    </div>
+                                    <Button className='font-bold bg-red-500 border-red-500 text-white' icon={<ReloadOutlined />} onClick={handleReset} />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className='w-full bg-white rounded shadow border p-2'>
-                        <Form form={formComment} onFinish={updateStatus}>
-                            <Form.Item
-                                name="gameStatus"
-                                label="Game Status"
-                                className='p-0 m-2'
-                            >
-                                <Select placeholder="Select the game status" defaultValue={"Not Started"}>
-                                    <Option value="notStarted">Not Started</Option>
-                                    <Option value="started">Started</Option>
-                                    <Option value="halftime">Halftime</Option>
-                                    {/* <Option value="ended">Ended</Option> */}
-                                </Select>
-                            </Form.Item>
+                        <div className='w-full bg-white rounded shadow border p-2'>
+                            <Form form={formComment} onFinish={updateStatus}>
+                                <Form.Item
+                                    name="gameStatus"
+                                    label="Game Status"
+                                    className='p-0 m-2'
+                                >
+                                    <Select placeholder="Select the game status" defaultValue={"Not Started"}>
+                                        <Option value="notStarted">Not Started</Option>
+                                        <Option value="started">Started</Option>
+                                        <Option value="halftime">Halftime</Option>
+                                        {/* <Option value="ended">Ended</Option> */}
+                                    </Select>
+                                </Form.Item>
 
-                            <Form.Item
-                                name="stadium"
-                                label="Stadium"
-                                className='p-0 m-2'
-                            >
-                                <Select placeholder="Select the stadium">
-                                    {stadiums.map((stadium) => (
-                                        <Option key={stadium.id} value={stadium.id}>
-                                            {stadium.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
+                                <Form.Item
+                                    name="stadium"
+                                    label="Stadium"
+                                    className='p-0 m-2'
+                                >
+                                    <Select placeholder="Select the stadium">
+                                        {stadiums.map((stadium) => (
+                                            <Option key={stadium.id} value={stadium.id}>
+                                                {stadium.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
 
-                            <Form.Item
-                                name="refereeHead"
-                                label="Referee Head"
-                                className='p-0 m-2'
-                            >
-                                <Select placeholder="Select a referee head">
-                                    {referees.map((referee) => (
-                                        <Option key={referee.id} value={referee.id}>
-                                            {referee.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
+                                <Form.Item
+                                    name="refereeHead"
+                                    label="Referee Head"
+                                    className='p-0 m-2'
+                                >
+                                    <Select placeholder="Select a referee head">
+                                        {referees.map((referee) => (
+                                            <Option key={referee.id} value={referee.id}>
+                                                {referee.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
 
-                            <Form.Item
-                                name="refereeAssistant1"
-                                label="Referee Assistant 1"
-                                className='p-0 m-2'
-                            >
-                                <Select placeholder="Select a referee assistant 1">
-                                    {referees.map((referee) => (
-                                        <Option key={referee.id} value={referee.id}>
-                                            {referee.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
+                                <Form.Item
+                                    name="refereeAssistant1"
+                                    label="Referee Assistant 1"
+                                    className='p-0 m-2'
+                                >
+                                    <Select placeholder="Select a referee assistant 1">
+                                        {referees.map((referee) => (
+                                            <Option key={referee.id} value={referee.id}>
+                                                {referee.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
 
-                            <Form.Item
-                                name="refereeAssistant2"
-                                label="Referee Assistant 2"
-                                className='p-0 m-2'
-                            >
-                                <Select placeholder="Select a referee assistant 2">
-                                    {referees.map((referee) => (
-                                        <Option key={referee.id} value={referee.id}>
-                                            {referee.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
+                                <Form.Item
+                                    name="refereeAssistant2"
+                                    label="Referee Assistant 2"
+                                    className='p-0 m-2'
+                                >
+                                    <Select placeholder="Select a referee assistant 2">
+                                        {referees.map((referee) => (
+                                            <Option key={referee.id} value={referee.id}>
+                                                {referee.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
 
-                            <Form.Item
-                                name="refereeAssistant3"
-                                label="Referee Assistant 3"
-                                className='p-0 m-2'
-                            >
-                                <Select placeholder="Select a referee assistant 3">
-                                    {referees.map((referee) => (
-                                        <Option key={referee.id} value={referee.id}>
-                                            {referee.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
+                                <Form.Item
+                                    name="refereeAssistant3"
+                                    label="Referee Assistant 3"
+                                    className='p-0 m-2'
+                                >
+                                    <Select placeholder="Select a referee assistant 3">
+                                        {referees.map((referee) => (
+                                            <Option key={referee.id} value={referee.id}>
+                                                {referee.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
 
-                            <Form.Item className='p-0 m-2'>
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    Update Status
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </div>
+                                <Form.Item className='p-0 m-2'>
+                                    <Button type="primary" htmlType="submit" className='w-full'>
+                                        Update Status
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+                        </div>
 
-                    {/* <div className='flex w-full bg-white rounded shadow border'>
+                        {/* <div className='flex w-full bg-white rounded shadow border'>
                         <div className='border-r p-2 w-2/5'>
                             <Form layout='vertical' form={formComment} onFinish={() => handleButtonClick(formComment)}>
                                 <Form.Item
@@ -1482,183 +1725,183 @@ export const MatchDashboard: React.FC = () => {
                             />
                         </div>
                     </div> */}
-                </div>
-
-                {/* Team B */}
-                <div className='w-80 flex-shrink-0 h-full rounded p-2'>
-                    <div className='text-center text-xl mb-1'>
-                        {matchRecord.teamB} - ({teamBGoals.length - teamBOwnGoals + teamAOwnGoals})
                     </div>
-                    <div className='flex flex-col gap-2'>
-                        <Form form={formColorTeamB} onFinish={updateTeamJerseyColorB}>
-                            <div className='bg-white p-4 rounded shadow flex gap-2'>
-                                <Form.Item
-                                    className='p-0 m-0'
-                                    name="colorPicker"
-                                    label="Select Jersey Color"
-                                    initialValue={colorPickerValueTeamB}
-                                >
-                                    <ColorPicker onChange={(color) => {
-                                        setColorPickerValueTeamB(color.toHexString())
-                                        colorB = color.toHexString()
-                                    }} />
-                                </Form.Item>
 
-                                <Form.Item
-                                    className='p-0 m-0'
-                                >
+                    {/* Team B */}
+                    <div className='w-80 flex-shrink-0 h-full rounded p-2'>
+                        <div className='text-center text-xl mb-1'>
+                            {matchRecord.teamB} - ({teamBGoals.length - teamBOwnGoals + teamAOwnGoals})
+                        </div>
+                        <div className='flex flex-col gap-2'>
+                            <Form form={formColorTeamB} onFinish={updateTeamJerseyColorB}>
+                                <div className='bg-white p-4 rounded shadow flex gap-2'>
+                                    <Form.Item
+                                        className='p-0 m-0'
+                                        name="colorPicker"
+                                        label="Select Jersey Color"
+                                        initialValue={colorPickerValueTeamB}
+                                    >
+                                        <ColorPicker onChange={(color) => {
+                                            setColorPickerValueTeamB(color.toHexString())
+                                            colorB = color.toHexString()
+                                        }} />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        className='p-0 m-0'
+                                    >
+                                        <Button type="primary" htmlType="submit" className='w-full'>
+                                            SET
+                                        </Button>
+                                    </Form.Item>
+                                </div>
+                            </Form>
+
+                            <Form form={formGoalTeamB} onFinish={createMatchGoalRecordTeamB}>
+                                <div className='bg-white p-4 rounded shadow'>
+                                    <div className='flex justify-between mb-1'>
+                                        <div className='font-bold text-primary'>GOAL</div>
+                                        <div>
+                                            <Button size='small' type='primary' icon={<MenuFoldOutlined />} onClick={showTeamBGoalsModal} />
+                                        </div>
+                                    </div>
+                                    {/* SELECT input */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="selectOption"
+                                    >
+                                        <Select
+                                            id="selectOption"
+                                            placeholder="Select a Player"
+                                            className='w-full mb-2'
+                                        >
+                                            {teamBPlayers.map((player) => (
+                                                <Option key={player.id} value={player.id}>
+                                                    {`${player.name} - ${player.squad_number}`}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </FormItem>
+                                    {/* RADIO GROUP */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="radioValue"
+                                        rules={[{ required: true, message: 'Please select a radio option' }]}
+                                    >
+                                        <Radio.Group onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
+                                            <Radio value={1}>Standard</Radio>
+                                            <Radio value={2}>Own</Radio>
+                                            <Radio value={3}>Penalty</Radio>
+                                        </Radio.Group>
+                                    </FormItem>
+                                    {/* BUTTON */}
                                     <Button type="primary" htmlType="submit" className='w-full'>
-                                        SET
+                                        GOAL!
                                     </Button>
-                                </Form.Item>
-                            </div>
-                        </Form>
-
-                        <Form form={formGoalTeamB} onFinish={createMatchGoalRecordTeamB}>
-                            <div className='bg-white p-4 rounded shadow'>
-                                <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>GOAL</div>
-                                    <div>
-                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
-                                    </div>
                                 </div>
-                                {/* SELECT input */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="selectOption"
-                                >
-                                    <Select
-                                        id="selectOption"
-                                        placeholder="Select a Player"
-                                        className='w-full mb-2'
-                                    >
-                                        {teamBPlayers.map((player) => (
-                                            <Option key={player.id} value={player.id}>
-                                                {`${player.name} - ${player.squad_number}`}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </FormItem>
-                                {/* RADIO GROUP */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="radioValue"
-                                    rules={[{ required: true, message: 'Please select a radio option' }]}
-                                >
-                                    <Radio.Group onChange={(e: RadioChangeEvent) => formGoalTeamA.setFieldsValue({ radioValue: e.target.value })} className='mb-2'>
-                                        <Radio value={1}>Standard</Radio>
-                                        <Radio value={2}>Own</Radio>
-                                        <Radio value={3}>Penalty</Radio>
-                                    </Radio.Group>
-                                </FormItem>
-                                {/* BUTTON */}
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    GOAL!
-                                </Button>
-                            </div>
-                        </Form>
+                            </Form>
 
-                        <Form form={formPenaltyTeamB} onFinish={createMatchCardRecordTeam}>
-                            <div className='bg-white p-4 rounded shadow mt-4'>
-                                <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>CARD PENALTY</div>
-                                    <div>
-                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
+                            <Form form={formPenaltyTeamB} onFinish={createMatchCardRecordTeam}>
+                                <div className='bg-white p-4 rounded shadow mt-4'>
+                                    <div className='flex justify-between mb-1'>
+                                        <div className='font-bold text-primary'>CARD PENALTY</div>
+                                        <div>
+                                            <Button size='small' type='primary' icon={<MenuFoldOutlined />} onClick={showTeamBCardPenaltyModal} />
+                                        </div>
                                     </div>
+
+                                    {/* SELECT PLAYER input */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="penaltyPlayer"
+                                        rules={[{ required: true, message: 'Please select a player for the penalty' }]}
+                                    >
+                                        <Select
+                                            id="selectOption"
+                                            placeholder="Select a Player"
+                                            className='w-full mb-2'
+                                        >
+                                            {teamBPlayers.map((player) => (
+                                                <Option key={player.id} value={player.id}>
+                                                    {`${player.name} - ${player.squad_number}`}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </FormItem>
+
+                                    {/* RADIO GROUP */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="penaltyCard"
+                                        rules={[{ required: true, message: 'Please select a card for the penalty' }]}
+                                    >
+                                        <Select
+                                            id="penaltyCard"
+                                            placeholder="Select a Card"
+                                            className='w-full mb-2'
+                                        >
+                                            <Option value="yellow">Yellow Card</Option>
+                                            <Option value="red">Red Card</Option>
+                                        </Select>
+                                    </FormItem>
+
+                                    {/* BUTTON */}
+                                    <Button type="primary" htmlType="submit" className='w-full'>
+                                        Add Penalty
+                                    </Button>
                                 </div>
+                            </Form>
 
-                                {/* SELECT PLAYER input */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyPlayer"
-                                    rules={[{ required: true, message: 'Please select a player for the penalty' }]}
-                                >
-                                    <Select
-                                        id="selectOption"
-                                        placeholder="Select a Player"
-                                        className='w-full mb-2'
-                                    >
-                                        {teamBPlayers.map((player) => (
-                                            <Option key={player.id} value={player.id}>
-                                                {`${player.name} - ${player.squad_number}`}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </FormItem>
-
-                                {/* RADIO GROUP */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyCard"
-                                    rules={[{ required: true, message: 'Please select a card for the penalty' }]}
-                                >
-                                    <Select
-                                        id="penaltyCard"
-                                        placeholder="Select a Card"
-                                        className='w-full mb-2'
-                                    >
-                                        <Option value="yellow">Yellow Card</Option>
-                                        <Option value="red">Red Card</Option>
-                                    </Select>
-                                </FormItem>
-
-                                {/* BUTTON */}
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    Add Penalty
-                                </Button>
-                            </div>
-                        </Form>
-
-                        <Form form={formTimeTeamB} onFinish={createMatchCardRecordTeam}>
-                            <div className='bg-white p-4 rounded shadow mt-4'>
-                                <div className='flex justify-between mb-1'>
-                                    <div className='font-bold text-primary'>TIME PENALTY</div>
-                                    <div>
-                                        <Button size='small' type='primary' icon={<MenuFoldOutlined />} />
+                            <Form form={formTimeTeamB} onFinish={createMatchCardRecordTeam}>
+                                <div className='bg-white p-4 rounded shadow mt-4'>
+                                    <div className='flex justify-between mb-1'>
+                                        <div className='font-bold text-primary'>TIME PENALTY</div>
+                                        <div>
+                                            <Button size='small' type='primary' icon={<MenuFoldOutlined />} onClick={showTeamBTimePenaltyModal} />
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* SELECT PLAYER input */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="penaltyPlayer"
-                                    rules={[{ required: true, message: 'Please select a player for the penalty' }]}
-                                >
-                                    <Select
-                                        id="penaltyPlayer"
-                                        placeholder="Select a Player"
-                                        className='w-full mb-2'
+                                    {/* SELECT PLAYER input */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="penaltyPlayer"
+                                        rules={[{ required: true, message: 'Please select a player for the penalty' }]}
                                     >
-                                        {teamBPlayers.map((player) => (
-                                            <Option key={player.id} value={player.id}>
-                                                {`${player.name} - ${player.squad_number}`}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </FormItem>
+                                        <Select
+                                            id="penaltyPlayer"
+                                            placeholder="Select a Player"
+                                            className='w-full mb-2'
+                                        >
+                                            {teamBPlayers.map((player) => (
+                                                <Option key={player.id} value={player.id}>
+                                                    {`${player.name} - ${player.squad_number}`}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </FormItem>
 
-                                {/* NUMBER INPUT FOR MINUTE */}
-                                <FormItem
-                                    className='p-0 m-0'
-                                    name="minute"
-                                    rules={[{ required: true, message: 'Please enter the penalty time in minutes' }]}
-                                >
-                                    <InputNumber
-                                        id="penaltyCard"
-                                        placeholder="Enter Penalty Time (minutes)"
-                                        className='w-full mb-2'
-                                        min={1}  // Set a minimum value if needed
-                                    />
-                                </FormItem>
+                                    {/* NUMBER INPUT FOR MINUTE */}
+                                    <FormItem
+                                        className='p-0 m-0'
+                                        name="minute"
+                                        rules={[{ required: true, message: 'Please enter the penalty time in minutes' }]}
+                                    >
+                                        <InputNumber
+                                            id="penaltyCard"
+                                            placeholder="Enter Penalty Time (minutes)"
+                                            className='w-full mb-2'
+                                            min={1}  // Set a minimum value if needed
+                                        />
+                                    </FormItem>
 
-                                {/* BUTTON */}
-                                <Button type="primary" htmlType="submit" className='w-full'>
-                                    Add Penalty
-                                </Button>
-                            </div>
-                        </Form>
+                                    {/* BUTTON */}
+                                    <Button type="primary" htmlType="submit" className='w-full'>
+                                        Add Penalty
+                                    </Button>
+                                </div>
+                            </Form>
 
-                        {/* <Form form={formSubstitutionTeamB} onFinish={() => { }}>
+                            {/* <Form form={formSubstitutionTeamB} onFinish={() => { }}>
                             <div className='bg-white p-4 rounded shadow mt-4'>
                                 <div className='flex justify-between mb-1'>
                                     <div className='font-bold text-primary'>SUBSTITUTION</div>
@@ -1704,9 +1947,10 @@ export const MatchDashboard: React.FC = () => {
                                 </Button>
                             </div>
                         </Form> */}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
