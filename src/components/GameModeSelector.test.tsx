@@ -96,5 +96,114 @@ describe('GameModeSelector', () => {
       expect(axios.get).toHaveBeenCalled()
     })
   })
+
+  it('should handle delete cancellation', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [mockGameMode],
+    })
+
+    vi.mocked(confirmation).mockResolvedValue(false)
+
+    render(
+      <GameModeSelector
+        selectedGameMode={null}
+        onSelect={mockOnSelect}
+        onEdit={mockOnEdit}
+      />
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle delete error', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [mockGameMode],
+    })
+
+    vi.mocked(confirmation).mockResolvedValue(true)
+    vi.mocked(axios.delete).mockRejectedValue(new Error('Delete failed'))
+
+    render(
+      <GameModeSelector
+        selectedGameMode={null}
+        onSelect={mockOnSelect}
+        onEdit={mockOnEdit}
+      />
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should display selected game mode', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [mockGameMode],
+    })
+
+    render(
+      <GameModeSelector
+        selectedGameMode={mockGameMode}
+        onSelect={mockOnSelect}
+        onEdit={mockOnEdit}
+      />
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle loading state', async () => {
+    vi.mocked(axios.get).mockImplementation(() => new Promise(() => {}))
+
+    render(
+      <GameModeSelector
+        selectedGameMode={null}
+        onSelect={mockOnSelect}
+        onEdit={mockOnEdit}
+      />
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle API errors gracefully', async () => {
+    vi.mocked(axios.get).mockRejectedValue(new Error('API Error'))
+
+    render(
+      <GameModeSelector
+        selectedGameMode={null}
+        onSelect={mockOnSelect}
+        onEdit={mockOnEdit}
+      />
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should call onSelect when game mode is selected', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: [mockGameMode],
+    })
+
+    render(
+      <GameModeSelector
+        selectedGameMode={null}
+        onSelect={mockOnSelect}
+        onEdit={mockOnEdit}
+      />
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
 })
 

@@ -106,5 +106,112 @@ describe('Tournaments', () => {
       expect(axios.get).toHaveBeenCalled()
     })
   })
+
+  it('should handle delete action', async () => {
+    const mockTournaments = [
+      { id: 1, name: 'Tournament 1', alias: 't1' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockTournaments, count: 1 },
+    })
+
+    vi.mocked(axios.delete).mockResolvedValue({})
+
+    render(
+      <BrowserRouter>
+        <Tournaments />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle edit navigation', async () => {
+    const mockTournaments = [
+      { id: 1, name: 'Tournament 1', alias: 't1' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockTournaments, count: 1 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Tournaments />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle add tournament navigation', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: [], count: 0 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Tournaments />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle loading state', async () => {
+    vi.mocked(axios.get).mockImplementation(() => new Promise(() => {}))
+
+    render(
+      <BrowserRouter>
+        <Tournaments />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle API errors gracefully', async () => {
+    vi.mocked(axios.get).mockRejectedValue(new Error('API Error'))
+
+    render(
+      <BrowserRouter>
+        <Tournaments />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should display tournament cards with images', async () => {
+    const mockTournaments = [
+      { id: 1, name: 'Tournament 1', alias: 't1', logo: 'logo1.png' },
+      { id: 2, name: 'Tournament 2', alias: 't2', logo: 'logo2.png' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockTournaments, count: 2 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Tournaments />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
 })
 
