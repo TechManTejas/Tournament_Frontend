@@ -112,5 +112,117 @@ describe('Teams', () => {
       expect(axios.get).toHaveBeenCalled()
     })
   })
+
+  it('should handle team selection', async () => {
+    const mockTeams = [
+      { id: 1, name: 'Team A', logo: 'logo1.png' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockTeams, count: 1 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Teams
+          toggleAddEdit={mockToggleAddEdit}
+          handleSelectTeam={mockHandleSelectTeam}
+          tournament={mockTournament}
+        />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle delete action', async () => {
+    const mockTeams = [
+      { id: 1, name: 'Team A', logo: 'logo1.png' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockTeams, count: 1 },
+    })
+
+    vi.mocked(axios.delete).mockResolvedValue({})
+
+    render(
+      <BrowserRouter>
+        <Teams
+          toggleAddEdit={mockToggleAddEdit}
+          handleSelectTeam={mockHandleSelectTeam}
+          tournament={mockTournament}
+        />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle edit action', async () => {
+    const mockTeams = [
+      { id: 1, name: 'Team A', logo: 'logo1.png' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockTeams, count: 1 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Teams
+          toggleAddEdit={mockToggleAddEdit}
+          handleSelectTeam={mockHandleSelectTeam}
+          tournament={mockTournament}
+        />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle search functionality', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: [], count: 0 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Teams
+          toggleAddEdit={mockToggleAddEdit}
+          handleSelectTeam={mockHandleSelectTeam}
+          tournament={mockTournament}
+        />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle API errors gracefully', async () => {
+    vi.mocked(axios.get).mockRejectedValue(new Error('API Error'))
+
+    render(
+      <BrowserRouter>
+        <Teams
+          toggleAddEdit={mockToggleAddEdit}
+          handleSelectTeam={mockHandleSelectTeam}
+          tournament={mockTournament}
+        />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
 })
 

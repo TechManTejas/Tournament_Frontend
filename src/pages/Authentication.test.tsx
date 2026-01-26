@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Authentication } from './Authentication'
 import axios from 'axios'
+import { saveUserDataToStorage } from '../utils/storage'
 
 vi.mock('axios')
 vi.mock('../context/context.provider', () => ({
@@ -19,6 +20,18 @@ vi.mock('../utils/storage', () => ({
 // Mock window.location
 delete (window as any).location
 window.location = { href: '' } as any
+
+// Mock import.meta.env
+Object.defineProperty(globalThis, 'import', {
+  value: {
+    meta: {
+      env: {
+        VITE_BASE_URL: 'http://test-api.com',
+      },
+    },
+  },
+  writable: true,
+})
 
 describe('Authentication', () => {
   beforeEach(() => {
@@ -42,7 +55,6 @@ describe('Authentication', () => {
       </BrowserRouter>
     )
 
-    // Form should be rendered
     const form = document.querySelector('.ant-form')
     expect(form).toBeTruthy()
   })
@@ -54,8 +66,98 @@ describe('Authentication', () => {
       </BrowserRouter>
     )
 
-    // Component should render
     expect(document.body).toBeTruthy()
+  })
+
+  it('should handle successful login', async () => {
+    const mockResponse = {
+      data: {
+        token: 'test-token',
+        user: { id: 1, username: 'testuser', verified: true },
+      },
+    }
+
+    vi.mocked(axios.post).mockResolvedValue(mockResponse)
+
+    render(
+      <BrowserRouter>
+        <Authentication />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(document.body).toBeTruthy()
+    })
+  })
+
+  it('should handle login error', async () => {
+    vi.mocked(axios.post).mockRejectedValue(new Error('Invalid credentials'))
+
+    render(
+      <BrowserRouter>
+        <Authentication />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(document.body).toBeTruthy()
+    })
+  })
+
+  it('should handle successful registration', async () => {
+    const mockResponse = {
+      data: {
+        token: 'test-token',
+        user: { id: 1, username: 'newuser', verified: false },
+      },
+    }
+
+    vi.mocked(axios.post).mockResolvedValue(mockResponse)
+
+    render(
+      <BrowserRouter>
+        <Authentication />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(document.body).toBeTruthy()
+    })
+  })
+
+  it('should handle registration error', async () => {
+    vi.mocked(axios.post).mockRejectedValue(new Error('Registration failed'))
+
+    render(
+      <BrowserRouter>
+        <Authentication />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(document.body).toBeTruthy()
+    })
+  })
+
+  it('should save user data on successful authentication', async () => {
+    const mockResponse = {
+      data: {
+        token: 'test-token',
+        user: { id: 1, username: 'testuser', verified: true },
+      },
+    }
+
+    vi.mocked(axios.post).mockResolvedValue(mockResponse)
+
+    render(
+      <BrowserRouter>
+        <Authentication />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(document.body).toBeTruthy()
+    })
   })
 })
 

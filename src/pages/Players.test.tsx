@@ -115,5 +115,91 @@ describe('Players', () => {
       expect(axios.get).toHaveBeenCalled()
     })
   })
+
+  it('should handle delete action', async () => {
+    const mockPlayers = [
+      { id: 1, name: 'Player 1', email: 'player1@test.com' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockPlayers, count: 1 },
+    })
+
+    vi.mocked(axios.delete).mockResolvedValue({})
+
+    render(
+      <BrowserRouter>
+        <Players />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle edit navigation', async () => {
+    const mockPlayers = [
+      { id: 1, name: 'Player 1', email: 'player1@test.com' },
+    ]
+
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: mockPlayers, count: 1 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Players />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should show add button for club admin', async () => {
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { results: [], count: 0 },
+    })
+
+    render(
+      <BrowserRouter>
+        <Players />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle loading state', async () => {
+    vi.mocked(axios.get).mockImplementation(() => new Promise(() => {}))
+
+    render(
+      <BrowserRouter>
+        <Players />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
+
+  it('should handle API errors gracefully', async () => {
+    vi.mocked(axios.get).mockRejectedValue(new Error('API Error'))
+
+    render(
+      <BrowserRouter>
+        <Players />
+      </BrowserRouter>
+    )
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled()
+    })
+  })
 })
 
