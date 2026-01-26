@@ -175,6 +175,16 @@ export const formatDateRange = (startDate: Date | string, endDate: Date | string
     return `${startStr} - ${end.getDate()}, ${end.getFullYear()}`;
   }
 
+  // If different years, include year in start date too
+  if (start.getFullYear() !== end.getFullYear()) {
+    const startStrWithYear = start.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    return `${startStrWithYear} - ${endStr}`;
+  }
+
   return `${startStr} - ${endStr}`;
 };
 
@@ -278,5 +288,213 @@ export const getDaysDifference = (date1: Date | string, date2: Date | string): n
 
   const diffMs = d2.getTime() - d1.getTime();
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+};
+
+/**
+ * Gets the difference in hours between two dates
+ * @param date1 - First date
+ * @param date2 - Second date
+ * @returns Difference in hours (positive if date2 is after date1)
+ */
+export const getHoursDifference = (date1: Date | string, date2: Date | string): number => {
+  const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+  const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+
+  if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+    throw new Error('Invalid date provided');
+  }
+
+  const diffMs = d2.getTime() - d1.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60));
+};
+
+/**
+ * Gets the difference in minutes between two dates
+ * @param date1 - First date
+ * @param date2 - Second date
+ * @returns Difference in minutes (positive if date2 is after date1)
+ */
+export const getMinutesDifference = (date1: Date | string, date2: Date | string): number => {
+  const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+  const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+
+  if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+    throw new Error('Invalid date provided');
+  }
+
+  const diffMs = d2.getTime() - d1.getTime();
+  return Math.floor(diffMs / (1000 * 60));
+};
+
+/**
+ * Adds hours to a date
+ * @param date - Date object
+ * @param hours - Number of hours to add (can be negative)
+ * @returns New date object
+ */
+export const addHours = (date: Date, hours: number): Date => {
+  const result = new Date(date);
+  result.setHours(result.getHours() + hours);
+  return result;
+};
+
+/**
+ * Adds minutes to a date
+ * @param date - Date object
+ * @param minutes - Number of minutes to add (can be negative)
+ * @returns New date object
+ */
+export const addMinutes = (date: Date, minutes: number): Date => {
+  const result = new Date(date);
+  result.setMinutes(result.getMinutes() + minutes);
+  return result;
+};
+
+/**
+ * Gets the start of week for a given date
+ * @param date - Date object (defaults to today)
+ * @param startOfWeek - Day of week to start (0 = Sunday, 1 = Monday, etc.)
+ * @returns Date object set to start of week
+ */
+export const getStartOfWeek = (date: Date = new Date(), startOfWeek: number = 0): Date => {
+  const result = new Date(date);
+  const day = result.getDay();
+  const diff = (day < startOfWeek ? 7 : 0) + day - startOfWeek;
+  result.setDate(result.getDate() - diff);
+  return getStartOfDay(result);
+};
+
+/**
+ * Gets the end of week for a given date
+ * @param date - Date object (defaults to today)
+ * @param startOfWeek - Day of week to start (0 = Sunday, 1 = Monday, etc.)
+ * @returns Date object set to end of week
+ */
+export const getEndOfWeek = (date: Date = new Date(), startOfWeek: number = 0): Date => {
+  const start = getStartOfWeek(date, startOfWeek);
+  return addDays(start, 6);
+};
+
+/**
+ * Gets the start of month for a given date
+ * @param date - Date object (defaults to today)
+ * @returns Date object set to start of month
+ */
+export const getStartOfMonth = (date: Date = new Date()): Date => {
+  const result = new Date(date);
+  result.setDate(1);
+  return getStartOfDay(result);
+};
+
+/**
+ * Gets the end of month for a given date
+ * @param date - Date object (defaults to today)
+ * @returns Date object set to end of month
+ */
+export const getEndOfMonth = (date: Date = new Date()): Date => {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + 1, 0);
+  return getEndOfDay(result);
+};
+
+/**
+ * Gets the start of year for a given date
+ * @param date - Date object (defaults to today)
+ * @returns Date object set to start of year
+ */
+export const getStartOfYear = (date: Date = new Date()): Date => {
+  const result = new Date(date);
+  result.setMonth(0, 1);
+  return getStartOfDay(result);
+};
+
+/**
+ * Gets the end of year for a given date
+ * @param date - Date object (defaults to today)
+ * @returns Date object set to end of year
+ */
+export const getEndOfYear = (date: Date = new Date()): Date => {
+  const result = new Date(date);
+  result.setMonth(11, 31);
+  return getEndOfDay(result);
+};
+
+/**
+ * Checks if a date is within a date range
+ * @param date - Date to check
+ * @param startDate - Start of range
+ * @param endDate - End of range
+ * @returns True if date is within range (inclusive)
+ */
+export const isDateInRange = (
+  date: Date | string,
+  startDate: Date | string,
+  endDate: Date | string
+): boolean => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
+  const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
+
+  if (isNaN(d.getTime()) || isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return false;
+  }
+
+  return d.getTime() >= start.getTime() && d.getTime() <= end.getTime();
+};
+
+/**
+ * Formats a duration in seconds to a human-readable string
+ * @param seconds - Duration in seconds
+ * @returns Formatted duration string (e.g., "1h 30m 15s")
+ */
+export const formatDuration = (seconds: number): string => {
+  if (seconds < 0) {
+    return '0s';
+  }
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+
+  return parts.join(' ');
+};
+
+/**
+ * Parses a duration string to seconds
+ * @param duration - Duration string (e.g., "1h 30m 15s" or "90:15")
+ * @returns Duration in seconds
+ */
+export const parseDuration = (duration: string): number => {
+  // Handle format like "1h 30m 15s"
+  const timeRegex = /(\d+)h\s*(\d+)m\s*(\d+)s/;
+  const match = duration.match(timeRegex);
+  if (match) {
+    const hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const seconds = parseInt(match[3], 10);
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  // Handle format like "90:15" (minutes:seconds)
+  const mmssRegex = /^(\d+):(\d+)$/;
+  const mmssMatch = duration.match(mmssRegex);
+  if (mmssMatch) {
+    const minutes = parseInt(mmssMatch[1], 10);
+    const seconds = parseInt(mmssMatch[2], 10);
+    return minutes * 60 + seconds;
+  }
+
+  // Handle format like "90" (just seconds)
+  const secondsOnly = parseInt(duration, 10);
+  if (!isNaN(secondsOnly)) {
+    return secondsOnly;
+  }
+
+  throw new Error(`Invalid duration format: ${duration}`);
 };
 
